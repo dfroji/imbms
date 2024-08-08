@@ -31,8 +31,11 @@ private:
     bool is_open_;
     sf::Font font;
 
+    bool is_shift_pressed;
+
     fVec2 grid_scale;
-    int position;
+    int y_position;
+    int x_position;
     int quantization;
     int measure_length;
 
