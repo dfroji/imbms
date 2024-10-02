@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <string>
+#include <cstring>
 
 #include "SFML/Window/Event.hpp"
 #include "SFML/System/Clock.hpp"
@@ -55,6 +57,10 @@ void UI::render() {
         if (event.type == sf::Event::KeyPressed) {
             if (event.key.scancode == sf::Keyboard::Scan::LShift) {
                 this->is_shift_pressed = true;
+            }
+
+            if (event.key.scancode == sf::Keyboard::Scan::E) {
+                load_bms("Asgard_[7-A_Another].bme");
             }
         }
 
@@ -113,15 +119,18 @@ void UI::render_main_menu_bar() {
     ImGui::BeginMainMenuBar();
 
     if (ImGui::BeginMenu("File")) {
-
+        // ImGui::MenuItem("Open file");
+        ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("Edit")) {
 
+        ImGui::EndMenu();
     }
     
     if (ImGui::BeginMenu("View")) {
 
+        ImGui::EndMenu();
     }
 
     ImGui::EndMainMenuBar();
@@ -151,10 +160,20 @@ void UI::render_side_section() {
     ImGui::Begin("Side section", &this->is_open_, window_flags);
 
     if (ImGui::CollapsingHeader("Metadata")) {
-        static char title[1024] = "", artist[1024] = "", genre[1024] = "";
+        static char title[1024] =  "", subtitle[1024] = "";
+        static char artist[1024] = "", subartist[1024] = "";
+        static char genre[1024] = "";
+        std::strcpy(title, this->bms->get_title().c_str());
+        std::strcpy(subtitle, this->bms->get_subtitle().c_str());
+        std::strcpy(artist, this->bms->get_artist().c_str());
+        std::strcpy(subartist, this->bms->get_subartist().c_str());
+        std::strcpy(genre, this->bms->get_genre().c_str());
+
         ImGui::InputText("Title", title, IM_ARRAYSIZE(title));
-        ImGui::InputText("Artist", title, IM_ARRAYSIZE(title));
-        ImGui::InputText("Genre", title, IM_ARRAYSIZE(title));
+        ImGui::InputText("Subtitle", subtitle, IM_ARRAYSIZE(subtitle));        
+        ImGui::InputText("Artist", artist, IM_ARRAYSIZE(title));
+        ImGui::InputText("Subartist", subartist, IM_ARRAYSIZE(subtitle));
+        ImGui::InputText("Genre", genre, IM_ARRAYSIZE(title));
 
         const char* modes[] = {"SP", "DP", "PM"};
         static int current_mode = 0;
@@ -162,15 +181,22 @@ void UI::render_side_section() {
 
         static double bpm = this->bms->get_bpm();
         ImGui::InputDouble("BPM", &bpm, 1.0f, 10.0f, "%.0f");
-        this->bms->set_bpm(bpm);
 
         static int total = 300;
         ImGui::InputInt("Total", &total);
 
-        const char* judges[] = {"Easy", "Normal", "Hard", "Very Hard"};
-        static int current_judge = 0;
-        ImGui::Combo("Judge", &current_judge, judges, IM_ARRAYSIZE(judges));
+        const char* ranks[] = {"Very Hard", "Hard", "Normal", "Easy"};
+        static int current_rank = this->bms->get_rank();
+        ImGui::Combo("Rank", &current_rank, ranks, IM_ARRAYSIZE(ranks));
 
+        this->bms->set_title(title);
+        this->bms->set_subtitle(subtitle);
+        this->bms->set_artist(artist);
+        this->bms->set_subartist(subartist);
+
+        this->bms->set_bpm(bpm);
+
+        this->bms->set_rank(static_cast<Rank>(current_rank));
     }
 
     if (ImGui::CollapsingHeader("Keysounds")) {
@@ -273,6 +299,7 @@ void UI::render_grid() {
         
 
         // Calculate the position of the given measure line
+
         float measure_distance = i*default_y_scaling*this->grid_scale.y;
         float measure_y_position = y_pos + viewport_size.y - viewport_pos.y - measure_distance - y_wrapping_offset;
 
@@ -301,4 +328,15 @@ void UI::render_grid() {
         this->window->draw(text);
     }
 
+}
+
+bool UI::load_bms(std::string filename) {
+    BMS* new_bms = ImBMS::parse_bms(filename);
+    if (new_bms == nullptr) {return false;}
+
+    BMS* bms_to_be_deleted = this->bms;
+    this->bms = new_bms;
+    delete bms_to_be_deleted;
+    
+    return true;
 }

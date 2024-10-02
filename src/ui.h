@@ -7,6 +7,7 @@
 #include "SFML/Graphics/Text.hpp"
 
 #include "bms.h"
+#include "bms_parser.h"
 
 struct fVec2 {
     float x;
@@ -26,6 +27,8 @@ private:
     void render_main_menu_bar();
     void render_side_section();
     void render_grid();
+
+    bool load_bms(std::string filename);
 
     sf::RenderWindow* window;
     bool is_open_;
