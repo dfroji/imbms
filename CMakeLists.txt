@@ -1,10 +1,12 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.12)
 
 include(FetchContent)
 
 project(ImBMS
     LANGUAGES CXX
 )
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 FetchContent_Declare(sfml
     GIT_REPOSITORY https://github.com/SFML/SFML
@@ -13,7 +15,7 @@ FetchContent_Declare(sfml
 
 FetchContent_Declare(imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui
-    GIT_TAG origin/master
+    GIT_TAG v1.90.7
 )
 
 FetchContent_Declare(imgui-sfml
