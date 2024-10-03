@@ -20,7 +20,14 @@ BMS::BMS() {
 }
 
 BMS::~BMS() {
-
+    for (auto measure : this->measures) {
+        if (measure == nullptr) {continue;}
+        for (auto channel : measure->channels) {
+            if (channel == nullptr) {continue;}
+            delete channel;
+        }
+        delete measure;
+    }
 }
 
 std::string BMS::get_artist() {
@@ -141,5 +148,21 @@ std::vector<double> BMS::get_bpm_changes() {
 
 void BMS::set_bpm_change(double bpm, int index) {
     this->bpm_changes[index] = bpm;
+}
+
+std::vector<Measure*> BMS::get_measures() {
+    return this->measures;
+}
+
+void BMS::new_measure(int index) {
+    Measure* to_be_deleted = this->measures[index];
+    this->measures[index] = new Measure();
+    this->measures[index]->channels.resize(DATA_LIMIT, nullptr);
+
+    if (to_be_deleted != nullptr) {delete to_be_deleted;}
+}
+
+void BMS::resize_measure_v(int new_size) {
+    this->measures.resize(new_size, nullptr);
 }
 

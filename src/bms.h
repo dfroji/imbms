@@ -3,10 +3,10 @@
 #include <string>
 #include <vector>
 
-const int DATA_LIMIT = 1295;  // base-36 zz
+const int DATA_LIMIT = 1296;  // base-36 zz (starting from 1)
 
 struct Channel {
-    std::vector<int> data;
+    std::vector<int> components;
 };
 
 struct Measure {
@@ -17,12 +17,10 @@ enum Player {player_null, sp, couple, dp};
 enum Rank {rank_vhard, rank_hard, rank_normal, rank_easy};
 enum Difficulty {difficulty_null, easy, normal, hyper, another, insane};
 
-enum DataField {field_header, field_main};
-
 class BMS {
 public:
     BMS();
-~BMS();
+    ~BMS();
 
     std::string get_artist();
     void set_artist(std::string artist);
@@ -68,6 +66,10 @@ public:
 
     std::vector<double> get_bpm_changes();
     void set_bpm_change(double bpm, int index);
+
+    std::vector<Measure*> get_measures();
+    void new_measure(int index);
+    void resize_measure_v(int new_size);
 
 private:
     std::string artist;
