@@ -9,6 +9,7 @@
 #include "SFML/Window/Event.hpp"
 #include "SFML/System/Clock.hpp"
 #include "SFML/Graphics/Text.hpp"
+#include "SFML/Graphics/RectangleShape.hpp"
 
 const sf::Color LINE_COLOR(50, 50, 50);
 const sf::Color BEAT_COLOR(100, 100, 100);
@@ -25,8 +26,7 @@ UI::UI() {
     this->is_shift_pressed = false;
 
     this->grid_scale = {2.5f, 2.5f};
-    this->y_position = 0;
-    this->x_position = 0;
+    this->absolute_pos = {0, 0};
 
     this->quantization = 16;
     this->measure_length = 4;
@@ -47,6 +47,8 @@ void UI::render() {
     sf::Event event;
     sf::Clock delta_clock;
 
+    this->calculate_values();
+
     while (window->pollEvent(event)) {
         ImGui::SFML::ProcessEvent(*window, event);
 
@@ -59,8 +61,9 @@ void UI::render() {
                 this->is_shift_pressed = true;
             }
 
+            // for debugging
             if (event.key.scancode == sf::Keyboard::Scan::E) {
-                load_bms("Asgard_[7-A_Another].bme");
+                load_bms("_ANOTHER.bms");
             }
         }
 
@@ -72,18 +75,17 @@ void UI::render() {
 
         if (event.type == sf::Event::MouseWheelScrolled) {
             if (!this->is_shift_pressed) {
-                this->y_position += event.mouseWheelScroll.delta*SCROLL_SPEED;
+                this->absolute_pos.y += event.mouseWheelScroll.delta*SCROLL_SPEED;
 
-                ImVec2 viewport_size = ImGui::GetMainViewport()->Size;
-                if (this->y_position < -viewport_size.y/2) {
-                    this->y_position = -viewport_size.y/2;
+                if (this->absolute_pos.y < -this->viewport_size.y/2) {
+                    this->absolute_pos.y = -this->viewport_size.y/2;
                 }
             } else {
-                this->x_position += event.mouseWheelScroll.delta*SCROLL_SPEED;
+                this->absolute_pos.x += event.mouseWheelScroll.delta*SCROLL_SPEED;
 
                 ImVec2 viewport_size = ImGui::GetMainViewport()->Size;
-                if (this->x_position < -viewport_size.x/2) {
-                    this->x_position = -viewport_size.x/2;
+                if (this->absolute_pos.x < -this->viewport_size.x/2) {
+                    this->absolute_pos.x = -this->viewport_size.x/2;
                 }
             }
         }
@@ -98,9 +100,11 @@ void UI::render() {
 
     window->clear();
 
+
     this->render_main_menu_bar();
     this->render_side_section();
     this->render_grid();
+    this->render_notes();
 
     ImGui::SFML::Render(*window);
     window->display();
@@ -214,50 +218,26 @@ void UI::render_side_section() {
 }
 
 void UI::render_grid() {
-    ImVec2 viewport_size = ImGui::GetMainViewport()->Size;
-    ImVec2 viewport_pos = ImGui::GetMainViewport()->WorkPos;
-
-    int default_y_scaling = viewport_size.y/10;
-    int default_x_scaling = viewport_size.x/10;
-    int padding = 3;
-
-    // Calculate the count of measures within the screen
-    // Limit the count to keep the scrolling seamless at higher grid scales
-    int measures = viewport_size.y / (default_y_scaling*this->grid_scale.y);
-    int measures_wrapped = viewport_size.y / default_y_scaling / 2;
-    if (measures < measures_wrapped) {measures = measures_wrapped;}
-
-    // Calculate the relative position as absolute position % viewport size accounting for scaling
-    float y_pos = std::fmod(this->y_position*this->grid_scale.y, viewport_size.y*this->grid_scale.y);
-    float x_pos = std::fmod(this->x_position*this->grid_scale.x, viewport_size.x*this->grid_scale.x);
-
-    // Numbers of wraps is absolute position divided by viewport size accounting for scaling
-    int y_wraps = (this->y_position*this->grid_scale.y) / (viewport_size.y*this->grid_scale.y);
-    int x_wraps = (this->x_position*this->grid_scale.x) / (viewport_size.x*this->grid_scale.x);
-
-    // The offsets needed for lines to match up when wrapping
-    float y_wrapping_offset = y_wraps*((std::sqrt(default_y_scaling)*2*this->grid_scale.y)-SCROLL_SPEED*this->grid_scale.y);
-    float x_wrapping_offset = x_wraps*((std::sqrt(default_x_scaling)*2*this->grid_scale.x)-SCROLL_SPEED*this->grid_scale.x);
 
     // Setup horizontal lines for drawing
-    int horizontal_line_count = measures*this->quantization;
-    sf::VertexArray horizontal_lines(sf::Lines, 2*horizontal_line_count*padding);
-    for (int i = 0; i < horizontal_line_count*padding; i += 2) {
+    int horizontal_line_count = this->visible_measures*this->quantization;
+    sf::VertexArray horizontal_lines(sf::Lines, 2*horizontal_line_count*PADDING);
+    for (int i = 0; i < horizontal_line_count*PADDING; i += 2) {
         
         // Calculate the position of the given line
-        float line_distance = i*((default_y_scaling*this->grid_scale.y)/this->quantization);
-        float line_y_position = y_pos + viewport_size.y - viewport_pos.y - line_distance - y_wrapping_offset;
+        float line_distance = i*((this->default_scaling.y*this->grid_scale.y)/this->quantization);
+        float line_y_position = this->relative_pos.y + this->viewport_size.y - this->viewport_pos.y - line_distance - this->wrapping_offset.y;
 
         // Offset the left end of the line if scrolled beyond the beginning of the grid
         float x_offset = 0;
-        if (x_pos < 0) {
-            x_offset = x_pos;
+        if (this->relative_pos.x < 0) {
+            x_offset = this->relative_pos.x;
         }
 
         // Set the line in the VertexArray
         // i corresponds to the left end of the line, and i+1 corresponds to the right end of the line
-        horizontal_lines[i].position = {viewport_pos.x - x_offset, line_y_position};
-        horizontal_lines[i+1].position = {viewport_size.x, line_y_position};
+        horizontal_lines[i].position = {this->viewport_pos.x - x_offset, line_y_position};
+        horizontal_lines[i+1].position = {this->viewport_size.x, line_y_position};
         horizontal_lines[i].color = LINE_COLOR;
         horizontal_lines[i+1].color = LINE_COLOR;
     }
@@ -265,57 +245,59 @@ void UI::render_grid() {
     // Arbitrary multiplier for the vertical lines
     int vertical_line_multiplier = 8;
     // Limit the vertical line count for seamless scrolling
-    int vertical_line_count_min = (viewport_size.x / default_x_scaling / 2)*vertical_line_multiplier;
+    int vertical_line_count_min = (this->viewport_size.x / this->default_scaling.x / 2)*vertical_line_multiplier;
 
     // Setup vertical lines for drawing
-    int vertical_line_count = (viewport_size.x / (default_x_scaling*this->grid_scale.x))*vertical_line_multiplier;
+    int vertical_line_count = (this->viewport_size.x / (this->default_scaling.x*this->grid_scale.x))*vertical_line_multiplier;
     if (vertical_line_count < vertical_line_count_min) {vertical_line_count = vertical_line_count_min;}
-    sf::VertexArray vertical_lines(sf::Lines, 2*vertical_line_count*padding);
-    for (int i = 0; i < vertical_line_count*padding; i += 2) {
+    sf::VertexArray vertical_lines(sf::Lines, 2*vertical_line_count*PADDING);
+    for (int i = 0; i < vertical_line_count*PADDING; i += 2) {
 
         // Calculate the position of the given line
-        float line_distance = i*((default_x_scaling*this->grid_scale.x)/vertical_line_multiplier);
-        float line_x_position = -x_pos + viewport_pos.x + line_distance + x_wrapping_offset;
+        float line_distance = i*((this->default_scaling.x*this->grid_scale.x)/vertical_line_multiplier);
+        float line_x_position = -this->relative_pos.x + this->viewport_pos.x + line_distance + this->wrapping_offset.x;
 
         // Offset the bottom end of the line if scrolled beyond the beginning of the grid
         float y_offset = 0;
-        if (y_pos < viewport_pos.y) {
-            y_offset = y_pos - viewport_pos.y;
+        if (this->relative_pos.y < this->viewport_pos.y) {
+            y_offset = this->relative_pos.y - this->viewport_pos.y;
         }
 
         // Set the line in the VertexArray
         // i corresponds to the top end of the line, and i+1 corresponds to the bottom end of the line
-        vertical_lines[i].position = {line_x_position, viewport_pos.y};
-        vertical_lines[i+1].position = {line_x_position, viewport_size.y + y_offset};
+        vertical_lines[i].position = {line_x_position, this->viewport_pos.y};
+        vertical_lines[i+1].position = {line_x_position, this->viewport_size.y + y_offset};
         vertical_lines[i].color = LINE_COLOR;
         vertical_lines[i+1].color = LINE_COLOR;
     }
 
 
     // Setup measure lines with their respective numbers for drawing
-    sf::VertexArray measure_lines(sf::Lines, 2*measures*padding);
+    sf::VertexArray measure_lines(sf::Lines, 2*this->visible_measures*PADDING);
     std::vector<sf::Text> texts;
-    for (int i = 0; i < measures*padding; i += 2) {
+    for (int i = 0; i < this->visible_measures*PADDING; i += 2) {
         
 
         // Calculate the position of the given measure line
 
-        float measure_distance = i*default_y_scaling*this->grid_scale.y;
-        float measure_y_position = y_pos + viewport_size.y - viewport_pos.y - measure_distance - y_wrapping_offset;
+        float measure_distance = i*this->default_scaling.y*this->grid_scale.y;
+        float measure_y_position = this->relative_pos.y + this->viewport_size.y - viewport_pos.y - measure_distance - this->wrapping_offset.y;
 
         // Set the line in the VertexArray
         // i corresponds to the left end of the line, and i+1 corresponds to the right end of the line
-        measure_lines[i].position = {viewport_pos.x, measure_y_position};
-        measure_lines[i+1].position = {viewport_size.x, measure_y_position}; 
+        measure_lines[i].position = {this->viewport_pos.x, measure_y_position};
+        measure_lines[i+1].position = {this->viewport_size.x, measure_y_position}; 
         measure_lines[i].color = MEASURE_COLOR;
         measure_lines[i+1].color = MEASURE_COLOR;
 
         // Setup the number of the measure line
-        int measure_number = (i/2)+y_wraps*measures_wrapped;
+        int measure_number = (i/2)+this->wraps.y*this->measures_wrapped;
         sf::Text text;
         text.setString(std::to_string(measure_number));
         text.setFont(this->font);
-        text.setPosition(viewport_pos.x + 2, y_pos + viewport_size.y - measure_distance - viewport_pos.y*2 - y_wrapping_offset);
+        text.setPosition(this->viewport_pos.x + 2, 
+                         this->relative_pos.y + this->viewport_size.y - measure_distance - this->viewport_pos.y*2 - this->wrapping_offset.y
+                        );
         text.setCharacterSize(12);
         text.setFillColor(sf::Color::White);
         texts.push_back(text);
@@ -328,6 +310,70 @@ void UI::render_grid() {
         this->window->draw(text);
     }
 
+}
+
+void UI::render_notes() {
+    std::vector<Measure*> measures_vec = this->bms->get_measures();
+    for (int i = 0; i < measures_vec.size(); i++) {
+        if (measures_vec[i] == nullptr) {continue;}
+        for (int j = 1; j < DATA_LIMIT; j++) {
+            Channel* channel = measures_vec[i]->channels[j];
+            if (channel == nullptr) {continue;}
+
+            std::vector<int> components = channel->components;
+            for (int k = 0; k < components.size(); k++) {
+                if (components[k] == 0) {continue;}
+                sf::RectangleShape note(sf::Vector2f((this->default_scaling.x*this->grid_scale.x)/4 - 1, 10));
+                note.setFillColor(sf::Color(255,0,0));
+                note.setOrigin(0, 10);
+                note.setOutlineThickness(1.f);
+                note.setOutlineColor(sf::Color(100,0,0));
+                note.setPosition(
+                    -this->absolute_pos.x*this->grid_scale.x + (j-1)*((this->default_scaling.x*this->grid_scale.x)/4),
+                    this->absolute_pos.y*this->grid_scale.y + this->viewport_size.y - this->viewport_pos.y - this->wrapping_offset.y - 2*i*this->default_scaling.y*this->grid_scale.y - ((2*this->default_scaling.y*this->grid_scale.y)/(components.size()))*k
+                );
+                this->window->draw(note);
+
+                sf::Text component_text;
+                component_text.setString(format_base36(components[k], 2));
+                component_text.setFont(this->font);
+                component_text.setPosition(note.getPosition().x, note.getPosition().y - 12);
+                component_text.setCharacterSize(12);
+                component_text.setFillColor(sf::Color::White);
+                component_text.setOutlineThickness(1.f);
+                component_text.setOutlineColor(sf::Color::Black);
+                this->window->draw(component_text);
+            }
+        }
+    }
+}
+
+void UI::calculate_values() {
+    this->viewport_size = ImGui::GetMainViewport()->Size;
+    this->viewport_pos = ImGui::GetMainViewport()->WorkPos;
+
+    this->default_scaling = {this->viewport_size.x/10, this->viewport_size.y/10};
+
+    // Calculate the count of measures within the screen
+    // Limit the count to keep the scrolling seamless at higher grid scales
+    this->visible_measures = this->viewport_size.y / (this->default_scaling.y*this->grid_scale.y);
+    this->measures_wrapped = this->viewport_size.y / this->default_scaling.y / 2;
+    if (this->visible_measures < this->measures_wrapped) {this->visible_measures = this->measures_wrapped;}
+
+    // Calculate the relative position as absolute position % viewport size accounting for scaling
+    this->relative_pos = {std::fmod(this->absolute_pos.x*this->grid_scale.x, this->viewport_size.x*this->grid_scale.x),
+                          std::fmod(this->absolute_pos.y*this->grid_scale.y, this->viewport_size.y*this->grid_scale.y)
+                         };
+
+    // Numbers of wraps is absolute position divided by viewport size accounting for scaling
+    this->wraps = {static_cast<int>((this->absolute_pos.x*this->grid_scale.x) / (this->viewport_size.x*this->grid_scale.x)), 
+                   static_cast<int>((this->absolute_pos.y*this->grid_scale.y) / (this->viewport_size.y*this->grid_scale.y))
+                  };
+
+    // The offsets are needed when wrapping
+    this->wrapping_offset = {this->wraps.x*((std::sqrt(this->default_scaling.x)*2*this->grid_scale.x)-SCROLL_SPEED*this->grid_scale.x),
+                             this->wraps.y*((std::sqrt(this->default_scaling.y)*2*this->grid_scale.y)-SCROLL_SPEED*this->grid_scale.y)
+                            };
 }
 
 bool UI::load_bms(std::string filename) {

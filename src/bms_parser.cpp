@@ -24,7 +24,7 @@ BMS* ImBMS::parse_bms(std::string filename) {
             if (splits.size() < 2 && current_field == DataField::field_header) {continue;}
 
             std::string type = splits[0];
-            std::string argument = trim(splits[1]);
+            std::string argument = rtrim(splits[1]);
             if (type == DATA_FIELD_TAG) {
                 if (argument == "MAIN DATA FIELD") {current_field = DataField::field_main;}
 
@@ -103,6 +103,8 @@ void parse_data(BMS* p_bms, std::string s) {
     else {
         Channel* channel = parse_measure_and_channel(p_bms, splits[0]);
         channel->components = parse_components(splits[1]);
+        for (const auto& comp : channel->components) {
+        }
     }
 }
 
@@ -144,7 +146,7 @@ std::vector<int> parse_components(std::string s) {
     for (int i = 0; i+1 < s.length(); i += 2) {
         std::string number = "";
         for (int j = i; j < i+2; j++) {
-            number.push_back(s[i]);
+            number.push_back(s[j]);
         }
         components.push_back(base36_to_int(number));
     }
@@ -179,7 +181,39 @@ int base36_to_int(std::string number) {
     return dec;
 }
 
-std::string trim(std::string s) {
+std::string int_to_base36(int number) {
+    std::string base36 = "";
+
+    int div = number / 36;
+    int remainder = number % 36;
+
+    if (div > 0) {base36 = int_to_base36(div);}
+    
+    int c = remainder + 55;
+    if (c < 'A') {c -= ('A' - '9' - 1);}
+
+    base36.push_back(c);
+    return base36;
+}
+
+std::string format_base36(int number, int digits) {
+    std::string base36 = int_to_base36(number);
+    if (base36.length() < digits) {
+        std::string tmp = base36;
+        base36 = "";
+        for (int i = 0; i < digits - tmp.length(); i++) {
+            base36.push_back('0');
+        }
+        for (const auto& c : tmp) {
+            base36.push_back(c);
+        }
+    }
+    return base36;
+}
+
+std::string rtrim(std::string s) {
+    if (!std::isspace(s[s.length()-1])) {return s;}
+
     std::string new_s = "";
     for (int i = 0; i < s.length() - 1; i++) {
         new_s.push_back(s[i]);
