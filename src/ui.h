@@ -56,7 +56,9 @@ private:
     void render_side_section();
     void render_grid();
     void render_notes();
-    void render_channel(int measure, std::vector<std::string> channels, std::vector<sf::Color> colors);
+    void render_channels(int measure_index, std::vector<std::string> channels, std::vector<sf::Color> colors);
+    void render_bgm_channels(int measure_index, int offset);
+    void render_channel_notes(int measure_index, int channel_index, std::vector<int> components, sf::Color color);
 
     void calculate_values();
 

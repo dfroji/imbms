@@ -350,38 +350,49 @@ void UI::render_notes() {
                 ImBMS::insert(colors, pm_colors, pm_colors.size());
                 break;
         } 
-        render_channel(measure, channels, colors);
+        render_channels(measure, channels, colors);
+        render_bgm_channels(measure, channels.size());
     }
 }
 
-void UI::render_channel(int measure, std::vector<std::string> channels, std::vector<sf::Color> colors) {
-    std::vector<Measure*> measures = this->bms->get_measures();
-    for (int channel_i = 0; channel_i < channels.size(); channel_i++) {
-        Channel* channel = measures[measure]->channels[ImBMS::base36_to_int(channels[channel_i])];
+void UI::render_channels(int measure_index, std::vector<std::string> channels, std::vector<sf::Color> colors) {
+    Measure* measure = this->bms->get_measures()[measure_index];
+    for (int channel_index = 0; channel_index < channels.size(); channel_index++) {
+        Channel* channel = measure->channels[ImBMS::base36_to_int(channels[channel_index])];
         if (channel == nullptr) {continue;}
+        render_channel_notes(measure_index, channel_index, channel->components, colors[channel_index]);
+    }
+}
 
-        std::vector<int> components = channel->components;
-        for (int i = 0; i < components.size(); i++) {
-            if (components[i] == 0) {continue;}
-            sf::RectangleShape note(sf::Vector2f((this->default_scaling.x*this->grid_scale.x)/4, 10));
-            note.setFillColor(colors[channel_i]);
-            note.setOrigin(0, 10);
-            note.setPosition(
-                -this->absolute_pos.x*this->grid_scale.x + channel_i*((this->default_scaling.x*this->grid_scale.x)/4),
-                this->absolute_pos.y*this->grid_scale.y + this->viewport_size.y - this->viewport_pos.y - this->wrapping_offset.y - 2*measure*this->default_scaling.y*this->grid_scale.y - ((2*this->default_scaling.y*this->grid_scale.y)/(components.size()))*i
-            );
-            this->window->draw(note);
+void UI::render_bgm_channels(int measure_index, int offset) {
+    Measure* measure = this->bms->get_measures()[measure_index];
+    for (int channel_index = 0; channel_index < measure->bgm_channels.size(); channel_index++) {
+        Channel* channel = measure->bgm_channels[channel_index];
+        render_channel_notes(measure_index, channel_index + offset, channel->components, BGM_COLOR);
+    } 
+}
 
-            sf::Text component_text;
-            component_text.setString(ImBMS::format_base36(components[i], 2));
-            component_text.setFont(this->font);
-            component_text.setPosition(note.getPosition().x, note.getPosition().y - 12);
-            component_text.setCharacterSize(12);
-            component_text.setFillColor(sf::Color::White);
-            component_text.setOutlineThickness(1.f);
-            component_text.setOutlineColor(sf::Color::Black);
-            this->window->draw(component_text);
-        }
+void UI::render_channel_notes(int measure_index, int channel_index, std::vector<int> components, sf::Color color) {
+    for (int i = 0; i < components.size(); i++) {
+        if (components[i] == 0) {continue;}
+        sf::RectangleShape note(sf::Vector2f((this->default_scaling.x*this->grid_scale.x)/4, 10));
+        note.setFillColor(color);
+        note.setOrigin(0, 10);
+        note.setPosition(
+            -this->absolute_pos.x*this->grid_scale.x + channel_index*((this->default_scaling.x*this->grid_scale.x)/4),
+            this->absolute_pos.y*this->grid_scale.y + this->viewport_size.y - this->viewport_pos.y - this->wrapping_offset.y - 2*measure_index*this->default_scaling.y*this->grid_scale.y - ((2*this->default_scaling.y*this->grid_scale.y)/(components.size()))*i
+        );
+        this->window->draw(note);
+
+        sf::Text component_text;
+        component_text.setString(ImBMS::format_base36(components[i], 2));
+        component_text.setFont(this->font);
+        component_text.setPosition(note.getPosition().x, note.getPosition().y - 12);
+        component_text.setCharacterSize(12);
+        component_text.setFillColor(sf::Color::White);
+        component_text.setOutlineThickness(1.f);
+        component_text.setOutlineColor(sf::Color::Black);
+        this->window->draw(component_text);
     }
 }
 

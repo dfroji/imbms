@@ -3,7 +3,9 @@
 #include <string>
 #include <vector>
 
-const int DATA_LIMIT = 1296;  // base-36 zz (starting from 1)
+#include "utils.h"
+
+const int DATA_LIMIT = ImBMS::base36_to_int("ZZ");
 
 struct Channel {
     std::vector<int> components;
