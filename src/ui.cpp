@@ -93,6 +93,8 @@ void UI::render() {
         }
 
         if (event.type == sf::Event::Resized) {
+            sf::FloatRect visible_area(0.f, 0.f, event.size.width, event.size.height);
+            this->window->setView(sf::View(visible_area));
         }
     }
 
