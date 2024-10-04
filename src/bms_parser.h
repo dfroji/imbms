@@ -26,9 +26,3 @@ void parse_data(BMS* p_bms, std::string s);
 Channel* parse_measure_and_channel(BMS* p_bms, std::string s);
 std::vector<int> parse_components(std::string s);
 
-std::vector<std::string> split_line(std::string line, const char* delimiter, int number_of_splits);
-
-int base36_to_int(std::string number);
-std::string int_to_base36(int number);
-std::string format_base36(int number, int digits);
-std::string rtrim(std::string s);

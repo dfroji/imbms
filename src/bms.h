@@ -11,11 +11,14 @@ struct Channel {
 
 struct Measure {
     std::vector<Channel*> channels;
+    std::vector<Channel*> bgm_channels;
 };
 
 enum Player {player_null, sp, couple, dp};
 enum Rank {rank_vhard, rank_hard, rank_normal, rank_easy};
 enum Difficulty {difficulty_null, easy, normal, hyper, another, insane};
+
+enum Playstyle {SP, DP, PM};
 
 class BMS {
 public:
@@ -71,6 +74,9 @@ public:
     void new_measure(int index);
     void resize_measure_v(int new_size);
 
+    Playstyle get_playstyle();
+    void set_playstyle(Playstyle playstyle);
+
 private:
     std::string artist;
     std::string subartist;
@@ -84,6 +90,8 @@ private:
     double total;
     std::string stagefile;
     std::string banner;
+
+    Playstyle playstyle;
 
     std::vector<std::string> keysounds;
     std::vector<std::string> graphics;

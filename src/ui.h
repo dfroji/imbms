@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "imgui.h"
 #include "imgui-SFML.h"
 
@@ -8,6 +11,12 @@
 
 #include "bms.h"
 #include "bms_parser.h"
+#include "utils.h"
+
+// *6 are scratches for 1p and 2p
+const std::vector<std::string> P1_VISIBLE = {"16", "11", "12", "13", "14", "15", "18", "19"};
+const std::vector<std::string> P2_VISIBLE = {"21", "22", "23", "24", "25", "28", "29", "26"};
+const std::vector<std::string> PM_VISIBLE = {"11", "12", "13", "14", "15", "21", "22", "23", "24", "25"};
 
 const int PADDING = 3;
 
@@ -35,6 +44,7 @@ private:
     void render_side_section();
     void render_grid();
     void render_notes();
+    void render_channel(int measure, std::vector<std::string> channels);
 
     void calculate_values();
 

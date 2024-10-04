@@ -11,6 +11,8 @@
 #include "SFML/Graphics/Text.hpp"
 #include "SFML/Graphics/RectangleShape.hpp"
 
+#include "utils.h"
+
 const sf::Color LINE_COLOR(50, 50, 50);
 const sf::Color BEAT_COLOR(100, 100, 100);
 const sf::Color MEASURE_COLOR(255, 255, 255);
@@ -63,7 +65,7 @@ void UI::render() {
 
             // for debugging
             if (event.key.scancode == sf::Keyboard::Scan::E) {
-                load_bms("_ANOTHER.bms");
+                load_bms("test.bme");
             }
         }
 
@@ -180,13 +182,13 @@ void UI::render_side_section() {
         ImGui::InputText("Genre", genre, IM_ARRAYSIZE(title));
 
         const char* modes[] = {"SP", "DP", "PM"};
-        static int current_mode = 0;
+        static int current_mode = this->bms->get_playstyle();
         ImGui::Combo("Mode", &current_mode, modes, IM_ARRAYSIZE(modes));
 
         static double bpm = this->bms->get_bpm();
         ImGui::InputDouble("BPM", &bpm, 1.0f, 10.0f, "%.0f");
 
-        static int total = 300;
+        static int total = this->bms->get_total();
         ImGui::InputInt("Total", &total);
 
         const char* ranks[] = {"Very Hard", "Hard", "Normal", "Easy"};
@@ -197,6 +199,9 @@ void UI::render_side_section() {
         this->bms->set_subtitle(subtitle);
         this->bms->set_artist(artist);
         this->bms->set_subartist(subartist);
+        this->bms->set_genre(genre);
+
+        this->bms->set_playstyle(static_cast<Playstyle>(current_mode));
 
         this->bms->set_bpm(bpm);
 
@@ -313,37 +318,54 @@ void UI::render_grid() {
 }
 
 void UI::render_notes() {
-    std::vector<Measure*> measures_vec = this->bms->get_measures();
-    for (int i = 0; i < measures_vec.size(); i++) {
-        if (measures_vec[i] == nullptr) {continue;}
-        for (int j = 1; j < DATA_LIMIT; j++) {
-            Channel* channel = measures_vec[i]->channels[j];
-            if (channel == nullptr) {continue;}
+    std::vector<Measure*> measures = this->bms->get_measures();
+    for (int measure = 0; measure < measures.size(); measure++) {
+        if (measures[measure] == nullptr) {continue;}
+        std::vector<std::string> channels = {};
+        switch (this->bms->get_playstyle()) {
+            case Playstyle::SP:
+                channels = P1_VISIBLE;
+                break;
+            case Playstyle::DP:
+                channels = P1_VISIBLE;
+                channels.insert(std::end(channels), std::begin(P2_VISIBLE), std::end(P2_VISIBLE));
+                break;
+            case Playstyle::PM:
+                channels = PM_VISIBLE;
+        } 
+        render_channel(measure, channels);
+    }
+}
 
-            std::vector<int> components = channel->components;
-            for (int k = 0; k < components.size(); k++) {
-                if (components[k] == 0) {continue;}
-                sf::RectangleShape note(sf::Vector2f((this->default_scaling.x*this->grid_scale.x)/4 - 1, 10));
-                note.setFillColor(sf::Color(255,0,0));
-                note.setOrigin(0, 10);
-                note.setOutlineThickness(1.f);
-                note.setOutlineColor(sf::Color(100,0,0));
-                note.setPosition(
-                    -this->absolute_pos.x*this->grid_scale.x + (j-1)*((this->default_scaling.x*this->grid_scale.x)/4),
-                    this->absolute_pos.y*this->grid_scale.y + this->viewport_size.y - this->viewport_pos.y - this->wrapping_offset.y - 2*i*this->default_scaling.y*this->grid_scale.y - ((2*this->default_scaling.y*this->grid_scale.y)/(components.size()))*k
-                );
-                this->window->draw(note);
+void UI::render_channel(int measure, std::vector<std::string> channels) {
+    std::vector<Measure*> measures = this->bms->get_measures();
+    for (int channel_i = 0; channel_i < channels.size(); channel_i++) {
+        Channel* channel = measures[measure]->channels[ImBMS::base36_to_int(channels[channel_i])];
+        if (channel == nullptr) {continue;}
 
-                sf::Text component_text;
-                component_text.setString(format_base36(components[k], 2));
-                component_text.setFont(this->font);
-                component_text.setPosition(note.getPosition().x, note.getPosition().y - 12);
-                component_text.setCharacterSize(12);
-                component_text.setFillColor(sf::Color::White);
-                component_text.setOutlineThickness(1.f);
-                component_text.setOutlineColor(sf::Color::Black);
-                this->window->draw(component_text);
-            }
+        std::vector<int> components = channel->components;
+        for (int i = 0; i < components.size(); i++) {
+            if (components[i] == 0) {continue;}
+            sf::RectangleShape note(sf::Vector2f((this->default_scaling.x*this->grid_scale.x)/4 - 1, 10));
+            note.setFillColor(sf::Color(255,0,0));
+            note.setOrigin(0, 10);
+            note.setOutlineThickness(1.f);
+            note.setOutlineColor(sf::Color(100,0,0));
+            note.setPosition(
+                -this->absolute_pos.x*this->grid_scale.x + channel_i*((this->default_scaling.x*this->grid_scale.x)/4),
+                this->absolute_pos.y*this->grid_scale.y + this->viewport_size.y - this->viewport_pos.y - this->wrapping_offset.y - 2*measure*this->default_scaling.y*this->grid_scale.y - ((2*this->default_scaling.y*this->grid_scale.y)/(components.size()))*i
+            );
+            this->window->draw(note);
+
+            sf::Text component_text;
+            component_text.setString(ImBMS::format_base36(components[i], 2));
+            component_text.setFont(this->font);
+            component_text.setPosition(note.getPosition().x, note.getPosition().y - 12);
+            component_text.setCharacterSize(12);
+            component_text.setFillColor(sf::Color::White);
+            component_text.setOutlineThickness(1.f);
+            component_text.setOutlineColor(sf::Color::Black);
+            this->window->draw(component_text);
         }
     }
 }

@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+#include "utils.h"
+
 BMS* ImBMS::parse_bms(std::string filename) {
     BMS* p_bms = new BMS(); 
     p_bms->resize_measure_v(1);
@@ -24,7 +26,7 @@ BMS* ImBMS::parse_bms(std::string filename) {
             if (splits.size() < 2 && current_field == DataField::field_header) {continue;}
 
             std::string type = splits[0];
-            std::string argument = rtrim(splits[1]);
+            std::string argument = ImBMS::rtrim(splits[1]);
             if (type == DATA_FIELD_TAG) {
                 if (argument == "MAIN DATA FIELD") {current_field = DataField::field_main;}
 
@@ -60,6 +62,14 @@ BMS* ImBMS::parse_bms(std::string filename) {
 
     file.close();
 
+    if (p_bms->get_player() == Player::dp) {
+        if (ImBMS::split_line(filename, ".", 2)[1] != "pms") {
+            p_bms->set_playstyle(Playstyle::DP);
+        } else {
+            p_bms->set_playstyle(Playstyle::PM);
+        }
+    }
+
     return p_bms;
 }
 
@@ -94,17 +104,15 @@ std::string get_tag_type(std::string s) {
 
 int get_tag_index(std::string s) {
     std::vector<std::string> sound_tag = parse_tag(s);
-    return base36_to_int(sound_tag[1]);
+    return ImBMS::base36_to_int(sound_tag[1]);
 }
 
 void parse_data(BMS* p_bms, std::string s) {
-    std::vector<std::string> splits = split_line(s, ":", 2);
+    std::vector<std::string> splits = ImBMS::split_line(s, ":", 2);
     if (splits.size() != 2) {}
     else {
         Channel* channel = parse_measure_and_channel(p_bms, splits[0]);
         channel->components = parse_components(splits[1]);
-        for (const auto& comp : channel->components) {
-        }
     }
 }
 
@@ -129,8 +137,11 @@ Channel* parse_measure_and_channel(BMS* p_bms, std::string s) {
 
     Measure* measure = p_bms->get_measures()[measure_index];
     Channel* channel = nullptr;
-    int channel_index = std::stoi(channel_index_str);
-    if (measure->channels[channel_index] == nullptr) {
+    int channel_index = ImBMS::base36_to_int(channel_index_str);
+    if (channel_index == 1) {
+        channel = new Channel();
+        measure->bgm_channels.push_back(channel);
+    } else if (measure->channels[channel_index] == nullptr) {
         channel = new Channel();
         measure->channels[channel_index] = channel;
     } else {
@@ -148,75 +159,8 @@ std::vector<int> parse_components(std::string s) {
         for (int j = i; j < i+2; j++) {
             number.push_back(s[j]);
         }
-        components.push_back(base36_to_int(number));
+        components.push_back(ImBMS::base36_to_int(number));
     }
     return components;
 }
 
-std::vector<std::string> split_line(std::string line, const char* delimiter, int number_of_splits) {
-    std::vector<std::string> splits;
-
-    std::string split = "";
-    for (const auto& c : line) {
-        if (c != *delimiter || !splits.size() < number_of_splits - 1) {split.push_back(c);}
-        else {
-            splits.push_back(split);
-            split = "";
-        }
-    }
-    if (split != "") {splits.push_back(split);}
-
-    return splits;
-}
-
-int base36_to_int(std::string number) {
-    int dec = 0;
-    int exp = number.length() - 1;
-    for (auto& c : number) {
-        if (c < 'A') {c += 'A' - '9' - 1;}
-        dec += (c - '0' - ('A' - '9' - 1)) * std::pow(36, exp);
-        exp -= 1;
-    }
-
-    return dec;
-}
-
-std::string int_to_base36(int number) {
-    std::string base36 = "";
-
-    int div = number / 36;
-    int remainder = number % 36;
-
-    if (div > 0) {base36 = int_to_base36(div);}
-    
-    int c = remainder + 55;
-    if (c < 'A') {c -= ('A' - '9' - 1);}
-
-    base36.push_back(c);
-    return base36;
-}
-
-std::string format_base36(int number, int digits) {
-    std::string base36 = int_to_base36(number);
-    if (base36.length() < digits) {
-        std::string tmp = base36;
-        base36 = "";
-        for (int i = 0; i < digits - tmp.length(); i++) {
-            base36.push_back('0');
-        }
-        for (const auto& c : tmp) {
-            base36.push_back(c);
-        }
-    }
-    return base36;
-}
-
-std::string rtrim(std::string s) {
-    if (!std::isspace(s[s.length()-1])) {return s;}
-
-    std::string new_s = "";
-    for (int i = 0; i < s.length() - 1; i++) {
-        new_s.push_back(s[i]);
-    }
-    return new_s;
-}

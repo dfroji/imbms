@@ -14,6 +14,8 @@ BMS::BMS() {
     this->stagefile = "";
     this->banner = "";
 
+    this->playstyle = Playstyle::SP;
+
     this->keysounds.resize(DATA_LIMIT, "");
     this->graphics.resize(DATA_LIMIT, "");
     this->bpm_changes.resize(DATA_LIMIT, 0);
@@ -25,6 +27,9 @@ BMS::~BMS() {
         for (auto channel : measure->channels) {
             if (channel == nullptr) {continue;}
             delete channel;
+        }
+        for (auto bgm_channel : measure->bgm_channels) {
+            delete bgm_channel;
         }
         delete measure;
     }
@@ -166,3 +171,10 @@ void BMS::resize_measure_v(int new_size) {
     this->measures.resize(new_size, nullptr);
 }
 
+Playstyle BMS::get_playstyle() {
+    return this->playstyle;
+}
+
+void BMS::set_playstyle(Playstyle playstyle) {
+    this->playstyle = playstyle;
+}
