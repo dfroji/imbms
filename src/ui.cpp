@@ -351,7 +351,8 @@ void UI::render_notes() {
                 break;
         } 
         render_channels(measure, channels, colors);
-        render_bgm_channels(measure, channels.size());
+        render_bga_channels(measure, BGA_CHANNELS, channels.size());
+        render_bgm_channels(measure, channels.size()+BGA_CHANNELS.size());
     }
 }
 
@@ -370,6 +371,15 @@ void UI::render_bgm_channels(int measure_index, int offset) {
         Channel* channel = measure->bgm_channels[channel_index];
         render_channel_notes(measure_index, channel_index + offset, channel->components, BGM_COLOR);
     } 
+}
+
+void UI::render_bga_channels(int measure_index, std::vector<std::string> channels, int offset) {
+    Measure* measure = this->bms->get_measures()[measure_index];
+    for (int channel_index = 0; channel_index < channels.size(); channel_index++) {
+        Channel* channel = measure->channels[ImBMS::base36_to_int(channels[channel_index])];
+        if (channel == nullptr) {continue;}
+        render_channel_notes(measure_index, channel_index + offset, channel->components, BGA_COLOR);
+    }
 }
 
 void UI::render_channel_notes(int measure_index, int channel_index, std::vector<int> components, sf::Color color) {
