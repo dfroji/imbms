@@ -9,4 +9,12 @@ namespace ImBMS {
     std::string int_to_base36(int number);
     std::string format_base36(int number, int digits);
     std::string rtrim(std::string s);
+
+    template<typename T>
+    void insert(std::vector<T>& target, std::vector<T> v, int elements_added) {
+        for (int i = 0; i < elements_added; i++) {
+            target.push_back(v[i % v.size()]);
+        } 
+    }
+
 }

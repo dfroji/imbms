@@ -72,7 +72,7 @@ void UI::render() {
         if (event.type == sf::Event::KeyReleased) {
             if (event.key.scancode == sf::Keyboard::Scan::LShift) {
                 this->is_shift_pressed = false;
-            }
+    }
         }
 
         if (event.type == sf::Event::MouseWheelScrolled) {
@@ -324,22 +324,37 @@ void UI::render_notes() {
     for (int measure = 0; measure < measures.size(); measure++) {
         if (measures[measure] == nullptr) {continue;}
         std::vector<std::string> channels = {};
+        std::vector<sf::Color> colors = {};
+        std::vector<sf::Color> bm_colors = {BM_BOTTOM_NOTE_COLOR, BM_TOP_NOTE_COLOR};
+        std::vector<sf::Color> pm_colors = {
+                                            PM_WHITE_COLOR, PM_YELLOW_COLOR, PM_GREEN_COLOR, PM_BLUE_COLOR, 
+                                            PM_RED_COLOR,
+                                            PM_BLUE_COLOR, PM_GREEN_COLOR, PM_YELLOW_COLOR, PM_WHITE_COLOR
+                                           };
         switch (this->bms->get_playstyle()) {
             case Playstyle::SP:
                 channels = P1_VISIBLE;
+                colors.push_back(SCRATCH_COLOR);
+                ImBMS::insert(colors, bm_colors, 7);
                 break;
             case Playstyle::DP:
                 channels = P1_VISIBLE;
                 channels.insert(std::end(channels), std::begin(P2_VISIBLE), std::end(P2_VISIBLE));
+                colors.push_back(SCRATCH_COLOR);
+                ImBMS::insert(colors, bm_colors, 7);
+                ImBMS::insert(colors, bm_colors, 7);
+                colors.push_back(SCRATCH_COLOR);
                 break;
             case Playstyle::PM:
                 channels = PM_VISIBLE;
+                ImBMS::insert(colors, pm_colors, pm_colors.size());
+                break;
         } 
-        render_channel(measure, channels);
+        render_channel(measure, channels, colors);
     }
 }
 
-void UI::render_channel(int measure, std::vector<std::string> channels) {
+void UI::render_channel(int measure, std::vector<std::string> channels, std::vector<sf::Color> colors) {
     std::vector<Measure*> measures = this->bms->get_measures();
     for (int channel_i = 0; channel_i < channels.size(); channel_i++) {
         Channel* channel = measures[measure]->channels[ImBMS::base36_to_int(channels[channel_i])];
@@ -348,11 +363,9 @@ void UI::render_channel(int measure, std::vector<std::string> channels) {
         std::vector<int> components = channel->components;
         for (int i = 0; i < components.size(); i++) {
             if (components[i] == 0) {continue;}
-            sf::RectangleShape note(sf::Vector2f((this->default_scaling.x*this->grid_scale.x)/4 - 1, 10));
-            note.setFillColor(sf::Color(255,0,0));
+            sf::RectangleShape note(sf::Vector2f((this->default_scaling.x*this->grid_scale.x)/4, 10));
+            note.setFillColor(colors[channel_i]);
             note.setOrigin(0, 10);
-            note.setOutlineThickness(1.f);
-            note.setOutlineColor(sf::Color(100,0,0));
             note.setPosition(
                 -this->absolute_pos.x*this->grid_scale.x + channel_i*((this->default_scaling.x*this->grid_scale.x)/4),
                 this->absolute_pos.y*this->grid_scale.y + this->viewport_size.y - this->viewport_pos.y - this->wrapping_offset.y - 2*measure*this->default_scaling.y*this->grid_scale.y - ((2*this->default_scaling.y*this->grid_scale.y)/(components.size()))*i
@@ -376,7 +389,7 @@ void UI::calculate_values() {
     this->viewport_size = ImGui::GetMainViewport()->Size;
     this->viewport_pos = ImGui::GetMainViewport()->WorkPos;
 
-    this->default_scaling = {this->viewport_size.x/10, this->viewport_size.y/10};
+    this->default_scaling = {this->viewport_size.x/DEFAULT_SCALING_DIV, this->viewport_size.y/DEFAULT_SCALING_DIV};
 
     // Calculate the count of measures within the screen
     // Limit the count to keep the scrolling seamless at higher grid scales

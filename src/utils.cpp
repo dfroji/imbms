@@ -69,3 +69,4 @@ std::string ImBMS::rtrim(std::string s) {
     }
     return new_s;
 }
+
