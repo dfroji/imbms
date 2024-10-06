@@ -9,6 +9,16 @@ const int DATA_LIMIT = ImBMS::base36_to_int("ZZ");
 
 struct Channel {
     std::vector<int> components;
+    void resize(int factor) {
+        std::vector<int> v;
+        for (const auto& comp : this->components) {
+            v.push_back(comp);
+            for (int i = 0; i < factor - 1; i++) {
+                v.push_back(0);
+            }
+        }
+        this->components = v;
+    }
 };
 
 struct Measure {

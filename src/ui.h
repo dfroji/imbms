@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 
 #include "imgui.h"
 #include "imgui-SFML.h"
@@ -45,6 +46,19 @@ struct fVec2 {
     float y;
 };
 
+struct Note {
+    Channel* channel = nullptr;
+    int component_i = -1;
+    int component = -1;
+    bool operator==(const Note& rhs) {
+        return (this->channel == rhs.channel && this->component_i == rhs.component_i);
+    }
+    bool operator!=(const Note& rhs) {
+        return (this->channel != rhs.channel && this->component_i != rhs.component_i);
+    }
+};
+const Note NULL_NOTE = Note(nullptr, -1, -1);
+
 class UI {
 public:
     UI();
@@ -59,7 +73,7 @@ private:
     void render_side_section();
     void render_grid();
     void render_notes();
-    void render_channels(int measure_index, std::vector<std::string> channels, std::vector<sf::Color> colors);
+    void render_play_channels(int measure_index, std::vector<std::string> channels);
     void render_bgm_channels(int measure_index, int offset);
     void render_bga_channels(int measure_index, std::vector<std::string> channels, int offset);
     void render_channel_notes(int measure_index, int channel_index, std::vector<int> components, sf::Color color);
@@ -68,11 +82,45 @@ private:
 
     bool load_bms(std::string filename);
 
+    void limit_mouse();
+
+    std::vector<std::string> get_play_channels();
+
+    sf::Vector2i get_mouse_pos();
+    int get_pointed_measure(sf::Vector2i mouse_pos);
+    int get_pointed_channel(sf::Vector2i mouse_pos);
+    int get_pointed_cell(sf::Vector2i mouse_pos);
+
+    Note get_pointed_note();
+    void render_moved_note();
+
+    void undo();
+
+    bool add_note(int component);
+    bool add_play_or_bga_note(int component, sf::Vector2i mouse_pos, int measure_i, int channel_i, int cell);
+    bool add_bgm_note(int component, sf::Vector2i mouse_pos, int measure_i, int channel_i, int cell);
+    static void undo_add_note(Measure* measure, Channel* channel, int channel_i, std::vector<int> components);
+
+    void remove_note(Note note);
+    static void undo_remove_note(Channel* channel, int component_i, int component);
+
+    static void undo_move_note(std::vector<std::function<void()>>* undo_list);
+
+    sf::Color get_channel_color(int channel_i);
+    
     sf::RenderWindow* window;
     bool is_open_;
     sf::Font font;
 
-    bool is_shift_pressed;
+    bool is_lshift_pressed;
+    bool is_lcontrol_pressed;
+    bool is_mouse1_held;
+
+    sf::Vector2i prev_mouse_pos;
+    Note clicked_note;
+    Note moved_note;
+    bool is_moved_note_removed;
+    bool is_moved_note_rendered;
 
     fVec2 grid_scale;
     iVec2 absolute_pos;
@@ -88,6 +136,8 @@ private:
     fVec2 relative_pos;
     iVec2 wraps;
     fVec2 wrapping_offset;
+    
+    std::vector<std::function<void()>> undo_list;
 
     BMS* bms;
 

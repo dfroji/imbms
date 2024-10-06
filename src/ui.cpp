@@ -25,13 +25,22 @@ UI::UI() {
     ImGui::SFML::Init(*window);
 
     this->is_open_ = window->isOpen();
-    this->is_shift_pressed = false;
+    this->is_lshift_pressed = false;
+    this->is_lcontrol_pressed = false;
+    this->is_mouse1_held = false;
+
+    this->clicked_note = NULL_NOTE;
+    this->moved_note = NULL_NOTE;
+    this->is_moved_note_removed = false;
+    this->is_moved_note_rendered = false;
 
     this->grid_scale = {2.5f, 2.5f};
     this->absolute_pos = {0, 0};
 
     this->quantization = 16;
     this->measure_length = 4;
+
+    this->undo_list = {};
 
     this->bms = new BMS();
 
@@ -60,7 +69,17 @@ void UI::render() {
 
         if (event.type == sf::Event::KeyPressed) {
             if (event.key.scancode == sf::Keyboard::Scan::LShift) {
-                this->is_shift_pressed = true;
+                this->is_lshift_pressed = true;
+            }
+
+            if (event.key.scancode == sf::Keyboard::Scan::LControl) {
+                this->is_lcontrol_pressed = true;
+            }
+
+            if (event.key.scancode == sf::Keyboard::Scan::Z) {
+                if (this->undo_list.size() > 0 && this->is_lcontrol_pressed) {
+                    undo();
+                }
             }
 
             // for debugging
@@ -71,12 +90,15 @@ void UI::render() {
 
         if (event.type == sf::Event::KeyReleased) {
             if (event.key.scancode == sf::Keyboard::Scan::LShift) {
-                this->is_shift_pressed = false;
-    }
+                this->is_lshift_pressed = false;
+            }
+            if (event.key.scancode == sf::Keyboard::Scan::LControl) {
+                this->is_lcontrol_pressed = false;
+            }
         }
 
         if (event.type == sf::Event::MouseWheelScrolled) {
-            if (!this->is_shift_pressed) {
+            if (!this->is_lshift_pressed) {
                 this->absolute_pos.y += event.mouseWheelScroll.delta*SCROLL_SPEED;
 
                 if (this->absolute_pos.y < -this->viewport_size.y/2) {
@@ -90,6 +112,46 @@ void UI::render() {
                     this->absolute_pos.x = -this->viewport_size.x/2;
                 }
             }
+        }
+
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+            limit_mouse();
+            get_pointed_cell(get_mouse_pos());
+            if (!this->is_mouse1_held) {
+                this->prev_mouse_pos = this->get_mouse_pos();
+                this->clicked_note = get_pointed_note();
+                if (this->clicked_note == NULL_NOTE || this->clicked_note.component <= 0) {
+                    add_note(1);
+                }
+                this->is_mouse1_held = true;
+
+            } else if (this->prev_mouse_pos != this->get_mouse_pos()) {
+                if (this->clicked_note != NULL_NOTE && this->clicked_note.component != 0) {
+                    if (!this->is_moved_note_removed) {
+                        remove_note(this->clicked_note);
+                        this->is_moved_note_removed = true;
+                    }
+                    this->moved_note = this->clicked_note;
+                    this->is_moved_note_rendered = true;
+                }
+            }
+        } else {
+            if (this->is_mouse1_held) {
+                if (this->is_moved_note_rendered) {
+                    if (get_pointed_note().component > 0 || !add_note(this->moved_note.component)) {
+                        undo();
+                    } else {
+                        this->undo_list.push_back(std::bind(undo_move_note, &this->undo_list));
+                    }
+                    this->is_moved_note_rendered = false;
+                    this->is_moved_note_removed = false;
+                }
+                this->is_mouse1_held = false;
+            }
+        }
+
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+            remove_note(get_pointed_note());
         }
 
         if (event.type == sf::Event::Resized) {
@@ -109,6 +171,9 @@ void UI::render() {
     this->render_side_section();
     this->render_grid();
     this->render_notes();
+    if (this->is_moved_note_rendered) {
+        this->render_moved_note();
+    }
 
     ImGui::SFML::Render(*window);
     window->display();
@@ -324,44 +389,30 @@ void UI::render_notes() {
     for (int measure = 0; measure < measures.size(); measure++) {
         if (measures[measure] == nullptr) {continue;}
         std::vector<std::string> channels = {};
-        std::vector<sf::Color> colors = {};
-        std::vector<sf::Color> bm_colors = {BM_BOTTOM_NOTE_COLOR, BM_TOP_NOTE_COLOR};
-        std::vector<sf::Color> pm_colors = {
-                                            PM_WHITE_COLOR, PM_YELLOW_COLOR, PM_GREEN_COLOR, PM_BLUE_COLOR, 
-                                            PM_RED_COLOR,
-                                            PM_BLUE_COLOR, PM_GREEN_COLOR, PM_YELLOW_COLOR, PM_WHITE_COLOR
-                                           };
         switch (this->bms->get_playstyle()) {
             case Playstyle::SP:
                 channels = P1_VISIBLE;
-                colors.push_back(SCRATCH_COLOR);
-                ImBMS::insert(colors, bm_colors, 7);
                 break;
             case Playstyle::DP:
                 channels = P1_VISIBLE;
                 channels.insert(std::end(channels), std::begin(P2_VISIBLE), std::end(P2_VISIBLE));
-                colors.push_back(SCRATCH_COLOR);
-                ImBMS::insert(colors, bm_colors, 7);
-                ImBMS::insert(colors, bm_colors, 7);
-                colors.push_back(SCRATCH_COLOR);
                 break;
             case Playstyle::PM:
                 channels = PM_VISIBLE;
-                ImBMS::insert(colors, pm_colors, pm_colors.size());
                 break;
         } 
-        render_channels(measure, channels, colors);
+        render_play_channels(measure, channels);
         render_bga_channels(measure, BGA_CHANNELS, channels.size());
         render_bgm_channels(measure, channels.size()+BGA_CHANNELS.size());
     }
 }
 
-void UI::render_channels(int measure_index, std::vector<std::string> channels, std::vector<sf::Color> colors) {
+void UI::render_play_channels(int measure_index, std::vector<std::string> channels) {
     Measure* measure = this->bms->get_measures()[measure_index];
     for (int channel_index = 0; channel_index < channels.size(); channel_index++) {
         Channel* channel = measure->channels[ImBMS::base36_to_int(channels[channel_index])];
         if (channel == nullptr) {continue;}
-        render_channel_notes(measure_index, channel_index, channel->components, colors[channel_index]);
+        render_channel_notes(measure_index, channel_index, channel->components, get_channel_color(channel_index));
     }
 }
 
@@ -441,6 +492,308 @@ bool UI::load_bms(std::string filename) {
     BMS* bms_to_be_deleted = this->bms;
     this->bms = new_bms;
     delete bms_to_be_deleted;
+
+    this->undo_list = {};
     
     return true;
+}
+
+void UI::limit_mouse() {
+    sf::Vector2i mouse_pos = sf::Mouse::getPosition(*this->window);
+    sf::Vector2i new_pos = mouse_pos;
+
+    if (mouse_pos.x < 0) {
+        new_pos.x = 0;
+    } else if (mouse_pos.x > this->viewport_size.x) {
+        new_pos.x = this->viewport_size.x;
+    }
+
+    if (mouse_pos.y < 0) {
+        new_pos.y = 0;
+    } else if (mouse_pos.y > this->viewport_size.y) {
+        new_pos.y = this->viewport_size.y;
+    }
+
+    if (new_pos != mouse_pos) {
+        sf::Mouse::setPosition(new_pos, *this->window);
+    }
+}
+
+std::vector<std::string> UI::get_play_channels() {
+    std::vector<std::string> play_channels;
+    switch(this->bms->get_playstyle()) {
+        case Playstyle::SP:
+            play_channels = P1_VISIBLE;
+            break;
+        case Playstyle::DP:
+            play_channels = P1_VISIBLE;
+            play_channels.insert(std::end(play_channels), std::begin(P2_VISIBLE), std::end(P2_VISIBLE));
+            break;
+        case Playstyle::PM:
+            play_channels = PM_VISIBLE;
+            break;
+    }
+
+    return play_channels;
+}
+
+
+sf::Vector2i UI::get_mouse_pos() {
+    sf::Vector2i mouse_pos = sf::Mouse::getPosition(*this->window);
+    mouse_pos.x += this->relative_pos.x;
+    mouse_pos.y = this->viewport_size.y - mouse_pos.y + this->relative_pos.y - 20; 
+    return mouse_pos;
+}
+
+int UI::get_pointed_measure(sf::Vector2i mouse_pos) {
+    int pointed_measure = static_cast<int>(
+        ((mouse_pos.y-this->wrapping_offset.y)/2)/(this->default_scaling.y*this->grid_scale.y)+(this->wraps.y*this->measures_wrapped)
+    );
+    return pointed_measure;
+}
+
+int UI::get_pointed_channel(sf::Vector2i mouse_pos) {
+    int pointed_channel = static_cast<int>(
+        ((mouse_pos.x-this->wrapping_offset.x)*4)/(this->default_scaling.x*this->grid_scale.x)+(this->wraps.x*(this->viewport_size.x / this->default_scaling.x / 2))
+    );
+    return pointed_channel;
+}
+
+int UI::get_pointed_cell(sf::Vector2i mouse_pos) {
+    int pointed_cell = static_cast<int>(
+        (((mouse_pos.y-this->wrapping_offset.y)/2)/(this->default_scaling.y*this->grid_scale.y)+(this->wraps.y*this->measures_wrapped))*this->quantization
+    );
+    pointed_cell = pointed_cell % this->quantization;
+    return pointed_cell;
+}
+
+Note UI::get_pointed_note() {
+    Note note = Note();
+
+    sf::Vector2i mouse_pos = get_mouse_pos();
+    int clicked_measure = get_pointed_measure(mouse_pos);
+    int clicked_channel = get_pointed_channel(mouse_pos);
+
+    if (clicked_measure >= this->bms->get_measures().size()) {return NULL_NOTE;}
+    Measure* measure = this->bms->get_measures()[clicked_measure];
+    if (measure == nullptr) {return NULL_NOTE;}
+
+    Channel* channel = nullptr;
+
+    std::vector<std::string> play_channels = get_play_channels();
+    if (clicked_channel < play_channels.size()) {
+        channel = measure->channels[ImBMS::base36_to_int(play_channels[clicked_channel])];
+    } else if (clicked_channel < play_channels.size() + BGA_CHANNELS.size()) {
+        channel = measure->channels[ImBMS::base36_to_int(BGA_CHANNELS[clicked_channel - play_channels.size()])];
+    } else if (clicked_channel - play_channels.size() - BGA_CHANNELS.size() < measure->bgm_channels.size()) {
+        channel = measure->bgm_channels[clicked_channel - play_channels.size() - BGA_CHANNELS.size()];
+    }
+    if (channel == nullptr) {return NULL_NOTE;}
+    note.channel = channel;
+
+    std::vector<int> components = channel->components;
+    for (int i = 0; i < components.size(); i++) {
+        float note_pos_y = 2*clicked_measure*this->default_scaling.y*this->grid_scale.y - 2*this->default_scaling.y*this->grid_scale.y*this->wraps.y*this->measures_wrapped + this->wrapping_offset.y + 2*i*((this->default_scaling.y*this->grid_scale.y)/components.size());
+        if (std::abs(mouse_pos.y - (note_pos_y + 5)) < 5) {
+            note.component_i = i;
+            note.component = components[i];
+            break;
+        }
+    }
+
+    return note;
+
+}
+
+void UI::render_moved_note() {
+    if (this->moved_note.channel == nullptr) {return;}
+
+    sf::Vector2i mouse_pos = sf::Mouse::getPosition(*this->window);
+    sf::RectangleShape note(sf::Vector2f((this->default_scaling.x*this->grid_scale.x)/4, 10));
+    note.setFillColor(get_channel_color(get_pointed_channel(get_mouse_pos())));
+    note.setOrigin(0, 10);
+    note.setPosition(mouse_pos.x - (this->default_scaling.y*this->grid_scale.x)/8,
+                     mouse_pos.y + 5
+                     );
+
+    sf::Text text;
+    text.setString(ImBMS::format_base36(this->moved_note.component, 2));
+    text.setFont(this->font);
+    text.setPosition(note.getPosition().x, note.getPosition().y - 12);
+    text.setCharacterSize(12);
+    text.setFillColor(sf::Color::White);
+    text.setOutlineThickness(1.f);
+    text.setOutlineColor(sf::Color::Black);
+
+    this->window->draw(note);
+    this->window->draw(text);
+}
+
+void UI::undo() {
+    this->undo_list.back()();
+    this->undo_list.pop_back();
+}
+
+bool UI::add_note(int component) {
+    sf::Vector2i mouse_pos = get_mouse_pos();
+    int measure_i = get_pointed_measure(mouse_pos);
+    int channel_i = get_pointed_channel(mouse_pos);
+    int cell = get_pointed_cell(mouse_pos); 
+
+    std::vector<std::string> play_channels = get_play_channels();
+    if (channel_i < play_channels.size()) {
+        channel_i = ImBMS::base36_to_int(play_channels[channel_i]);
+        return add_play_or_bga_note(component, mouse_pos, measure_i, channel_i, cell); 
+    }
+    else if (channel_i < play_channels.size() + BGA_CHANNELS.size()) {
+        channel_i = ImBMS::base36_to_int(BGA_CHANNELS[channel_i-play_channels.size()]);
+        return add_play_or_bga_note(component, mouse_pos, measure_i, channel_i, cell); 
+    } else {
+        channel_i = channel_i - play_channels.size() - BGA_CHANNELS.size();
+        return add_bgm_note(component, mouse_pos, measure_i, channel_i, cell); 
+    }
+}
+
+bool UI::add_play_or_bga_note(int component, sf::Vector2i mouse_pos, int measure_i, int channel_i, int cell) {
+    std::vector<Measure*> measures = this->bms->get_measures();
+    Channel* channel = nullptr;
+    std::vector<int> old_components = {};
+    if (measure_i >= measures.size()) {return false;}
+    if (measures[measure_i]->channels[channel_i] == nullptr) {
+        channel = new Channel();
+        measures[measure_i]->channels[channel_i] = channel;
+        std::vector<int> components = {};
+        components.resize(this->quantization, 0);
+        components[cell] = component;
+        channel->components = components;
+    } else {
+        channel = measures[measure_i]->channels[channel_i];
+        old_components = channel->components;
+        if (this->quantization != channel->components.size()) {
+            int common_divisor = ImBMS::get_gcd(this->quantization, channel->components.size());
+            if (channel->components.size() < this->quantization || 
+                (this->quantization != common_divisor && channel->components.size() != common_divisor)) 
+            {
+                int components_old_size = channel->components.size();
+                channel->resize(this->quantization/common_divisor);
+                if (this->quantization < components_old_size) {
+                    cell *= common_divisor;
+                } else {
+                    cell *= components_old_size/common_divisor;
+                }
+            } else if (this->quantization < channel->components.size()) {
+                cell *= channel->components.size()/common_divisor;
+            }
+        }
+        channel->components[cell] = component;
+    }
+
+    this->undo_list.push_back(std::bind(undo_add_note, measures[measure_i], channel, channel_i, old_components));
+
+    return true;
+}
+
+bool UI::add_bgm_note(int component, sf::Vector2i mouse_pos, int measure_i, int channel_i, int cell) {
+    std::vector<Measure*> measures = this->bms->get_measures();
+    
+    if (measures.size() <= measure_i) {
+        return false;
+    }
+    
+    Measure* measure = measures[measure_i];
+    Channel* channel = nullptr;
+    std::vector<int> old_components;
+
+    if (measure->bgm_channels.size() <= channel_i) {
+        for (int i = 0; i < channel_i + 1; i++) {
+            measure->bgm_channels.resize(measure->bgm_channels.size() + 1, new Channel({0}));
+        }
+    }
+
+    channel = measure->bgm_channels[channel_i];
+    old_components = channel->components;
+    if (this->quantization != channel->components.size()) {
+        int common_divisor = ImBMS::get_gcd(this->quantization, channel->components.size());
+        if (channel->components.size() < this->quantization || 
+            (this->quantization != common_divisor && channel->components.size() != common_divisor)) 
+        {
+            int components_old_size = channel->components.size();
+            channel->resize(this->quantization/common_divisor);
+            if (this->quantization < components_old_size) {
+                cell *= common_divisor;
+            } else {
+                cell *= components_old_size/common_divisor;
+            }
+        } else if (this->quantization < channel->components.size()) {
+            cell *= channel->components.size()/common_divisor;
+        }
+    }
+    channel->components[cell] = component;
+
+    this->undo_list.push_back(std::bind(undo_add_note, measures[measure_i], channel, channel_i, old_components));
+
+    return true;
+}
+
+void UI::undo_add_note(Measure* measure, Channel* channel, int channel_i, std::vector<int> old_components) {
+    if (old_components.size() == 0) {
+        measure->channels[channel_i] = nullptr;
+        delete channel;
+    } else {
+        channel->components = old_components;
+    }
+}
+
+void UI::remove_note(Note note) {
+    if (note.channel != nullptr && note.component_i != -1) {
+        int component = note.channel->components[note.component_i];
+        if (component == 0) {return;}
+        note.channel->components[note.component_i] = 0;
+        this->undo_list.push_back(std::bind(undo_remove_note, note.channel, note.component_i, component));
+    }
+}
+
+void UI::undo_remove_note(Channel* channel, int component_i, int component) {
+    channel->components[component_i] = component;
+}
+
+void UI::undo_move_note(std::vector<std::function<void()>>* undo_list) {
+    undo_list->pop_back();
+    int i_end = 2;
+    for (int i = 0; i < i_end; i++) {
+        undo_list->back()();
+        if (i != i_end - 1) {
+            undo_list->pop_back();
+        }
+    }
+}
+
+sf::Color UI::get_channel_color(int channel_i) {
+    std::vector<sf::Color> bm_colors = {BM_BOTTOM_NOTE_COLOR, BM_TOP_NOTE_COLOR};
+    std::vector<sf::Color> pm_colors = {
+                                        PM_WHITE_COLOR, PM_YELLOW_COLOR, PM_GREEN_COLOR, PM_BLUE_COLOR, 
+                                        PM_RED_COLOR,
+                                        PM_BLUE_COLOR, PM_GREEN_COLOR, PM_YELLOW_COLOR, PM_WHITE_COLOR
+                                       };
+
+    std::vector<sf::Color> play_channel_colors;
+    switch (this->bms->get_playstyle()) {
+        case Playstyle::SP:
+            play_channel_colors.push_back(SCRATCH_COLOR);
+            ImBMS::insert(play_channel_colors, bm_colors, P1_VISIBLE.size() - 1);
+            break;
+        case Playstyle::DP:
+            play_channel_colors.push_back(SCRATCH_COLOR);
+            ImBMS::insert(play_channel_colors, bm_colors, P1_VISIBLE.size() - 1);
+            ImBMS::insert(play_channel_colors, bm_colors, P2_VISIBLE.size() - 1);
+            play_channel_colors.push_back(SCRATCH_COLOR);
+            break;
+        case Playstyle::PM:
+            ImBMS::insert(play_channel_colors, pm_colors, PM_VISIBLE.size());
+            break;
+    }
+
+    if (channel_i < play_channel_colors.size()) {return play_channel_colors[channel_i];}
+    else if (channel_i < play_channel_colors.size() + BGA_CHANNELS.size()) {return BGA_COLOR;}
+    else {return BGM_COLOR;}
 }
