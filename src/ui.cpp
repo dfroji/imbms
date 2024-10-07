@@ -232,6 +232,13 @@ void UI::render_side_section() {
 
     ImGui::Begin("Side section", &this->is_open_, window_flags);
 
+
+    // static values used in a collapsing header are initialized outside of it
+    // as they wouldn't update propely when loading a file and the header is open
+    static int current_mode = this->bms->get_playstyle();
+    static double bpm = this->bms->get_bpm();
+    static int total = this->bms->get_total();
+    static int current_rank = this->bms->get_rank();
     if (ImGui::CollapsingHeader("Metadata")) {
         static char title[1024] =  "", subtitle[1024] = "";
         static char artist[1024] = "", subartist[1024] = "";
@@ -249,18 +256,26 @@ void UI::render_side_section() {
         ImGui::InputText("Genre", genre, IM_ARRAYSIZE(title));
 
         const char* modes[] = {"SP", "DP", "PM"};
-        static int current_mode = this->bms->get_playstyle();
-        ImGui::Combo("Mode", &current_mode, modes, IM_ARRAYSIZE(modes));
+        current_mode = this->bms->get_playstyle();
+        if (ImGui::Combo("Mode", &current_mode, modes, IM_ARRAYSIZE(modes))) {
+            this->bms->set_playstyle(static_cast<Playstyle>(current_mode));
+        }
 
-        static double bpm = this->bms->get_bpm();
-        ImGui::InputDouble("BPM", &bpm, 1.0f, 10.0f, "%.0f");
+        bpm = this->bms->get_bpm();
+        if (ImGui::InputDouble("BPM", &bpm, 1.0f, 10.0f, "%.0f")) {
+            this->bms->set_bpm(bpm);
+        }
 
-        static int total = this->bms->get_total();
-        ImGui::InputInt("Total", &total);
+        total = this->bms->get_total();
+        if (ImGui::InputInt("Total", &total)) {
+            this->bms->set_total(total);
+        }
 
         const char* ranks[] = {"Very Hard", "Hard", "Normal", "Easy"};
-        static int current_rank = this->bms->get_rank();
-        ImGui::Combo("Rank", &current_rank, ranks, IM_ARRAYSIZE(ranks));
+        current_rank = this->bms->get_rank();
+        if (ImGui::Combo("Rank", &current_rank, ranks, IM_ARRAYSIZE(ranks))) {
+            this->bms->set_rank(static_cast<Rank>(current_rank));
+        }
 
         this->bms->set_title(title);
         this->bms->set_subtitle(subtitle);
@@ -268,7 +283,6 @@ void UI::render_side_section() {
         this->bms->set_subartist(subartist);
         this->bms->set_genre(genre);
 
-        this->bms->set_playstyle(static_cast<Playstyle>(current_mode));
 
         this->bms->set_bpm(bpm);
 
