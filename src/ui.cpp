@@ -40,6 +40,8 @@ UI::UI() {
     this->quantization = 16;
     this->measure_length = 4;
 
+    this->keysound = 1;
+
     this->undo_list = {};
 
     this->bms = new BMS();
@@ -121,7 +123,7 @@ void UI::render() {
                 this->prev_mouse_pos = this->get_mouse_pos();
                 this->clicked_note = get_pointed_note();
                 if (this->clicked_note == NULL_NOTE || this->clicked_note.component <= 0) {
-                    add_note(1);
+                    add_note(this->keysound);
                 }
                 this->is_mouse1_held = true;
 
@@ -290,7 +292,21 @@ void UI::render_side_section() {
     }
 
     if (ImGui::CollapsingHeader("Keysounds")) {
+        char* keysound_labels[DATA_LIMIT];
+        std::vector<std::string> label_strings = get_keysound_labels(DATA_LIMIT, 2);
+        for (int i = 0; i < DATA_LIMIT; i++) {
+            keysound_labels[i] = const_cast<char*>(label_strings[i].c_str()); 
+        } 
 
+        static int selected_keysound = this->keysound - 1;
+        if (ImGui::ListBox("##keysounds_list", &selected_keysound, keysound_labels, DATA_LIMIT, 10)) {
+            this->keysound = selected_keysound + 1;
+        }
+        if (ImGui::IsItemHovered()) {
+            if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                // todo: file dialog
+            }
+        }
     }
 
     if (ImGui::CollapsingHeader("Grid")) {
@@ -810,4 +826,17 @@ sf::Color UI::get_channel_color(int channel_i) {
     if (channel_i < play_channel_colors.size()) {return play_channel_colors[channel_i];}
     else if (channel_i < play_channel_colors.size() + BGA_CHANNELS.size()) {return BGA_COLOR;}
     else {return BGM_COLOR;}
+}
+
+std::vector<std::string> UI::get_keysound_labels(int size, int digits) {
+    std::vector<std::string> labels = {};
+    std::vector<std::string> keysounds = this->bms->get_keysounds();
+    for (int i = 1; i < size+1; i++) {
+        std::string keysound = "";
+        if (i < keysounds.size()) {
+            keysound += keysounds[i];
+        }
+        labels.push_back(ImBMS::format_base36(i, 2) + " " + keysound);
+    }
+    return labels;
 }

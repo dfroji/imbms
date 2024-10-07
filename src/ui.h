@@ -107,7 +107,9 @@ private:
     static void undo_move_note(std::vector<std::function<void()>>* undo_list);
 
     sf::Color get_channel_color(int channel_i);
-    
+
+    std::vector<std::string> get_keysound_labels(int size, int digits);
+
     sf::RenderWindow* window;
     bool is_open_;
     sf::Font font;
@@ -126,6 +128,7 @@ private:
     iVec2 absolute_pos;
     int quantization;
     int measure_length;
+    int keysound;
 
     // these are calculated by calculate_values()
     ImVec2 viewport_size;
