@@ -99,7 +99,7 @@ void UI::render() {
             }
         }
 
-        if (event.type == sf::Event::MouseWheelScrolled) {
+        if (event.type == sf::Event::MouseWheelScrolled && !this->is_keysounds_hovered) {
             if (!this->is_lshift_pressed) {
                 this->absolute_pos.y += event.mouseWheelScroll.delta*SCROLL_SPEED;
 
@@ -234,7 +234,6 @@ void UI::render_side_section() {
 
     ImGui::Begin("Side section", &this->is_open_, window_flags);
 
-
     // static values used in a collapsing header are initialized outside of it
     // as they wouldn't update propely when loading a file and the header is open
     static int current_mode = this->bms->get_playstyle();
@@ -303,9 +302,12 @@ void UI::render_side_section() {
             this->keysound = selected_keysound + 1;
         }
         if (ImGui::IsItemHovered()) {
+            this->is_keysounds_hovered = true;
             if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                 // todo: file dialog
             }
+        } else {
+            this->is_keysounds_hovered = false;
         }
     }
 

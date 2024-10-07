@@ -117,6 +117,7 @@ private:
     bool is_lshift_pressed;
     bool is_lcontrol_pressed;
     bool is_mouse1_held;
+    bool is_keysounds_hovered;
 
     sf::Vector2i prev_mouse_pos;
     Note clicked_note;
