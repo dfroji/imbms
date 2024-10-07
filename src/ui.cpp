@@ -672,6 +672,14 @@ bool UI::add_note(int component) {
     int channel_i = get_pointed_channel(mouse_pos);
     int cell = get_pointed_cell(mouse_pos); 
 
+    if (this->bms->get_measures().size() - 1 <= measure_i) {
+        this->bms->resize_measure_v(measure_i + 1);
+    }
+
+    if (this->bms->get_measures()[measure_i] == nullptr) {
+        this->bms->new_measure(measure_i);
+    }
+
     std::vector<std::string> play_channels = get_play_channels();
     if (channel_i < play_channels.size()) {
         channel_i = ImBMS::base36_to_int(play_channels[channel_i]);

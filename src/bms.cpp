@@ -19,6 +19,8 @@ BMS::BMS() {
     this->keysounds.resize(DATA_LIMIT, "");
     this->graphics.resize(DATA_LIMIT, "");
     this->bpm_changes.resize(DATA_LIMIT, 0);
+
+    resize_measure_v(1);
 }
 
 BMS::~BMS() {
