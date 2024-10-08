@@ -3,12 +3,14 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <mutex>
 
 #include "imgui.h"
 #include "imgui-SFML.h"
 
 #include "SFML/Graphics/RenderWindow.hpp"
 #include "SFML/Graphics/Text.hpp"
+#include "SFML/Graphics/RectangleShape.hpp"
 
 #include "bms.h"
 #include "bms_parser.h"
@@ -35,6 +37,9 @@ const sf::Color BGA_COLOR = sf::Color(0,255,0);
 
 const int PADDING = 3;
 const int DEFAULT_SCALING_DIV = 20;
+
+using VRectangleShape = std::vector<sf::RectangleShape>;
+using VText = std::vector<sf::Text>;
 
 struct iVec2 {
     int x;
@@ -73,10 +78,11 @@ private:
     void render_side_section();
     void render_grid();
     void render_notes();
-    void render_play_channels(int measure_index, std::vector<std::string> channels);
-    void render_bgm_channels(int measure_index, int offset);
-    void render_bga_channels(int measure_index, std::vector<std::string> channels, int offset);
-    void render_channel_notes(int measure_index, int channel_index, std::vector<int> components, sf::Color color);
+    void render_notes_thread(int measure_i, std::vector<std::string> channels);
+    void render_play_channels(int measure_i, std::vector<std::string> channels);
+    void render_bgm_channels(int measure_i, int offset);
+    void render_bga_channels(int measure_i, std::vector<std::string> channels, int offset);
+    void render_channel_notes(int measure_i, int channel_i, std::vector<int> components, sf::Color color);
 
     void calculate_values();
 
@@ -141,6 +147,11 @@ private:
     fVec2 relative_pos;
     iVec2 wraps;
     fVec2 wrapping_offset;
+
+    VRectangleShape notes_render_v;
+    VText labels_render_v;
+    std::mutex notes_m;
+    std::mutex labels_m;
     
     std::vector<std::function<void()>> undo_list;
 

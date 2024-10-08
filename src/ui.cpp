@@ -5,11 +5,10 @@
 #include <cmath>
 #include <string>
 #include <cstring>
+#include <thread>
 
 #include "SFML/Window/Event.hpp"
 #include "SFML/System/Clock.hpp"
-#include "SFML/Graphics/Text.hpp"
-#include "SFML/Graphics/RectangleShape.hpp"
 
 #include "utils.h"
 #include "bms_writer.h"
@@ -22,7 +21,7 @@ const int SCROLL_SPEED = 20;
 
 UI::UI() {
     window = new sf::RenderWindow(sf::VideoMode(640, 480), "ImBMS");
-    window->setFramerateLimit(60);
+    window->setVerticalSyncEnabled(true);
     ImGui::SFML::Init(*window);
 
     this->is_open_ = window->isOpen();
@@ -52,6 +51,7 @@ UI::UI() {
 
 UI::~UI() {
     ImGui::SFML::Shutdown();
+    window->setVerticalSyncEnabled(true);
 
     delete this->window;
     delete this->bms;
@@ -87,7 +87,7 @@ void UI::render() {
 
             // for debugging
             if (event.key.scancode == sf::Keyboard::Scan::E) {
-                load_bms("test2.bme");
+                load_bms("test.bme");
             }
             if (event.key.scancode == sf::Keyboard::Scan::R) {
                 save_bms("test_o.bme");
@@ -422,64 +422,84 @@ void UI::render_grid() {
 
 void UI::render_notes() {
     std::vector<Measure*> measures = this->bms->get_measures();
-    for (int measure = 0; measure < measures.size(); measure++) {
-        if (measures[measure] == nullptr) {continue;}
-        std::vector<std::string> channels = {};
-        switch (this->bms->get_playstyle()) {
-            case Playstyle::SP:
-                channels = P1_VISIBLE;
-                break;
-            case Playstyle::DP:
-                channels = P1_VISIBLE;
-                channels.insert(std::end(channels), std::begin(P2_VISIBLE), std::end(P2_VISIBLE));
-                break;
-            case Playstyle::PM:
-                channels = PM_VISIBLE;
-                break;
-        } 
-        render_play_channels(measure, channels);
-        render_bga_channels(measure, BGA_CHANNELS, channels.size());
-        render_bgm_channels(measure, channels.size()+BGA_CHANNELS.size());
-    }
-}
+    int first_visible = this->wraps.y*this->measures_wrapped;
+    int last_visible = first_visible+(this->visible_measures*+PADDING);
 
-void UI::render_play_channels(int measure_index, std::vector<std::string> channels) {
-    Measure* measure = this->bms->get_measures()[measure_index];
-    for (int channel_index = 0; channel_index < channels.size(); channel_index++) {
-        Channel* channel = measure->channels[ImBMS::base36_to_int(channels[channel_index])];
-        if (channel == nullptr) {continue;}
-        render_channel_notes(measure_index, channel_index, channel->components, get_channel_color(channel_index));
-    }
-}
+    std::vector<std::string> channels = {};
+    switch (this->bms->get_playstyle()) {
+        case Playstyle::SP:
+            channels = P1_VISIBLE;
+            break;
+        case Playstyle::DP:
+            channels = P1_VISIBLE;
+            channels.insert(std::end(channels), std::begin(P2_VISIBLE), std::end(P2_VISIBLE));
+            break;
+        case Playstyle::PM:
+            channels = PM_VISIBLE;
+            break;
+    } 
 
-void UI::render_bgm_channels(int measure_index, int offset) {
-    Measure* measure = this->bms->get_measures()[measure_index];
-    for (int channel_index = 0; channel_index < measure->bgm_channels.size(); channel_index++) {
-        Channel* channel = measure->bgm_channels[channel_index];
-        render_channel_notes(measure_index, channel_index + offset, channel->components, BGM_COLOR);
+    std::vector<std::thread> threads;
+    this->notes_render_v = {};
+    this->labels_render_v = {};
+    VText label_v = {};
+    for (int measure_i = first_visible; measure_i < measures.size() && measure_i < last_visible; measure_i++) {
+        if (measures[measure_i] == nullptr) {continue;}
+        threads.push_back(std::thread(&UI::render_notes_thread, this, measure_i, channels));
+    }
+    for (auto& thread : threads) {
+        thread.join();
+    }
+    for (const auto& n : this->notes_render_v) {
+        this->window->draw(n);
+    }
+    for (const auto& l : this->labels_render_v) {
+        this->window->draw(l);
     } 
 }
 
-void UI::render_bga_channels(int measure_index, std::vector<std::string> channels, int offset) {
-    Measure* measure = this->bms->get_measures()[measure_index];
-    for (int channel_index = 0; channel_index < channels.size(); channel_index++) {
-        Channel* channel = measure->channels[ImBMS::base36_to_int(channels[channel_index])];
+void UI::render_notes_thread(int measure_i, std::vector<std::string> channels) {
+    render_play_channels(measure_i, channels);
+    render_bga_channels(measure_i, BGA_CHANNELS, channels.size());
+    render_bgm_channels(measure_i, channels.size()+BGA_CHANNELS.size());
+}
+
+void UI::render_play_channels(int measure_i, std::vector<std::string> channels) {
+    Measure* measure = this->bms->get_measures()[measure_i];
+    for (int channel_i = 0; channel_i < channels.size(); channel_i++) {
+        Channel* channel = measure->channels[ImBMS::base36_to_int(channels[channel_i])];
         if (channel == nullptr) {continue;}
-        render_channel_notes(measure_index, channel_index + offset, channel->components, BGA_COLOR);
+        render_channel_notes(measure_i, channel_i, channel->components, get_channel_color(channel_i));
     }
 }
 
-void UI::render_channel_notes(int measure_index, int channel_index, std::vector<int> components, sf::Color color) {
+void UI::render_bgm_channels(int measure_i, int offset) {
+    Measure* measure = this->bms->get_measures()[measure_i];
+    for (int channel_i = 0; channel_i < measure->bgm_channels.size(); channel_i++) {
+        Channel* channel = measure->bgm_channels[channel_i];
+        render_channel_notes(measure_i, channel_i + offset, channel->components, BGM_COLOR);
+    } 
+}
+
+void UI::render_bga_channels(int measure_i, std::vector<std::string> channels, int offset) {
+    Measure* measure = this->bms->get_measures()[measure_i];
+    for (int channel_i = 0; channel_i < channels.size(); channel_i++) {
+        Channel* channel = measure->channels[ImBMS::base36_to_int(channels[channel_i])];
+        if (channel == nullptr) {continue;}
+        render_channel_notes(measure_i, channel_i + offset, channel->components, BGA_COLOR);
+    }
+}
+
+void UI::render_channel_notes(int measure_i, int channel_i, std::vector<int> components, sf::Color color) {
     for (int i = 0; i < components.size(); i++) {
         if (components[i] == 0) {continue;}
         sf::RectangleShape note(sf::Vector2f((this->default_scaling.x*this->grid_scale.x)/4, 10));
         note.setFillColor(color);
         note.setOrigin(0, 10);
         note.setPosition(
-            -this->absolute_pos.x*this->grid_scale.x + channel_index*((this->default_scaling.x*this->grid_scale.x)/4),
-            this->absolute_pos.y*this->grid_scale.y + this->viewport_size.y - this->viewport_pos.y - this->wrapping_offset.y - 2*measure_index*this->default_scaling.y*this->grid_scale.y - ((2*this->default_scaling.y*this->grid_scale.y)/(components.size()))*i
+            -this->absolute_pos.x*this->grid_scale.x + channel_i*((this->default_scaling.x*this->grid_scale.x)/4),
+            this->absolute_pos.y*this->grid_scale.y + this->viewport_size.y - this->viewport_pos.y - this->wrapping_offset.y - 2*measure_i*this->default_scaling.y*this->grid_scale.y - ((2*this->default_scaling.y*this->grid_scale.y)/(components.size()))*i
         );
-        this->window->draw(note);
 
         sf::Text component_text;
         component_text.setString(ImBMS::format_base36(components[i], 2));
@@ -489,7 +509,13 @@ void UI::render_channel_notes(int measure_index, int channel_index, std::vector<
         component_text.setFillColor(sf::Color::White);
         component_text.setOutlineThickness(1.f);
         component_text.setOutlineColor(sf::Color::Black);
-        this->window->draw(component_text);
+
+        this->notes_m.lock();
+        this->notes_render_v.push_back(note);
+        this->notes_m.unlock();
+        this->labels_m.lock();
+        this->labels_render_v.push_back(component_text);
+        this->labels_m.unlock();
     }
 }
 
