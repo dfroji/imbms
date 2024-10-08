@@ -50,8 +50,6 @@ BMS* ImBMS::parse_bms(std::string filename) {
                         p_bms->set_keysound(argument, tag_index);
                     } else if (tag_type == "BMP") {
                         p_bms->set_graphic(argument, tag_index);
-                    } else if (tag_type == "BPM") {
-                       p_bms->set_bpm_change(std::stod(argument), tag_index); 
                     }
                 }
             }
@@ -71,10 +69,6 @@ BMS* ImBMS::parse_bms(std::string filename) {
     }
 
     return p_bms;
-}
-
-void ImBMS::save_bms(std::string filename, BMS* p_bms) {
-
 }
 
 std::vector<std::string> parse_tag(std::string s) {

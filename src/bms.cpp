@@ -18,7 +18,6 @@ BMS::BMS() {
 
     this->keysounds.resize(DATA_LIMIT, "");
     this->graphics.resize(DATA_LIMIT, "");
-    this->bpm_changes.resize(DATA_LIMIT, 0);
 
     resize_measure_v(1);
 }
@@ -147,14 +146,6 @@ std::vector<std::string> BMS::get_graphics() {
 
 void BMS::set_graphic(std::string filepath, int index) {
     this->graphics[index] = filepath;
-}
-
-std::vector<double> BMS::get_bpm_changes() {
-    return this->bpm_changes;
-}
-
-void BMS::set_bpm_change(double bpm, int index) {
-    this->bpm_changes[index] = bpm;
 }
 
 std::vector<Measure*> BMS::get_measures() {

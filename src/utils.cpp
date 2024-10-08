@@ -2,8 +2,6 @@
 
 #include <cmath>
 
-#include <iostream>
-
 std::vector<std::string> ImBMS::split_line(std::string line, const char* delimiter, int number_of_splits) {
     std::vector<std::string> splits;
 
@@ -83,4 +81,25 @@ int ImBMS::get_gcd(int lhs, int rhs) {
         if (lhs % i == 0 && rhs % i == 0) {return i;}
     }
     return 0;
+}
+
+std::string ImBMS::fint(int number, int digits) {
+    std::string number_str = std::to_string(number);
+    std::string new_str = "";
+    if (number_str.length() < digits) {
+        for (int i = 0; i < digits - number_str.length(); i++) {
+             new_str.push_back('0');
+        }
+        for (const auto& c : number_str) {
+                new_str.push_back(c);
+        }
+    } else if (digits < number_str.length()) {
+        for (int i = number_str.length() - digits; i < number_str.length(); i++) {
+            new_str.push_back(number_str[i]);
+        }
+    } else {
+        return number_str;
+    }
+
+    return new_str;
 }

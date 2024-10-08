@@ -19,6 +19,16 @@ struct Channel {
         }
         this->components = v;
     }
+    std::string components_to_s() {
+        std::string str = "";
+        for (const auto& comp : this->components) {
+            std::string fcomp = ImBMS::format_base36(comp, 2);
+            for (const auto& c : fcomp) {
+                str.push_back(c);
+            }
+        }
+        return str;
+    }
 };
 
 struct Measure {
@@ -79,9 +89,6 @@ public:
     std::vector<std::string> get_graphics();
     void set_graphic(std::string filepath, int index);
 
-    std::vector<double> get_bpm_changes();
-    void set_bpm_change(double bpm, int index);
-
     std::vector<Measure*> get_measures();
     void new_measure(int index);
     void resize_measure_v(int new_size);
@@ -107,7 +114,6 @@ private:
 
     std::vector<std::string> keysounds;
     std::vector<std::string> graphics;
-    std::vector<double> bpm_changes;
 
     std::vector<Measure*> measures;
 };

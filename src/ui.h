@@ -81,6 +81,7 @@ private:
     void calculate_values();
 
     bool load_bms(std::string filename);
+    bool save_bms(std::string filename);
 
     void limit_mouse();
 

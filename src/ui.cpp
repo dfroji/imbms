@@ -12,6 +12,7 @@
 #include "SFML/Graphics/RectangleShape.hpp"
 
 #include "utils.h"
+#include "bms_writer.h"
 
 const sf::Color LINE_COLOR(50, 50, 50);
 const sf::Color BEAT_COLOR(100, 100, 100);
@@ -86,7 +87,10 @@ void UI::render() {
 
             // for debugging
             if (event.key.scancode == sf::Keyboard::Scan::E) {
-                load_bms("test.bme");
+                load_bms("test2.bme");
+            }
+            if (event.key.scancode == sf::Keyboard::Scan::R) {
+                save_bms("test_o.bme");
             }
         }
 
@@ -527,6 +531,11 @@ bool UI::load_bms(std::string filename) {
 
     this->undo_list = {};
     
+    return true;
+}
+
+bool UI::save_bms(std::string filename) {
+    ImBMS::write(this->bms, filename);
     return true;
 }
 
