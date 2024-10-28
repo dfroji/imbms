@@ -13,6 +13,8 @@
 #include "utils.h"
 #include "bms_writer.h"
 
+#include "filedialog.h"
+
 const sf::Color LINE_COLOR(50, 50, 50);
 const sf::Color BEAT_COLOR(100, 100, 100);
 const sf::Color MEASURE_COLOR(255, 255, 255);
@@ -46,12 +48,14 @@ UI::UI() {
 
     this->bms = new BMS();
 
+    this->current_path = fs::current_path();
+
     this->font.loadFromFile("../fonts/Cousine-Regular.ttf");
 }
 
 UI::~UI() {
-    ImGui::SFML::Shutdown();
-    window->setVerticalSyncEnabled(true);
+    this->window->close();
+    ImGui::SFML::Shutdown(*(this->window));
 
     delete this->window;
     delete this->bms;
@@ -91,6 +95,13 @@ void UI::render() {
             }
             if (event.key.scancode == sf::Keyboard::Scan::R) {
                 save_bms("test_o.bme");
+            }
+            if (event.key.scancode == sf::Keyboard::Scan::F) {
+                FileDialog fd;
+                std::string filepath = fd.open_file(this->current_path, {".bms", ".bme", ".bml", ".pms"});
+                if (filepath != "") {
+                    load_bms(filepath);
+                }
             }
         }
 
@@ -183,6 +194,7 @@ void UI::render() {
 
     ImGui::SFML::Render(*window);
     window->display();
+
 }
 
 bool UI::is_open() {
@@ -308,7 +320,12 @@ void UI::render_side_section() {
         if (ImGui::IsItemHovered()) {
             this->is_keysounds_hovered = true;
             if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                // todo: file dialog
+                FileDialog fd;
+                fs::path filepath = fd.open_file(this->current_path, {".wav", ".ogg"});
+                std::string file = filepath.filename();
+                if (file != "") {
+                    this->bms->set_keysound(file, this->keysound);
+                }
             }
         } else {
             this->is_keysounds_hovered = false;
@@ -406,7 +423,7 @@ void UI::render_grid() {
         text.setPosition(this->viewport_pos.x + 2, 
                          this->relative_pos.y + this->viewport_size.y - measure_distance - this->viewport_pos.y*2 - this->wrapping_offset.y
                         );
-        text.setCharacterSize(12);
+        text.setCharacterSize(FONT_SIZE);
         text.setFillColor(sf::Color::White);
         texts.push_back(text);
     }
@@ -505,7 +522,7 @@ void UI::render_channel_notes(int measure_i, int channel_i, std::vector<int> com
         component_text.setString(ImBMS::format_base36(components[i], 2));
         component_text.setFont(this->font);
         component_text.setPosition(note.getPosition().x, note.getPosition().y - 12);
-        component_text.setCharacterSize(12);
+        component_text.setCharacterSize(FONT_SIZE);
         component_text.setFillColor(sf::Color::White);
         component_text.setOutlineThickness(1.f);
         component_text.setOutlineColor(sf::Color::Black);
@@ -547,21 +564,27 @@ void UI::calculate_values() {
                             };
 }
 
-bool UI::load_bms(std::string filename) {
-    BMS* new_bms = ImBMS::parse_bms(filename);
+bool UI::load_bms(fs::path filepath) {
+    if (!fs::is_regular_file(filepath)) {return false;}
+
+    BMS* new_bms = ImBMS::parse_bms(filepath);
     if (new_bms == nullptr) {return false;}
 
     BMS* bms_to_be_deleted = this->bms;
     this->bms = new_bms;
     delete bms_to_be_deleted;
 
+    this->current_path = filepath.parent_path();
+
     this->undo_list = {};
     
     return true;
 }
 
-bool UI::save_bms(std::string filename) {
-    ImBMS::write(this->bms, filename);
+bool UI::save_bms(fs::path filepath) {
+    if (!fs::is_regular_file(filepath)) {return false;}
+
+    ImBMS::write(this->bms, filepath);
     return true;
 }
 
@@ -687,7 +710,7 @@ void UI::render_moved_note() {
     text.setString(ImBMS::format_base36(this->moved_note.component, 2));
     text.setFont(this->font);
     text.setPosition(note.getPosition().x, note.getPosition().y - 12);
-    text.setCharacterSize(12);
+    text.setCharacterSize(FONT_SIZE);
     text.setFillColor(sf::Color::White);
     text.setOutlineThickness(1.f);
     text.setOutlineColor(sf::Color::Black);

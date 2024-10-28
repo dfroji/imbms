@@ -15,6 +15,9 @@
 #include "bms.h"
 #include "bms_parser.h"
 #include "utils.h"
+#include "filedialog.h"
+
+const int FONT_SIZE = 12;
 
 // channels
 // *6 are scratches for 1p and 2p
@@ -72,7 +75,6 @@ public:
     void render();
 
     bool is_open();
-
 private:
     void render_main_menu_bar();
     void render_side_section();
@@ -86,8 +88,8 @@ private:
 
     void calculate_values();
 
-    bool load_bms(std::string filename);
-    bool save_bms(std::string filename);
+    bool load_bms(fs::path filepath);
+    bool save_bms(fs::path filepath);
 
     void limit_mouse();
 
@@ -157,4 +159,6 @@ private:
 
     BMS* bms;
 
+    std::string filename;
+    fs::path current_path;
 };
