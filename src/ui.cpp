@@ -98,7 +98,7 @@ void UI::render() {
             }
             if (event.key.scancode == sf::Keyboard::Scan::F) {
                 FileDialog fd;
-                std::string filepath = fd.open_file(this->current_path, {".bms", ".bme", ".bml", ".pms"});
+                std::string filepath = fd.open_file(this->current_path, FDMode::BMSFiles);
                 if (filepath != "") {
                     load_bms(filepath);
                 }
@@ -190,6 +190,12 @@ void UI::render() {
     this->render_notes();
     if (this->is_moved_note_rendered) {
         this->render_moved_note();
+    }
+
+    for (auto& t : this->threads) {
+        if (t.joinable()) {
+            t.join();
+        }
     }
 
     ImGui::SFML::Render(*window);
@@ -313,6 +319,7 @@ void UI::render_side_section() {
             keysound_labels[i] = const_cast<char*>(label_strings[i].c_str()); 
         } 
 
+        ImGui::SetNextItemWidth(-FLT_MIN);
         static int selected_keysound = this->keysound - 1;
         if (ImGui::ListBox("##keysounds_list", &selected_keysound, keysound_labels, DATA_LIMIT, 10)) {
             this->keysound = selected_keysound + 1;
@@ -321,7 +328,7 @@ void UI::render_side_section() {
             this->is_keysounds_hovered = true;
             if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                 FileDialog fd;
-                fs::path filepath = fd.open_file(this->current_path, {".wav", ".ogg"});
+                fs::path filepath = fd.open_file(this->current_path, FDMode::Keysounds);
                 std::string file = filepath.filename();
                 if (file != "") {
                     this->bms->set_keysound(file, this->keysound);

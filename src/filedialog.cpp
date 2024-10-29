@@ -4,6 +4,8 @@
 #include "SFML/System/Clock.hpp"
 
 #include <cstring>
+#include <thread>
+#include <iostream>
 
 const int FRAMES = 2;
 const int INNER_SPACES = 6;
@@ -21,12 +23,13 @@ FileDialog::~FileDialog() {
     }
 }
 
-std::string FileDialog::open_file(fs::path path, std::set<std::string> extensions) {
+std::string FileDialog::open_file(fs::path path, FDMode mode) {
     init_window("Open file"); 
     this->button_label = "Open";
 
     this->path = path;
-    this->extensions = extensions;
+    this->mode = mode;
+    set_extensions(mode);
 
     while (this->is_open) {
         render();
@@ -35,18 +38,30 @@ std::string FileDialog::open_file(fs::path path, std::set<std::string> extension
     return this->path.string() + fs::path::preferred_separator + this->filename;
 }
 
-std::string FileDialog::save_file(fs::path path, std::set<std::string> extensions) {
+std::string FileDialog::save_file(fs::path path, FDMode mode) {
     init_window("Save file");
     this->button_label = "Save";
 
     this->path = path;
-    this->extensions = extensions;
+    this->mode = mode;
+    set_extensions(mode);
 
     while (this->is_open) {
         render();
     }
     
     return this->path.string() + fs::path::preferred_separator + this->filename;
+}
+
+void FileDialog::set_extensions(FDMode mode) {
+    switch (mode) {
+        case FDMode::BMSFiles:
+            this->extensions = BMS_EXTENSIONS;
+            break;
+        case FDMode::Keysounds:
+            this->extensions = KEYSOUND_EXTENSIONS;
+            break;
+    }
 }
 
 void FileDialog::init_window(std::string window_name) {
@@ -116,6 +131,10 @@ void FileDialog::render() {
             if (ImGui::Selectable(label.c_str(), is_selected)) {
                 was_selected = true;
                 this->selected = i;
+
+                if (fs::is_regular_file(files[i]) && this->mode == FDMode::Keysounds) {
+                    this->audio_player.play_sample(files[i]);
+                } 
             }
             if (ImGui::IsItemHovered()) {
                 if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {

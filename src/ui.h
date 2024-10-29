@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <thread>
 #include <mutex>
 
 #include "imgui.h"
@@ -161,4 +162,6 @@ private:
 
     std::string filename;
     fs::path current_path;
+
+    std::vector<std::thread> threads;
 };
