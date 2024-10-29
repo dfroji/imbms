@@ -23,6 +23,12 @@ FetchContent_Declare(imgui-sfml
     GIT_TAG v2.6
 )
 
+FetchContent_Declare(soloud
+    GIT_REPOSITORY https://github.com/jarikomppa/soloud
+    GIT_TAG 
+    SOURCE_SUBDIR contrib
+)
+
 option(SFML_BUILD_AUDIO "Build audio" OFF)
 option(SFML_BUILD_NETWORK "Build network" OFF)
 FetchContent_MakeAvailable(sfml)
@@ -34,6 +40,12 @@ option(IMGUI_SFML_FIND_SFML "Use find_package to find SFML" OFF)
 option(IMGUI_SFML_IMGUI_DEMO "Build imgui_demo.cpp" ON)
 FetchContent_MakeAvailable(imgui-sfml)
 
+FetchContent_MakeAvailable(soloud)
+
+include_directories(soloud
+    ${soloud_SOURCE_DIR}/include
+)
+
 file(GLOB imbms_src CONFIGURE_DEPENDS
     src/*.cpp
 )
@@ -44,4 +56,5 @@ add_executable(imbms
 
 target_link_libraries(imbms
     PUBLIC ImGui-SFML::ImGui-SFML
+    PUBLIC soloud
 )
