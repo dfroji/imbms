@@ -1,7 +1,7 @@
 #pragma once
 
 #include "bms.h"
-#include "bms_parser.h"
+#include "parser.h"
 
 namespace ImBMS {
     void write(BMS* bms, std::string filename="");

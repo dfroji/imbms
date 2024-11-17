@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "utils.h"
+#include "channels_and_colors.h"
 
 const int DATA_LIMIT = ImBMS::base36_to_int("ZZ");
 
@@ -95,6 +96,8 @@ public:
 
     Playstyle get_playstyle();
     void set_playstyle(Playstyle playstyle);
+
+    std::vector<std::string> get_play_channels();
 
 private:
     std::string artist;

@@ -171,3 +171,21 @@ Playstyle BMS::get_playstyle() {
 void BMS::set_playstyle(Playstyle playstyle) {
     this->playstyle = playstyle;
 }
+
+std::vector<std::string> BMS::get_play_channels() {
+    std::vector<std::string> play_channels;
+    switch(playstyle) {
+        case Playstyle::SP:
+            play_channels = P1_VISIBLE;
+            break;
+        case Playstyle::DP:
+            play_channels = P1_VISIBLE;
+            play_channels.insert(std::end(play_channels), std::begin(P2_VISIBLE), std::end(P2_VISIBLE));
+            break;
+        case Playstyle::PM:
+            play_channels = PM_VISIBLE;
+            break;
+    }
+
+    return play_channels;
+}

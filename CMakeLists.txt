@@ -7,6 +7,7 @@ project(ImBMS
 )
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS_DEBUG  "-g")
 
 FetchContent_Declare(sfml
     GIT_REPOSITORY https://github.com/SFML/SFML
@@ -37,7 +38,7 @@ FetchContent_MakeAvailable(imgui)
 
 set(IMGUI_DIR ${imgui_SOURCE_DIR})
 option(IMGUI_SFML_FIND_SFML "Use find_package to find SFML" OFF)
-option(IMGUI_SFML_IMGUI_DEMO "Build imgui_demo.cpp" ON)
+option(IMGUI_SFML_IMGUI_DEMO "Build imgui_demo.cpp" OFF)
 FetchContent_MakeAvailable(imgui-sfml)
 
 FetchContent_MakeAvailable(soloud)
@@ -46,13 +47,17 @@ include_directories(soloud
     ${soloud_SOURCE_DIR}/include
 )
 
+include_directories(include/audio include/bms include/event include/filedialog include/ui include/utility)
+
 file(GLOB imbms_src CONFIGURE_DEPENDS
     src/*.cpp
+    src/*/*.cpp
 )
 
 add_executable(imbms
     ${imbms_src}
 )
+
 
 target_link_libraries(imbms
     PUBLIC ImGui-SFML::ImGui-SFML

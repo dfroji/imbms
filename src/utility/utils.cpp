@@ -103,3 +103,4 @@ std::string ImBMS::fint(int number, int digits) {
 
     return new_str;
 }
+
