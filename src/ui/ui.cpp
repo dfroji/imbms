@@ -11,7 +11,7 @@
 #include "SFML/System/Clock.hpp"
 
 #include "utils.h"
-#include "bms_writer.h"
+#include "write.h"
 #include "eventhandler.h"
 
 UI::UI() {

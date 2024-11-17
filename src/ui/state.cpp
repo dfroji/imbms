@@ -3,8 +3,8 @@
 #include <cmath>
 #include <iostream>
 
-#include "bms_parser.h"
-#include "bms_writer.h"
+#include "parse.h"
+#include "write.h"
 
 State::State() {
     quantization = 16;
@@ -12,7 +12,7 @@ State::State() {
     selected_keysound = 1;
 
     font = new sf::Font();
-    set_font("../fonts/Cousine-Regular.ttf");
+    set_font("Cousine-Regular.ttf");
 
     current_path = fs::current_path();
     absolute_pos = {0, 0};

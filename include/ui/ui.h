@@ -18,7 +18,7 @@
 #include "filedialog.h"
 
 #include "bms.h"
-#include "parser.h"
+#include "parse.h"
 #include "utils.h"
 
 #include "menu_bar.h"
