@@ -12,7 +12,7 @@ State::State() {
     selected_keysound = 1;
 
     font = new sf::Font();
-    set_font("Cousine-Regular.ttf");
+    set_font("../fonts/Cousine-Regular.ttf");
 
     current_path = fs::current_path();
     absolute_pos = {0, 0};
