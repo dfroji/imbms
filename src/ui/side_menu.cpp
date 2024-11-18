@@ -13,6 +13,7 @@ SideMenu::~SideMenu() {
 }
 
 void SideMenu::render(State* state, BMS* bms) {
+    this->state = state;
     this->bms = bms;
 
     ImGuiWindowFlags window_flags = 0;
@@ -106,9 +107,8 @@ void SideMenu::render(State* state, BMS* bms) {
             state->set_selected_keysound(selected_keysound + 1);
         }
         if (ImGui::IsItemHovered()) {
-            // this->is_keysounds_hovered = true;
             if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                FileDialog fd;
+                FileDialog fd(state);
                 fs::path filepath = fd.open_file(state->get_current_path(), FDMode::Keysounds);
                 std::string file = filepath.filename();
                 if (file != "") {
@@ -116,7 +116,6 @@ void SideMenu::render(State* state, BMS* bms) {
                 }
             }
         } else {
-            // this->is_keysounds_hovered = false;
         }
     }
 
@@ -136,12 +135,31 @@ void SideMenu::render(State* state, BMS* bms) {
 std::vector<std::string> SideMenu::get_keysound_labels(int size, int digits) {
     std::vector<std::string> labels = {};
     std::vector<std::string> keysounds = bms->get_keysounds();
+
     for (int i = 1; i < size+1; i++) {
-        std::string keysound = "";
+        fs::path keysound = "";
         if (i < keysounds.size()) {
             keysound += keysounds[i];
+
         }
-        labels.push_back(ImBMS::format_base36(i, 2) + " " + keysound);
+
+        if (keysound == "") {
+            labels.push_back(ImBMS::format_base36(i, 2));
+            continue;
+        }
+
+        // change the extension of the label in the case the actual sound files
+        // are different format than in the parsed bms file.
+        fs::path fullpath = state->get_current_path();
+        fullpath /= keysound;
+        if (fs::exists(fullpath.replace_extension(".wav"))) {
+            keysound.replace_extension(".wav");
+            labels.push_back(ImBMS::format_base36(i, 2) + " " + keysound.generic_string());
+
+        } else if (fs::exists(fullpath.replace_extension(".ogg"))) {
+            keysound.replace_extension(".ogg");
+            labels.push_back(ImBMS::format_base36(i, 2) + " " + keysound.generic_string());
+        }
     }
     return labels;
 }
