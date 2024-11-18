@@ -1,6 +1,7 @@
 #include "notes.h"
 
 #include "eventhandler.h"
+#include <iostream>
 
 Notes::Notes() {
     notes_render_v = {};
@@ -61,7 +62,7 @@ void Notes::render_play_channels(int measure_i, std::vector<std::string> channel
     for (int channel_i = 0; channel_i < channels.size(); channel_i++) {
         Channel* channel = measure->channels[ImBMS::base36_to_int(channels[channel_i])];
         if (channel == nullptr) {continue;}
-        render_channel_notes(measure_i, channel_i, channel->components, get_channel_color(channel_i, state), state);
+        render_channel_notes(measure_i, channel_i, channel, get_channel_color(channel_i, state), state);
     }
 }
 
@@ -69,7 +70,7 @@ void Notes::render_bgm_channels(int measure_i, int offset, State* state) {
     Measure* measure = state->get_bms()->get_measures()[measure_i];
     for (int channel_i = 0; channel_i < measure->bgm_channels.size(); channel_i++) {
         Channel* channel = measure->bgm_channels[channel_i];
-        render_channel_notes(measure_i, channel_i + offset, channel->components, BGM_COLOR, state);
+        render_channel_notes(measure_i, channel_i + offset, channel, BGM_COLOR, state);
     } 
 }
 
@@ -78,11 +79,11 @@ void Notes::render_bga_channels(int measure_i, std::vector<std::string> channels
     for (int channel_i = 0; channel_i < channels.size(); channel_i++) {
         Channel* channel = measure->channels[ImBMS::base36_to_int(channels[channel_i])];
         if (channel == nullptr) {continue;}
-        render_channel_notes(measure_i, channel_i + offset, channel->components, BGA_COLOR, state);
+        render_channel_notes(measure_i, channel_i + offset, channel, BGA_COLOR, state);
     }
 }
 
-void Notes::render_channel_notes(int measure_i, int channel_i, std::vector<int> components, sf::Color color, State* state) {
+void Notes::render_channel_notes(int measure_i, int channel_i, Channel* channel, sf::Color color, State* state) {
     iVec2 absolute_pos = state->get_absolute_pos();
     fVec2 grid_scale = state->get_grid_scale();
     fVec2 default_scaling = state->get_default_scaling();
@@ -91,6 +92,7 @@ void Notes::render_channel_notes(int measure_i, int channel_i, std::vector<int> 
     fVec2 wrapping_offset = state->get_wrapping_offset();
     float note_width = (default_scaling.x*grid_scale.x)/4;
 
+    std::vector<int> components = channel->components;
 
     for (int i = 0; i < components.size(); i++) {
         if (components[i] == 0) {continue;}
@@ -105,6 +107,13 @@ void Notes::render_channel_notes(int measure_i, int channel_i, std::vector<int> 
         note.setFillColor(color);
         note.setOrigin(0, NOTE_HEIGHT);
         note.setPosition(note_pos.x, note_pos.y);
+
+        for (auto n : state->get_selected_notes()) {
+            if (n->channel == channel && n->component == components[i] && n->component_i == i) {
+                note.setOutlineThickness(SELECTION_OUTLINE_THICKNESS);
+                note.setOutlineColor(SELECTION_OUTLINE_COLOR);
+            }
+        }
 
         sf::Text component_text;
         component_text.setString(ImBMS::format_base36(components[i], 2));
@@ -168,6 +177,8 @@ void Notes::render_moving_selection(State* state, sf::RenderWindow* window, sf::
             note_render.setFillColor(color);
             note_render.setOrigin(note_width/2, NOTE_HEIGHT/2);
             note_render.setPosition(absolute_mouse_pos.x, absolute_mouse_pos.y);
+            note_render.setOutlineThickness(SELECTION_OUTLINE_THICKNESS);
+            note_render.setOutlineColor(SELECTION_OUTLINE_COLOR);
 
             sf::Text component_text;
             component_text.setString(ImBMS::format_base36(note->component, 2));

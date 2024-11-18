@@ -148,6 +148,8 @@ Note EventHandler::get_pointed_note(sf::Vector2i mouse_pos, State* state) {
         if (std::abs(mouse_pos.y - (note_pos_y + 5)) < 5) {
             note.component_i = i;
             note.component = components[i];
+            note.measure_i = measure_i;
+            note.channel_i = channel_i;
             break;
         }
     }
@@ -194,6 +196,7 @@ void EventHandler::key_released_event(sf::Event event) {
 
 void EventHandler::mouse_button_pressed_event(sf::Event event) {
     Note pointed_note = EventHandler::get_pointed_note(get_mouse_pos(), state);
+    state->clear_selected_notes();
 
     if (event.mouseButton.button == sf::Mouse::Left) {
         state->set_mouse_left(true);
@@ -212,46 +215,6 @@ void EventHandler::mouse_button_pressed_event(sf::Event event) {
             BMSEditEvent::remove_note(get_mouse_pos(), state);
         }
     }
-    // if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-    //     limit_mouse();
-    //     get_pointed_cell(get_mouse_pos());
-    //     if (!this->is_mouse1_held) {
-    //         this->prev_mouse_pos = this->get_mouse_pos();
-    //         this->clicked_note = get_pointed_note();
-    //         if (this->clicked_note == NULL_NOTE || this->clicked_note.component <= 0) {
-    //             add_note(this->keysound);
-    //         }
-    //         this->is_mouse1_held = true;
-    //
-    //     } else if (this->prev_mouse_pos != this->get_mouse_pos()) {
-    //         if (this->clicked_note != NULL_NOTE && this->clicked_note.component != 0) {
-    //             if (!this->is_moved_note_removed) {
-    //                 remove_note(this->clicked_note);
-    //                 this->is_moved_note_removed = true;
-    //             }
-    //             this->moved_note = this->clicked_note;
-    //             this->is_moved_note_rendered = true;
-    //         }
-    //     }
-    // } else {
-    //     if (this->is_mouse1_held) {
-    //         if (this->is_moved_note_rendered) {
-    //             if (get_pointed_note().component > 0 || !add_note(this->moved_note.component)) {
-    //                 undo();
-    //             } else {
-    //                 this->undo_list.push_back(std::bind(undo_move_note, &this->undo_list));
-    //             }
-    //             this->is_moved_note_rendered = false;
-    //             this->is_moved_note_removed = false;
-    //         }
-    //         this->is_mouse1_held = false;
-    //     }
-    // }
-    //
-    // if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
-    //     remove_note(get_pointed_note());
-    // }
-    //
 }
 
 void EventHandler::mouse_button_released_event(sf::Event event) {

@@ -247,10 +247,14 @@ void State::set_selected_notes(std::vector<Note> notes) {
     clear_selected_notes();
 
     for (const auto& note : notes) {
-        Note* new_note = new Note();
-        *new_note = note;
-        selected_notes.push_back(new_note);
+        add_selected_note(note);
     }
+}
+
+void State::add_selected_note(Note note) {
+    Note* new_note = new Note();
+    *new_note = note;
+    selected_notes.push_back(new_note);
 }
 
 void State::clear_selected_notes() {

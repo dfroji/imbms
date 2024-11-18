@@ -30,6 +30,8 @@ struct Note {
     Channel* channel = nullptr;
     int component_i = -1;
     int component = -1;
+    int measure_i = -1;
+    int channel_i = -1;
     bool operator==(const Note& rhs) {
         return (this->channel == rhs.channel && this->component_i == rhs.component_i);
     }
@@ -37,7 +39,7 @@ struct Note {
         return (this->channel != rhs.channel && this->component_i != rhs.component_i);
     }
 };
-const Note NULL_NOTE = Note(nullptr, -1, -1);
+const Note NULL_NOTE = Note(nullptr, -1, -1, -1, -1);
 
 class State {
     public:
@@ -99,6 +101,7 @@ class State {
 
         std::vector<Note*> get_selected_notes();
         void set_selected_notes(std::vector<Note> notes);
+        void add_selected_note(Note note);
         void clear_selected_notes(); 
 
     private:

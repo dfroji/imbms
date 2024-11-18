@@ -15,7 +15,8 @@ using VRectangleShape = std::vector<sf::RectangleShape>;
 using VText = std::vector<sf::Text>;
 
 const int NOTE_HEIGHT = 10;
-const int NOTES_PADDING = 3;
+const int SELECTION_OUTLINE_THICKNESS = 2;
+const sf::Color SELECTION_OUTLINE_COLOR = sf::Color(255,100,100);
 
 class Notes {
     public:
@@ -28,7 +29,7 @@ class Notes {
         void render_play_channels(int measure_i, std::vector<std::string> channels, State* state);
         void render_bgm_channels(int measure_i, int offset, State* state);
         void render_bga_channels(int measure_i, std::vector<std::string> channels, int offset, State* state);
-        void render_channel_notes(int measure_i, int channel_i, std::vector<int> components, sf::Color color, State* state);
+        void render_channel_notes(int measure_i, int channel_i, Channel* channel, sf::Color color, State* state);
         void render_moving_selection(State* state, sf::RenderWindow* window, sf::Vector2i mouse_pos);
 
         sf::Color get_channel_color(int channel_i, State* state);
