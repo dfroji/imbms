@@ -23,7 +23,7 @@ void Notes::render(State* state, sf::RenderWindow* window, sf::Vector2i mouse_po
     std::vector<Measure*> measures = state->get_bms()->get_measures();
 
     int first_visible = state->get_wraps().y*state->get_measures_wrapped();
-    int last_visible = first_visible+state->get_visible_measures();
+    int last_visible = first_visible+state->get_visible_measures()+NOTE_PADDING;
 
     std::vector<std::string> channels = state->get_bms()->get_play_channels();
 
