@@ -6,10 +6,11 @@
 #include <iostream>
 
 EventHandler::EventHandler() {
+    // audio_player = new Audio();
 }
 
 EventHandler::~EventHandler() {
-
+    // delete audio_player;
 }
 
 void EventHandler::poll_event(State* state, sf::RenderWindow* window) {
@@ -168,7 +169,7 @@ void EventHandler::key_pressed_event(sf::Event event) {
 
     if (event.key.scancode == sf::Keyboard::Scan::O) {
         if (state->is_control()) {
-            FileDialog fd;
+            FileDialog fd(state);
             std::string filepath = fd.open_file(state->get_current_path(), FDMode::BMSFiles);
             if (filepath != "") {
                 state->load_bms(filepath);
@@ -206,6 +207,7 @@ void EventHandler::mouse_button_pressed_event(sf::Event event) {
             state->set_movable(false);
 
         } else {
+            state->play_keysound(state->get_bms()->get_keysounds()[pointed_note.component]);
             state->set_selected_notes({pointed_note});
         }
     }

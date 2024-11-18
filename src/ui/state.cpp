@@ -263,3 +263,18 @@ void State::clear_selected_notes() {
     }
     selected_notes.clear();
 }
+
+void State::play_keysound(fs::path keysound) {
+    if (keysound == "") {
+        return;
+    }
+
+    fs::path filepath = current_path;
+    filepath /= keysound;
+
+    if (fs::exists(filepath.replace_extension(".wav"))) {
+        audio_player.play_sample(filepath);
+    } else if (fs::exists(filepath.replace_extension(".ogg"))) {
+        audio_player.play_sample(filepath);
+    }
+}

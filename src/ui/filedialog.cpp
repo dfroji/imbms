@@ -10,9 +10,10 @@
 const int FRAMES = 2;
 const int INNER_SPACES = 6;
 
-FileDialog::FileDialog() {
+FileDialog::FileDialog(State* state) {
     this->is_open = true;
     this->selected = 0;
+    this->state = state;
 }
 
 FileDialog::~FileDialog() {
@@ -133,7 +134,7 @@ void FileDialog::render() {
                 this->selected = i;
 
                 if (fs::is_regular_file(files[i]) && this->mode == FDMode::Keysounds) {
-                    this->audio_player.play_sample(files[i]);
+                    state->play_keysound(files[i]);
                 } 
             }
             if (ImGui::IsItemHovered()) {

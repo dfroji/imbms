@@ -2,7 +2,7 @@
 
 #include "imgui.h"
 
-#include <filedialog.h>
+#include "filedialog.h"
 
 MenuBar::MenuBar() {
 
@@ -18,7 +18,7 @@ void MenuBar::render(State* state) {
 
     if (ImGui::BeginMenu("File")) {
         if (ImGui::MenuItem("Open", "Ctrl+O")) {
-            FileDialog fd;
+            FileDialog fd(state);
         }
         if (ImGui::MenuItem("Save", "Ctrl+S")) {
         }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "state.h"
+#include "audio.h"
 
 #include "SFML/Graphics/RenderWindow.hpp"
 #include "SFML/Window/Event.hpp"
@@ -34,4 +35,6 @@ class EventHandler {
         bool is_lcontrol_pressed;
         bool is_mouse1_held;
         bool is_keysounds_hovered;
+
+        // Audio* audio_player;
 };

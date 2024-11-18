@@ -8,6 +8,7 @@
 #include "SFML/Graphics/Text.hpp"
 
 #include "bms.h"
+#include "audio.h"
 
 namespace fs = std::filesystem;
 
@@ -104,6 +105,8 @@ class State {
         void add_selected_note(Note note);
         void clear_selected_notes(); 
 
+        void play_keysound(fs::path keysound);
+
     private:
         int quantization;
         fVec2 grid_scale;
@@ -132,4 +135,6 @@ class State {
         std::vector<std::function<void()>> undo_list;
 
         std::vector<Note*> selected_notes;
+        
+        Audio audio_player;
 };

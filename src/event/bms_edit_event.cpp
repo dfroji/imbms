@@ -14,7 +14,7 @@ bool BMSEditEvent::add_note(int component, sf::Vector2i mouse_pos, State* state)
     int cell = EventHandler::get_pointed_cell(mouse_pos, state); 
 
     if (bms->get_measures().size() - 1 <= measure_i) {
-        bms->resize_measure_v(measure_i + 1);
+    bms->resize_measure_v(measure_i + 1);
     }
 
     if (bms->get_measures()[measure_i] == nullptr) {

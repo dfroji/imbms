@@ -10,7 +10,7 @@
 
 #include "SFML/Graphics/RenderWindow.hpp"
 
-#include "audio.h"
+#include "state.h"
 
 namespace fs = std::filesystem;
 
@@ -20,7 +20,7 @@ const std::set<std::string> KEYSOUND_EXTENSIONS = {".wav", ".ogg"};
 
 class FileDialog {
 public:
-    FileDialog();
+    FileDialog(State* state);
     ~FileDialog();
 
     std::string open_file(fs::path path, FDMode mode);
@@ -45,5 +45,5 @@ private:
 
     std::string filename;
 
-    Audio audio_player;
+    State* state;
 };

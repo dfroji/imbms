@@ -5,13 +5,14 @@
 #include <chrono>
 
 Audio::Audio() {
-    this->audio_engine.init();
+    audio_engine.init();
 }
 
 Audio::~Audio() {
+    audio_engine.deinit();
 }
 
 void Audio::play_sample(std::string filepath) {
-    this->sample.load(filepath.c_str());
-    this->audio_engine.play(this->sample);
+    sample.load(filepath.c_str());
+    audio_engine.play(sample);
 }
