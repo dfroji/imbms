@@ -77,6 +77,10 @@ void State::set_current_path(fs::path new_path) {
     current_path = new_path;
 }
 
+fs::path State::get_filename() {
+    return filename;
+}
+
 sf::Font* State::get_font() {
     return font;
 }
@@ -209,7 +213,7 @@ void State::set_bms(BMS* new_bms) {
 }
 
 bool State::load_bms(fs::path filepath) {
-    if (!fs::is_regular_file(filepath)) {return false;}
+    if (filepath == "" || !fs::is_regular_file(filepath)) {return false;}
 
     BMS* new_bms = ImBMS::parse_bms(filepath);
     if (new_bms == nullptr) {return false;}
@@ -218,6 +222,7 @@ bool State::load_bms(fs::path filepath) {
     delete bms_to_be_deleted;
     bms = new_bms;
 
+    filename = filepath;
     current_path = filepath.parent_path();
 
     undo_list.clear();
@@ -226,9 +231,12 @@ bool State::load_bms(fs::path filepath) {
 }
 
 bool State::save_bms(fs::path filepath) {
-    if (!fs::is_regular_file(filepath)) {return false;}
+    if (filepath == "" || !filepath.has_filename() || fs::is_directory(filepath)) {return false;}
 
     ImBMS::write(bms, filepath);
+    filename = filepath;
+    current_path == filepath.parent_path();
+
     return true;
 }
 

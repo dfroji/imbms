@@ -170,11 +170,22 @@ void EventHandler::key_pressed_event(sf::Event event) {
     if (event.key.scancode == sf::Keyboard::Scan::O) {
         if (state->is_control()) {
             FileDialog fd(state);
-            std::string filepath = fd.open_file(state->get_current_path(), FDMode::BMSFiles);
-            if (filepath != "") {
-                state->load_bms(filepath);
-            }
+            fs::path filepath = fd.open_file(state->get_current_path(), FDMode::BMSFiles);
+            state->load_bms(filepath);
         }
+    }
+
+    if (event.key.scancode == sf::Keyboard::Scan::S) {
+        if (state->is_control()) {
+            if (state->is_shift()) {
+                FileDialog fd(state);
+                fs::path filepath = fd.save_file(state->get_current_path(), FDMode::BMSFiles);
+                state->save_bms(filepath);
+
+            } else {
+                state->save_bms(state->get_filename());
+            }
+        } 
     }
 
     if (event.key.scancode == sf::Keyboard::Scan::Z) {

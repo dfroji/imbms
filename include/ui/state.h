@@ -60,6 +60,8 @@ class State {
         fs::path get_current_path();
         void set_current_path(fs::path path);
 
+        fs::path get_filename();
+
         sf::Font* get_font();
         void set_font(fs::path path);
 
@@ -116,6 +118,7 @@ class State {
         fVec2 grid_scale;
         int selected_keysound;
         fs::path current_path;
+        fs::path filename;
         sf::Font* font;
         iVec2 absolute_pos;
 
