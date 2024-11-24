@@ -16,6 +16,7 @@ const int FONT_SIZE = 12;
 const int SCROLL_SPEED = 20;
 const int PADDING = 3;
 const int DEFAULT_SCALING_DIV = 20;
+const float SIDE_MENU_WIDTH = 0.2f;
 
 struct iVec2 {
     int x;
@@ -91,6 +92,9 @@ class State {
         bool is_movable();
         void set_movable(bool b);
 
+        bool is_menu_bar_interacted();
+        void set_menu_bar_interacted(bool b);
+
         BMS* get_bms();
         void set_bms(BMS* new_bms);
         bool load_bms(fs::path filepath);
@@ -129,6 +133,7 @@ class State {
         bool is_mouse_left_;
         bool is_selected_notes_moved_;
         bool is_movable_;
+        bool is_menu_bar_interacted_;
 
         BMS* bms;
 

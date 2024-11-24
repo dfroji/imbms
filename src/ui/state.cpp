@@ -31,6 +31,7 @@ State::State() {
     is_mouse_left_ = false;
     is_selected_notes_moved_ = false;
     is_movable_ = false;
+    is_menu_bar_interacted_ = false;
 
     bms = new BMS();
 
@@ -189,6 +190,14 @@ bool State::is_movable() {
 
 void State::set_movable(bool b) {
     is_movable_ = b;
+}
+
+bool State::is_menu_bar_interacted() {
+    return is_menu_bar_interacted_;
+}
+
+void State::set_menu_bar_interacted(bool b) {
+    is_menu_bar_interacted_ = b;
 }
 
 BMS* State::get_bms() {

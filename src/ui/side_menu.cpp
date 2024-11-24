@@ -25,7 +25,7 @@ void SideMenu::render(State* state, BMS* bms) {
     ImVec2 viewport_size = ImGui::GetMainViewport()->WorkSize;
 
     ImVec2 size;
-    size.x = viewport_size.x * 0.2f;
+    size.x = viewport_size.x * SIDE_MENU_WIDTH;
     size.y = viewport_size.y;
     ImGui::SetNextWindowSize(size);
 

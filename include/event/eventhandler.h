@@ -27,6 +27,7 @@ class EventHandler {
         void mouse_button_released_event(sf::Event event);
         void mouse_wheel_scrolled_event(sf::Event event);
         void mouse_moved_event(sf::Event event);
+        bool is_mouse_on_main_field();
 
         State* state;
         sf::RenderWindow* window;
@@ -34,7 +35,5 @@ class EventHandler {
         bool is_lshift_pressed;
         bool is_lcontrol_pressed;
         bool is_mouse1_held;
-        bool is_keysounds_hovered;
 
-        // Audio* audio_player;
 };

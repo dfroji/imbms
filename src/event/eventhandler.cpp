@@ -196,6 +196,10 @@ void EventHandler::key_released_event(sf::Event event) {
 }
 
 void EventHandler::mouse_button_pressed_event(sf::Event event) {
+    if (!is_mouse_on_main_field()) {
+        return;
+    }
+
     Note pointed_note = EventHandler::get_pointed_note(get_mouse_pos(), state);
     state->clear_selected_notes();
 
@@ -269,6 +273,17 @@ void EventHandler::mouse_moved_event(sf::Event event) {
     }
 }
 
+bool EventHandler::is_mouse_on_main_field() {
+    if (state->is_menu_bar_interacted()) {return false;}
 
+    sf::Vector2i mouse_pos = sf::Mouse::getPosition(*window);
+    ImVec2 viewport_size = state->get_viewport_size();
+    int menu_bar_height = ImGui::CalcTextSize("").y + ImGui::GetStyle().FramePadding.y;
 
+    if (mouse_pos.x > viewport_size.x * (1-SIDE_MENU_WIDTH) || mouse_pos.y < menu_bar_height) {
+        return false;
+    } else {
+        return true;
+    }
 
+}
