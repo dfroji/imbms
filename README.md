@@ -6,7 +6,6 @@ ImBMS is a BMS chart editor built with [ImGui-SFML](https://github.com/SFML/imgu
 
 ## TODO
 
-- Redo actions
 - Copy and paste notes
 - Selecting and manipulating multiple notes
 - Support for long notes and hidden notes (they won't be erased when saving a file, they just aren't rendered and they can't be interacted with)
