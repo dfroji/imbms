@@ -18,9 +18,12 @@ class BMSEditEvent {
     private:
         static bool add_play_or_bga_note(int component, sf::Vector2i mouse_pos, int measure_i, int channel_i, int cell, State* state);
         static bool add_bgm_note(int component, sf::Vector2i mouse_pos, int measure_i, int channel_i, int cell, State* state);
-        static void undo_add_note(Measure* measure, Channel* channel, int channel_i, std::vector<int> old_components);
+        static void undo_add_note(Channel* channel, std::vector<int> old_components, State* state);
+        static void redo_add_note(Channel* channel, std::vector<int> components, State* state);
 
-        static void undo_remove_note(Channel* channel, int component_i, int component);
+        static void undo_remove_note(Channel* channel, int component_i, int component, State* state);
+        static void redo_remove_note(Channel* channel, int component_i, int component, State* state);
 
         static void undo_move_notes(int moved_notes, State* state);
+        static void redo_move_notes(int moved_notes, State* state);
 };

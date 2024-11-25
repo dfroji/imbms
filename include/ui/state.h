@@ -104,7 +104,12 @@ class State {
 
         void add_undo(std::function<void()> command);
         void pop_undo();
+        void clear_redo();
         void undo(bool pop = true);
+
+        void add_redo(std::function<void()> command);
+        void pop_redo();
+        void redo(bool pop = true);
 
         std::vector<Note*> get_selected_notes();
         void set_selected_notes(std::vector<Note> notes);
@@ -141,6 +146,7 @@ class State {
         BMS* bms;
 
         std::vector<std::function<void()>> undo_list;
+        std::vector<std::function<void()>> redo_list;
 
         std::vector<Note*> selected_notes;
         

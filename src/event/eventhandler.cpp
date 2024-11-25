@@ -194,6 +194,12 @@ void EventHandler::key_pressed_event(sf::Event event) {
         }
     }
 
+    if (event.key.scancode == sf::Keyboard::Scan::Y) {
+        if (state->is_control()) {
+            state->redo();
+        }
+    }
+
 }
 
 void EventHandler::key_released_event(sf::Event event) {

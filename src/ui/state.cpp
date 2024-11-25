@@ -256,6 +256,27 @@ void State::undo(bool pop) {
     if (pop) {undo_list.pop_back();}
 }
 
+void State::add_redo(std::function<void()> command) {
+    redo_list.push_back(command);
+}
+
+void State::pop_redo() {
+    redo_list.pop_back();
+}
+
+void State::clear_redo() {
+    redo_list.clear();
+}
+
+
+void State::redo(bool pop) {
+    if (redo_list.size() < 1) {return;}
+
+    redo_list.back()();
+
+    if (pop) {redo_list.pop_back();}
+}
+
 std::vector<Note*> State::get_selected_notes() {
     return selected_notes;
 }

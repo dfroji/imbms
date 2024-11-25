@@ -42,7 +42,8 @@ void BMSEditEvent::remove_note(sf::Vector2i mouse_pos, State* state) {
         int component = note.channel->components[note.component_i];
         if (component == 0) {return;}
         note.channel->components[note.component_i] = 0;
-        state->add_undo(std::bind(BMSEditEvent::undo_remove_note, note.channel, note.component_i, component));
+        state->add_undo(std::bind(BMSEditEvent::undo_remove_note, note.channel, note.component_i, component, state));
+        state->clear_redo();
     }
 }
 
@@ -135,13 +136,14 @@ void BMSEditEvent::move_notes(sf::Vector2i mouse_pos, State* state) {
     }
 
     state->add_undo(std::bind(BMSEditEvent::undo_move_notes, moved_notes, state));
+    state->clear_redo();
 }
 
 void BMSEditEvent::remove_selected_notes(State* state) {
     for (auto note : state->get_selected_notes()) {
         int component = note->channel->components[note->component_i];
         note->channel->components[note->component_i] = 0;
-        state->add_undo(std::bind(BMSEditEvent::undo_remove_note, note->channel, note->component_i, component));
+        state->add_undo(std::bind(BMSEditEvent::undo_remove_note, note->channel, note->component_i, component, state));
     }
 }
 
@@ -191,7 +193,8 @@ bool BMSEditEvent::add_play_or_bga_note(int component, sf::Vector2i mouse_pos, i
         channel->components[cell] = component;
     }
 
-    state->add_undo(std::bind(undo_add_note, measures[measure_i], channel, channel_i, old_components));
+    state->add_undo(std::bind(undo_add_note, channel, old_components, state));
+    state->clear_redo();
     return true;
 }
 
@@ -235,21 +238,40 @@ bool BMSEditEvent::add_bgm_note(int component, sf::Vector2i mouse_pos, int measu
     if (channel->components[cell] != 0)  {return false;}
     channel->components[cell] = component;
 
-    state->add_undo(std::bind(undo_add_note, measures[measure_i], channel, channel_i, old_components));
+    state->add_undo(std::bind(undo_add_note, channel, old_components, state));
+    state->clear_redo();
     return true;
 }
 
-void BMSEditEvent::undo_add_note(Measure* measure, Channel* channel, int channel_i, std::vector<int> old_components) {
-    if (old_components.size() == 0) {
-        measure->channels[channel_i] = nullptr;
-        delete channel;
-    } else {
-        channel->components = old_components;
+void BMSEditEvent::undo_add_note(Channel* channel, std::vector<int> old_components, State* state) {
+    std::vector<int> components = channel->components;
+    channel->components = old_components;
+
+    // if the channel's component vector now has no items (ie. the channel object was created when the note was added),
+    // resize it to the current quantization instead of keeping it 0-size.
+    // this may or may not have consequences along the line so I'll have to keep this in mind
+    if (channel->components.size() == 0) {
+        channel->components.resize(state->get_quantization(), 0);
     }
+
+    state->add_redo(std::bind(redo_add_note, channel, components, state));
 }
 
-void BMSEditEvent::undo_remove_note(Channel* channel, int component_i, int component) {
+void BMSEditEvent::redo_add_note(Channel* channel, std::vector<int> components, State* state) {
+    std::vector<int> old_components = channel->components;
+    channel->components = components;
+
+    state->add_undo(std::bind(undo_add_note, channel, old_components, state));
+}
+
+void BMSEditEvent::undo_remove_note(Channel* channel, int component_i, int component, State* state) {
     channel->components[component_i] = component;
+    state->add_redo(std::bind(redo_remove_note, channel, component_i, component, state));
+}
+
+void BMSEditEvent::redo_remove_note(Channel* channel, int component_i, int component, State* state) {
+    channel->components[component_i] = 0;
+    state->add_undo(std::bind(undo_remove_note, channel, component_i, component, state));
 }
 
 void BMSEditEvent::undo_move_notes(int moved_notes, State* state) {
@@ -263,4 +285,17 @@ void BMSEditEvent::undo_move_notes(int moved_notes, State* state) {
         state->undo();
     }
     state->undo(false);
+    state->add_redo(std::bind(redo_move_notes, moved_notes, state));
+}
+
+void BMSEditEvent::redo_move_notes(int moved_notes, State* state) {
+    // the comments for undo_move_notes() also apply here
+
+    state->pop_redo();
+
+    for (int i = 0; i < moved_notes*2-1; i++) {
+        state->redo();
+    }
+    state->redo(false);
+    state->add_undo(std::bind(undo_move_notes, moved_notes, state));
 }
