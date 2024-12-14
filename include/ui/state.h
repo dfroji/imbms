@@ -63,7 +63,6 @@ class State {
         fs::path get_filename();
 
         sf::Font* get_font();
-        void set_font(fs::path path);
 
         iVec2 get_absolute_pos();
         void set_absolute_pos(iVec2 new_pos);

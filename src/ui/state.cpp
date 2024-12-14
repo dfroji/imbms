@@ -6,13 +6,16 @@
 #include "parse.h"
 #include "write.h"
 
+#include "battery/embed.hpp"
+
 State::State() {
     quantization = 16;
     grid_scale = {5, 5};
     selected_keysound = 1;
 
     font = new sf::Font();
-    set_font("../fonts/Cousine-Regular.ttf");
+    auto f = b::embed<"fonts/Cousine-Regular.ttf">();
+    font->loadFromMemory(f.data(), f.size());
 
     current_path = fs::current_path();
     absolute_pos = {0, 0};
@@ -83,10 +86,6 @@ fs::path State::get_filename() {
 
 sf::Font* State::get_font() {
     return font;
-}
-
-void State::set_font(fs::path path) {
-    font->loadFromFile(path);
 }
 
 iVec2 State::get_absolute_pos() {
