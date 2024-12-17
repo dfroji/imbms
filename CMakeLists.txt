@@ -70,5 +70,3 @@ target_link_libraries(imbms
     PUBLIC ImGui-SFML::ImGui-SFML
     PUBLIC soloud
 )
-
-install(TARGETS imbms)
