@@ -104,3 +104,9 @@ std::string ImBMS::fint(int number, int digits) {
     return new_str;
 }
 
+char* ImBMS::cstr(std::string& str) {
+    char* c = new char[str.size() + 1];
+    std::strcpy(c, str.c_str());
+    return c;
+}
+

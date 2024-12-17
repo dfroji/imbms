@@ -36,7 +36,8 @@ std::string FileDialog::open_file(fs::path path, FDMode mode) {
         render();
     }
 
-    return this->path.string() + fs::path::preferred_separator + this->filename;
+    path /= this->filename;
+    return path.string();
 }
 
 std::string FileDialog::save_file(fs::path path, FDMode mode) {
@@ -51,7 +52,8 @@ std::string FileDialog::save_file(fs::path path, FDMode mode) {
         render();
     }
     
-    return this->path.string() + fs::path::preferred_separator + this->filename;
+    path /= this->filename;
+    return path.string();
 }
 
 void FileDialog::set_extensions(FDMode mode) {
@@ -103,7 +105,7 @@ void FileDialog::render() {
     if (is_root()) {
         path_label = fs::path::preferred_separator;
     } else {
-        path_label = this->path.string() + fs::path::preferred_separator;
+        path_label = this->path.string();
     }
     std::strcpy(path, path_label.c_str());
     ImGui::InputText("##Path", path, IM_ARRAYSIZE(path)); 
@@ -111,7 +113,7 @@ void FileDialog::render() {
     bool was_selected = false;
     if (ImGui::BeginListBox("##Files", ImVec2(-FLT_MIN, ImGui::GetMainViewport()->Size.y - FRAMES*ImGui::GetFrameHeight() - INNER_SPACES*ImGui::GetStyle().ItemInnerSpacing.y))) {
         for (int i = 0; i < files.size(); i++) {
-            if (fs::is_regular_file(files[i]) && !this->extensions.contains(files[i].extension())) {
+            if (fs::is_regular_file(files[i]) && !this->extensions.contains(files[i].extension().string())) {
                 continue;
             }
             if (files[i] == this->path) {
@@ -122,7 +124,7 @@ void FileDialog::render() {
             if (files[i] == this->path.parent_path()) {
                 label = "..";
             } else {
-                label = files[i].filename();
+                label = files[i].filename().string();
             }
             if (fs::is_directory(files[i])) {
                 label.push_back(fs::path::preferred_separator);
@@ -164,10 +166,10 @@ void FileDialog::render() {
 
     static char file[1024] = "";
     if (fs::is_regular_file(files[this->selected]) 
-            && this->extensions.contains(files[this->selected].extension())
+            && this->extensions.contains(files[this->selected].extension().string())
             && was_selected
             ) {
-        std::strcpy(file, files[this->selected].filename().c_str());
+        std::strcpy(file, files[this->selected].filename().string().c_str());
 
     } else if (was_selected) {
         std::string s = "";
@@ -180,7 +182,7 @@ void FileDialog::render() {
 
     if (ImGui::Button(button_label.c_str())) {
         fs::path fpath = this->path.string() + filename;
-        if (this->extensions.contains(fpath.extension())) {
+        if (this->extensions.contains(fpath.extension().string())) {
             this->is_open = false;
         }
     }

@@ -214,7 +214,7 @@ void State::set_bms(BMS* new_bms) {
 bool State::load_bms(fs::path filepath) {
     if (filepath == "" || !fs::is_regular_file(filepath)) {return false;}
 
-    BMS* new_bms = ImBMS::parse_bms(filepath);
+    BMS* new_bms = ImBMS::parse_bms(filepath.string());
     if (new_bms == nullptr) {return false;}
 
     BMS* bms_to_be_deleted = bms;
@@ -232,7 +232,7 @@ bool State::load_bms(fs::path filepath) {
 bool State::save_bms(fs::path filepath) {
     if (filepath == "" || !filepath.has_filename() || fs::is_directory(filepath)) {return false;}
 
-    ImBMS::write(bms, filepath);
+    ImBMS::write(bms, filepath.string());
     filename = filepath;
     current_path == filepath.parent_path();
 
@@ -310,8 +310,8 @@ void State::play_keysound(fs::path keysound) {
     filepath /= keysound;
 
     if (fs::exists(filepath.replace_extension(".wav"))) {
-        audio_player.play_sample(filepath);
+        audio_player.play_sample(filepath.string());
     } else if (fs::exists(filepath.replace_extension(".ogg"))) {
-        audio_player.play_sample(filepath);
+        audio_player.play_sample(filepath.string());
     }
 }

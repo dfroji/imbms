@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <cstring>
 #include <vector>
 
 namespace ImBMS {
@@ -11,6 +12,7 @@ namespace ImBMS {
     std::string rtrim(std::string s);
     int get_gcd(int lhs, int rhs);
     std::string fint(int number, int digits);
+    char* cstr(std::string& str);
 
     template<typename T>
     void insert(std::vector<T>& target, std::vector<T> v, int elements_added) {

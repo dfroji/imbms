@@ -95,27 +95,29 @@ void SideMenu::render(State* state, BMS* bms) {
     }
 
     if (ImGui::CollapsingHeader("Keysounds")) {
-        char* keysound_labels[DATA_LIMIT];
+        std::vector<char*> keysound_labels;
         std::vector<std::string> label_strings = get_keysound_labels(DATA_LIMIT, 2);
-        for (int i = 0; i < DATA_LIMIT; i++) {
-            keysound_labels[i] = const_cast<char*>(label_strings[i].c_str()); 
-        } 
+        std::transform(label_strings.begin(), label_strings.end(), std::back_inserter(keysound_labels), ImBMS::cstr);
 
         ImGui::SetNextItemWidth(-FLT_MIN);
         static int selected_keysound = state->get_selected_keysound() - 1;
-        if (ImGui::ListBox("##keysounds_list", &selected_keysound, keysound_labels, DATA_LIMIT, 10)) {
+        if (ImGui::ListBox("##keysounds_list", &selected_keysound, keysound_labels.data(), DATA_LIMIT, 10)) {
             state->set_selected_keysound(selected_keysound + 1);
         }
         if (ImGui::IsItemHovered()) {
             if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                 FileDialog fd(state);
                 fs::path filepath = fd.open_file(state->get_current_path(), FDMode::Keysounds);
-                std::string file = filepath.filename();
+                std::string file = filepath.filename().string();
                 if (file != "") {
                     bms->set_keysound(file, state->get_selected_keysound());
                 }
             }
         } else {
+        }
+
+        for (auto c : keysound_labels) {
+            delete c;
         }
     }
 
