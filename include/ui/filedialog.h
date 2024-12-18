@@ -23,8 +23,8 @@ public:
     FileDialog(State* state);
     ~FileDialog();
 
-    std::string open_file(fs::path path, FDMode mode);
-    std::string save_file(fs::path path, FDMode mode);
+    fs::path open_file(fs::path path, FDMode mode);
+    fs::path save_file(fs::path path, FDMode mode);
 private:
     void set_extensions(FDMode mode);
     void init_window(std::string window_name);

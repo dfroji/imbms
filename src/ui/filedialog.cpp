@@ -24,7 +24,7 @@ FileDialog::~FileDialog() {
     }
 }
 
-std::string FileDialog::open_file(fs::path path, FDMode mode) {
+fs::path FileDialog::open_file(fs::path path, FDMode mode) {
     init_window("Open file"); 
     this->button_label = "Open";
 
@@ -36,11 +36,11 @@ std::string FileDialog::open_file(fs::path path, FDMode mode) {
         render();
     }
 
-    path /= this->filename;
-    return path.string();
+    this->path /= this->filename;
+    return this->path;
 }
 
-std::string FileDialog::save_file(fs::path path, FDMode mode) {
+fs::path FileDialog::save_file(fs::path path, FDMode mode) {
     init_window("Save file");
     this->button_label = "Save";
 
@@ -52,8 +52,8 @@ std::string FileDialog::save_file(fs::path path, FDMode mode) {
         render();
     }
     
-    path /= this->filename;
-    return path.string();
+    this->path /= this->filename;
+    return this->path;
 }
 
 void FileDialog::set_extensions(FDMode mode) {
