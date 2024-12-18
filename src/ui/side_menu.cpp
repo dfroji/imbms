@@ -161,6 +161,9 @@ std::vector<std::string> SideMenu::get_keysound_labels(int size, int digits) {
         } else if (fs::exists(fullpath.replace_extension(".ogg"))) {
             keysound.replace_extension(".ogg");
             labels.push_back(ImBMS::format_base36(i, 2) + " " + keysound.generic_string());
+
+        } else {
+            labels.push_back(ImBMS::format_base36(i, 2));
         }
     }
     return labels;
