@@ -214,6 +214,7 @@ void State::set_bms(BMS* new_bms) {
 bool State::load_bms(fs::path filepath) {
     if (filepath == "" || !fs::is_regular_file(filepath)) {return false;}
 
+    // parse the given file and return if the parsing fails 
     BMS* new_bms = ImBMS::parse_bms(filepath.string());
     if (new_bms == nullptr) {return false;}
 
@@ -309,8 +310,10 @@ void State::play_keysound(fs::path keysound) {
     fs::path filepath = current_path;
     filepath /= keysound;
 
+    // check which format the keysound actually has
     if (fs::exists(filepath.replace_extension(".wav"))) {
         audio_player.play_sample(filepath.string());
+
     } else if (fs::exists(filepath.replace_extension(".ogg"))) {
         audio_player.play_sample(filepath.string());
     }

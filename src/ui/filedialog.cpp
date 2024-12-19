@@ -32,6 +32,7 @@ fs::path FileDialog::open_file(fs::path path, FDMode mode) {
     this->mode = mode;
     set_extensions(mode);
 
+    // this->path and this->filename are modified in render()
     while (this->is_open) {
         render();
     }
@@ -48,6 +49,7 @@ fs::path FileDialog::save_file(fs::path path, FDMode mode) {
     this->mode = mode;
     set_extensions(mode);
 
+    // this->path and this->filename are modified in render()
     while (this->is_open) {
         render();
     }
@@ -111,12 +113,15 @@ void FileDialog::render() {
     std::strcpy(path, path_label.c_str());
     ImGui::InputText("##Path", path, IM_ARRAYSIZE(path)); 
 
-    bool was_selected = false;
+    bool was_selected = false; // this is used to display the selected file in a widget
     if (ImGui::BeginListBox("##Files", ImVec2(-FLT_MIN, ImGui::GetMainViewport()->Size.y - FRAMES*ImGui::GetFrameHeight() - INNER_SPACES*ImGui::GetStyle().ItemInnerSpacing.y))) {
         for (int i = 0; i < files.size(); i++) {
+            // files that don't have a valid extension are not displayed
             if (fs::is_regular_file(files[i]) && !this->extensions.contains(files[i].extension().string())) {
                 continue;
             }
+
+            // don't display if the directory is the current directory (i.e. root)
             if (files[i] == this->path) {
                 continue;
             }
@@ -136,11 +141,13 @@ void FileDialog::render() {
                 was_selected = true;
                 this->selected = i;
 
+                // play audio file of a valid format when clicked
                 if (fs::is_regular_file(files[i]) && this->mode == FDMode::Keysounds) {
                     state->play_keysound(files[i]);
                 } 
             }
             if (ImGui::IsItemHovered()) {
+                // move to directory on double click
                 if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                     if (fs::is_directory(files[i])) {
                         this->path = files[i];
@@ -156,7 +163,7 @@ void FileDialog::render() {
     double first_button_width = get_button_width(first_button_label);
     double second_button_width = get_button_width(this->button_label);
 
-
+    // close the file dialog when pressed
     if (ImGui::Button(first_button_label.c_str())) {
         this->path = "";
         this->is_open = false;
@@ -165,13 +172,14 @@ void FileDialog::render() {
     ImGui::SameLine();
     ImGui::SetNextItemWidth(ImGui::GetMainViewport()->WorkSize.x - first_button_width - second_button_width);
 
-    static char file[1024] = "";
+    static char file[1024] = ""; // define this within the listbox widget so the label doesn't get cleared every tick
     if (fs::is_regular_file(files[this->selected]) 
             && this->extensions.contains(files[this->selected].extension().string())
             && was_selected
             ) {
         std::strcpy(file, files[this->selected].filename().string().c_str());
 
+    // this clears the label for the selected file if a directory etc is selected
     } else if (was_selected) {
         std::string s = "";
         std::strcpy(file, s.c_str());
@@ -181,6 +189,7 @@ void FileDialog::render() {
 
     ImGui::SameLine();
 
+    // close the file dialog and change the path if the file is valid
     if (ImGui::Button(button_label.c_str())) {
         fs::path fpath = this->path.string() + filename;
         if (this->extensions.contains(fpath.extension().string())) {
@@ -196,12 +205,18 @@ void FileDialog::render() {
 
 std::vector<fs::path> FileDialog::get_files() {
     std::vector<fs::path> files;
+
+    // parent path always first
     if (this->path.has_parent_path()) {
         files.push_back(this->path.parent_path());
     }
+
+    // use directory iterator to get every item in the directory
+    // todo: some kind of sorting
     for (const auto& file : fs::directory_iterator(this->path)) {
         files.push_back(file);
     }
+
     return files;
 }
 

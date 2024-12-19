@@ -6,11 +6,9 @@
 #include <iostream>
 
 EventHandler::EventHandler() {
-    // audio_player = new Audio();
 }
 
 EventHandler::~EventHandler() {
-    // delete audio_player;
 }
 
 void EventHandler::poll_event(State* state, sf::RenderWindow* window) {
@@ -75,6 +73,7 @@ int EventHandler::get_pointed_measure(sf::Vector2i mouse_pos, State* state) {
     iVec2 wraps = state->get_wraps();
     int measures_wrapped = state->get_measures_wrapped();
 
+    // get the pointed measure with this funny calculation
     int pointed_measure = static_cast<int>(
         ((mouse_pos.y-wrapping_offset.y)/2)/(default_scaling.y*grid_scale.y)+(wraps.y*measures_wrapped)
     );
@@ -88,6 +87,7 @@ int EventHandler::get_pointed_channel(sf::Vector2i mouse_pos, State* state) {
     iVec2 wraps = state->get_wraps();
     ImVec2 viewport_size = state->get_viewport_size();
 
+    // another funny calculation
     int pointed_channel = static_cast<int>(
         ((mouse_pos.x-wrapping_offset.x)*4)/(default_scaling.x*grid_scale.x)+(wraps.x*(viewport_size.x / default_scaling.x / 2))
     );
@@ -102,6 +102,7 @@ int EventHandler::get_pointed_cell(sf::Vector2i mouse_pos, State* state) {
     int measures_wrapped = state->get_measures_wrapped();
     int quantization = state->get_quantization();
 
+    // another one who would've thought
     int pointed_cell = static_cast<int>(
         (((mouse_pos.y-wrapping_offset.y)/2)/(default_scaling.y*grid_scale.y)+(wraps.y*measures_wrapped))*quantization
     );

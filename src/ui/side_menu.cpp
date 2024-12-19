@@ -27,13 +27,13 @@ void SideMenu::render(State* state, BMS* bms) {
     ImVec2 size;
     size.x = viewport_size.x * SIDE_MENU_WIDTH;
     size.y = viewport_size.y;
-    ImGui::SetNextWindowSize(size);
 
     ImVec2 pos;
     pos.x = viewport_pos.x + viewport_size.x / 2 - size.x;
     pos.y = viewport_pos.y - viewport_size.y / 2;
-    ImGui::SetNextWindowPos(pos);
 
+    ImGui::SetNextWindowSize(size);
+    ImGui::SetNextWindowPos(pos);
     ImGui::SetNextWindowBgAlpha(1.0f);
 
     ImGui::Begin("Side menu", NULL, window_flags);
@@ -95,9 +95,7 @@ void SideMenu::render(State* state, BMS* bms) {
     }
 
     if (ImGui::CollapsingHeader("Keysounds")) {
-        std::vector<char*> keysound_labels;
-        std::vector<std::string> label_strings = get_keysound_labels(DATA_LIMIT, 2);
-        std::transform(label_strings.begin(), label_strings.end(), std::back_inserter(keysound_labels), ImBMS::cstr);
+        std::vector<char*> keysound_labels = get_keysound_labels(DATA_LIMIT, 2);
 
         ImGui::SetNextItemWidth(-FLT_MIN);
         static int selected_keysound = state->get_selected_keysound() - 1;
@@ -105,6 +103,7 @@ void SideMenu::render(State* state, BMS* bms) {
             state->set_selected_keysound(selected_keysound + 1);
         }
         if (ImGui::IsItemHovered()) {
+            // open a file dialog if an item on the keysound list is double clicked
             if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                 FileDialog fd(state);
                 fs::path filepath = fd.open_file(state->get_current_path(), FDMode::Keysounds);
@@ -116,6 +115,7 @@ void SideMenu::render(State* state, BMS* bms) {
         } else {
         }
 
+        // free the memory allocated for the labels
         for (auto c : keysound_labels) {
             delete c;
         }
@@ -134,10 +134,12 @@ void SideMenu::render(State* state, BMS* bms) {
     ImGui::End();
 }
 
-std::vector<std::string> SideMenu::get_keysound_labels(int size, int digits) {
+std::vector<char*> SideMenu::get_keysound_labels(int size, int digits) {
     std::vector<std::string> labels = {};
     std::vector<std::string> keysounds = bms->get_keysounds();
-
+ 
+    // push labels to labels in a loop
+    // start at 1 as keysounds[0] is reserved for empty notes and isn't displayed
     for (int i = 1; i < size+1; i++) {
         fs::path keysound = "";
         if (i < keysounds.size()) {
@@ -145,6 +147,8 @@ std::vector<std::string> SideMenu::get_keysound_labels(int size, int digits) {
 
         }
 
+        // push the index in base36 as the label if the keysound is unassigned
+        // continue to skip extension checks
         if (keysound == "") {
             labels.push_back(ImBMS::format_base36(i, 2));
             continue;
@@ -162,9 +166,16 @@ std::vector<std::string> SideMenu::get_keysound_labels(int size, int digits) {
             keysound.replace_extension(".ogg");
             labels.push_back(ImBMS::format_base36(i, 2) + " " + keysound.generic_string());
 
+        // if the keysound file doesn't exist push the same label as if it was unassigned
         } else {
             labels.push_back(ImBMS::format_base36(i, 2));
         }
     }
-    return labels;
+
+    // transform the vector of strings to vector of char* for imgui's listbox to use
+    // ImBMS::cstr allocates memory for each label so it has to be freed wherever this function is called
+    std::vector<char*> labels_c;
+    std::transform(labels.begin(), labels.end(), std::back_inserter(labels_c), ImBMS::cstr);
+
+    return labels_c;
 }

@@ -22,18 +22,23 @@ void Notes::render(State* state, sf::RenderWindow* window, sf::Vector2i mouse_po
 
     std::vector<Measure*> measures = state->get_bms()->get_measures();
 
+    // limit the rendered measures of notes to only visible measures
+    // last_visible may be excessive but further limitations occur when the notes are processed 
     int first_visible = state->get_wraps().y*state->get_measures_wrapped();
     int last_visible = first_visible+state->get_visible_measures()+NOTE_PADDING;
 
     std::vector<std::string> channels = state->get_bms()->get_play_channels();
 
+    // process the notes in threads
+    // one thread per measure
     std::vector<std::thread> threads = {};
     for (int measure_i = first_visible; measure_i < measures.size() && measure_i < last_visible; measure_i++) {
         if (measures[measure_i] == nullptr) {continue;}
         threads.push_back(std::thread(&Notes::render_thread, this, measure_i, channels, state));
     }
-    render_moving_selection(state, window, mouse_pos);
+    render_moving_selection(state, window, mouse_pos); // also render moved notes
 
+    // join the threads and draw all the elements processed in the threads
     for (auto& thread : threads) {
         thread.join();
     }
@@ -97,17 +102,21 @@ void Notes::render_channel_notes(int measure_i, int channel_i, Channel* channel,
     for (int i = 0; i < components.size(); i++) {
         if (components[i] == 0) {continue;}
 
+        // calculate the position of the note with this hell
         fVec2 note_pos = {-absolute_pos.x*grid_scale.x + channel_i*note_width,
                           absolute_pos.y*grid_scale.y + viewport_size.y - viewport_pos.y - wrapping_offset.y - 2*measure_i*default_scaling.y*grid_scale.y - ((2*default_scaling.y*grid_scale.y)/(components.size()))*i
                          };
 
+        // continue if the note is not visible
         if (note_pos.y < 0 || note_pos.y > viewport_size.y) {continue;}
 
+        // the rectangle for the note
         sf::RectangleShape note(sf::Vector2f(note_width, NOTE_HEIGHT));
         note.setFillColor(color);
         note.setOrigin(0, NOTE_HEIGHT);
         note.setPosition(note_pos.x, note_pos.y);
 
+        // give selected notes an outline
         for (auto n : state->get_selected_notes()) {
             if (n->channel == channel && n->component == components[i] && n->component_i == i) {
                 note.setOutlineThickness(SELECTION_OUTLINE_THICKNESS);
@@ -115,6 +124,7 @@ void Notes::render_channel_notes(int measure_i, int channel_i, Channel* channel,
             }
         }
 
+        // label for the note
         sf::Text component_text;
         component_text.setString(ImBMS::format_base36(components[i], 2));
         component_text.setFont(*state->get_font());
@@ -127,6 +137,7 @@ void Notes::render_channel_notes(int measure_i, int channel_i, Channel* channel,
         notes_m.lock();
         notes_render_v.push_back(note);
         notes_m.unlock();
+
         labels_m.lock();
         labels_render_v.push_back(component_text);
         labels_m.unlock();
@@ -173,6 +184,11 @@ void Notes::render_moving_selection(State* state, sf::RenderWindow* window, sf::
 
     if (state->is_selected_notes_moved()) {
         for (auto note : state->get_selected_notes()) {
+            // right now it just renders the notes to the mouse as selection of multiple notes is not implemented
+            // todo: support for multiple moved notes with offsets perhaps 
+
+            // rectangle for the note
+            // selection outline included as it is a selected note
             sf::RectangleShape note_render(sf::Vector2f(note_width, NOTE_HEIGHT));
             note_render.setFillColor(color);
             note_render.setOrigin(note_width/2, NOTE_HEIGHT/2);
@@ -180,6 +196,7 @@ void Notes::render_moving_selection(State* state, sf::RenderWindow* window, sf::
             note_render.setOutlineThickness(SELECTION_OUTLINE_THICKNESS);
             note_render.setOutlineColor(SELECTION_OUTLINE_COLOR);
 
+            // label for the note
             sf::Text component_text;
             component_text.setString(ImBMS::format_base36(note->component, 2));
             component_text.setFont(*state->get_font());

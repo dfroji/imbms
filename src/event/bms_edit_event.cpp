@@ -14,7 +14,7 @@ bool BMSEditEvent::add_note(int component, sf::Vector2i mouse_pos, State* state)
     int cell = EventHandler::get_pointed_cell(mouse_pos, state); 
 
     if (bms->get_measures().size() - 1 <= measure_i) {
-    bms->resize_measure_v(measure_i + 1);
+        bms->resize_measure_v(measure_i + 1);
     }
 
     if (bms->get_measures()[measure_i] == nullptr) {
@@ -158,6 +158,8 @@ bool BMSEditEvent::add_play_or_bga_note(int component, sf::Vector2i mouse_pos, i
 
     if (measure_i >= measures.size()) {return false;}
 
+    // create a new channel if it doesn't exist yet
+    // otherwise modify the channel
     if (measures[measure_i]->channels[channel_i] == nullptr) {
         channel = new Channel();
         measures[measure_i]->channels[channel_i] = channel;
@@ -170,6 +172,7 @@ bool BMSEditEvent::add_play_or_bga_note(int component, sf::Vector2i mouse_pos, i
         channel = measures[measure_i]->channels[channel_i];
         old_components = channel->components;
 
+        // change the channel's quantization if it doesn't match with the quantization used
         if (quantization != channel->components.size()) {
             int common_divisor = ImBMS::get_gcd(quantization, channel->components.size());
 
@@ -189,12 +192,16 @@ bool BMSEditEvent::add_play_or_bga_note(int component, sf::Vector2i mouse_pos, i
             }
         }
 
+        // channel is not modified if a note on the specific cell already exists
         if (channel->components[cell] != 0) {return false;}
+
+        // add the note
         channel->components[cell] = component;
     }
 
     state->add_undo(std::bind(undo_add_note, channel, old_components, state));
     state->clear_redo();
+
     return true;
 }
 
@@ -210,6 +217,7 @@ bool BMSEditEvent::add_bgm_note(int component, sf::Vector2i mouse_pos, int measu
 
     int quantization = state->get_quantization();
 
+    // add new bgm channels if needed
     if (measure->bgm_channels.size() <= channel_i) {
         for (int i = 0; i < channel_i + 1; i++) {
             measure->bgm_channels.resize(measure->bgm_channels.size() + 1, new Channel({0}));
@@ -217,8 +225,9 @@ bool BMSEditEvent::add_bgm_note(int component, sf::Vector2i mouse_pos, int measu
     }
 
     channel = measure->bgm_channels[channel_i];
-
     old_components = channel->components;
+
+    // same deal with quantization as play and bga notes
     if (quantization != channel->components.size()) {
         int common_divisor = ImBMS::get_gcd(quantization, channel->components.size());
         if (channel->components.size() < quantization || 
@@ -228,13 +237,16 @@ bool BMSEditEvent::add_bgm_note(int component, sf::Vector2i mouse_pos, int measu
             channel->resize(quantization/common_divisor);
             if (quantization < components_old_size) {
                 cell *= common_divisor;
+
             } else {
                 cell *= components_old_size/common_divisor;
             }
+
         } else if (quantization < channel->components.size()) {
             cell *= channel->components.size()/common_divisor;
         }
     }
+
     if (channel->components[cell] != 0)  {return false;}
     channel->components[cell] = component;
 

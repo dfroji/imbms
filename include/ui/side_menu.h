@@ -13,7 +13,7 @@ class SideMenu {
         void render(State* state, BMS* bms);
         
     private:
-        std::vector<std::string> get_keysound_labels(int size, int digits);
+        std::vector<char*> get_keysound_labels(int size, int digits);
 
         State* state;
         BMS* bms;
