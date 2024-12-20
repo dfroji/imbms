@@ -86,10 +86,11 @@ int EventHandler::get_pointed_channel(sf::Vector2i mouse_pos, State* state) {
     fVec2 grid_scale = state->get_grid_scale();
     iVec2 wraps = state->get_wraps();
     ImVec2 viewport_size = state->get_viewport_size();
+    float note_width = state->get_note_width(); 
 
     // another funny calculation
     int pointed_channel = static_cast<int>(
-        ((mouse_pos.x-wrapping_offset.x)*4)/(default_scaling.x*grid_scale.x)+(wraps.x*(viewport_size.x / default_scaling.x / 2))
+        ((mouse_pos.x-wrapping_offset.x)*4)/(default_scaling.x*grid_scale.x)+(wraps.x*((viewport_size.x*grid_scale.x)/note_width))
     );
     return pointed_channel;
 }

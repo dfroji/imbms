@@ -103,7 +103,7 @@ void Notes::render_channel_notes(int measure_i, int channel_i, Channel* channel,
         if (components[i] == 0) {continue;}
 
         // calculate the position of the note with this hell
-        fVec2 note_pos = {-absolute_pos.x*grid_scale.x + channel_i*note_width,
+        fVec2 note_pos = {-absolute_pos.x*grid_scale.x + channel_i*note_width + wrapping_offset.x,
                           absolute_pos.y*grid_scale.y + viewport_size.y - viewport_pos.y - wrapping_offset.y - 2*measure_i*default_scaling.y*grid_scale.y - ((2*default_scaling.y*grid_scale.y)/(components.size()))*i
                          };
 
@@ -180,7 +180,7 @@ void Notes::render_moving_selection(State* state, sf::RenderWindow* window, sf::
     fVec2 grid_scale = state->get_grid_scale();
     sf::Color color = Notes::get_channel_color(EventHandler::get_pointed_channel(mouse_pos, state), state);
     sf::Vector2i absolute_mouse_pos = sf::Mouse::getPosition(*window);
-    float note_width = (default_scaling.x*grid_scale.x)/4;
+    float note_width = state->get_note_width(); 
 
     if (state->is_selected_notes_moved()) {
         for (auto note : state->get_selected_notes()) {

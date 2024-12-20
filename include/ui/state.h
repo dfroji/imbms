@@ -77,6 +77,7 @@ class State {
         fVec2 get_relative_pos();
         iVec2 get_wraps();
         fVec2 get_wrapping_offset();
+        float get_note_width();
 
         bool is_shift();
         void set_shift(bool b);
@@ -134,6 +135,7 @@ class State {
         fVec2 relative_pos;
         iVec2 wraps;
         fVec2 wrapping_offset;
+        float note_width;
 
         bool is_shift_;
         bool is_control_;

@@ -122,6 +122,8 @@ void State::update() {
     wrapping_offset = {wraps.x*((std::sqrt(default_scaling.x)*2*grid_scale.x)-SCROLL_SPEED*grid_scale.x),
                        wraps.y*((std::sqrt(default_scaling.y)*2*grid_scale.y)-SCROLL_SPEED*grid_scale.y)
                       };
+
+    note_width = (default_scaling.x*grid_scale.x)/4;
 }
 
 ImVec2 State::get_viewport_size() {
@@ -153,6 +155,10 @@ iVec2 State::get_wraps() {
 
 fVec2 State::get_wrapping_offset() {
     return wrapping_offset;
+}
+
+float State::get_note_width() {
+    return note_width;
 }
 
 bool State::is_shift() {
