@@ -218,8 +218,9 @@ bool BMSEditEvent::add_bgm_note(int component, sf::Vector2i mouse_pos, int measu
     int quantization = state->get_quantization();
 
     // add new bgm channels if needed
-    if (measure->bgm_channels.size() <= channel_i) {
-        for (int i = 0; i < channel_i + 1; i++) {
+    int bgm_channels_size = measure->bgm_channels.size();
+    if (bgm_channels_size <= channel_i) {
+        for (int i = bgm_channels_size; i < channel_i + 1; i++) {
             measure->bgm_channels.resize(measure->bgm_channels.size() + 1, new Channel({0}));
         }
     }
