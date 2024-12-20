@@ -29,6 +29,13 @@ void UI::render() {
 
     state->update();
 
+    // change the title of the window to the filename
+    std::string filename = state->get_filename().filename().generic_string();
+    if (filename == "") {filename = "Untitled";} // use Untitled if if filepath is empty
+    std::string new_title = "ImBMS - " + filename;
+    if (state->is_modified()) {new_title += "*";} // add asterix if changes are made
+    window->setTitle(new_title);
+
     EventHandler event;
     event.poll_event(state, window);
 

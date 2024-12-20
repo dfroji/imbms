@@ -67,6 +67,8 @@ class State {
         iVec2 get_absolute_pos();
         void set_absolute_pos(iVec2 new_pos);
 
+        bool is_modified();
+
         void update();
 
         ImVec2 get_viewport_size();

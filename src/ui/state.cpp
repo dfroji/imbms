@@ -96,6 +96,11 @@ void State::set_absolute_pos(iVec2 new_pos) {
     absolute_pos = new_pos;
 }
 
+// todo: reflect changes in metadata here as well
+bool State::is_modified() {
+    return undo_list.size() > 0;
+}
+
 void State::update() {
     viewport_size = ImGui::GetMainViewport()->Size;
     viewport_pos = ImGui::GetMainViewport()->WorkPos;
