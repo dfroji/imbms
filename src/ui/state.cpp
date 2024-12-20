@@ -101,6 +101,10 @@ bool State::is_modified() {
     return undo_list.size() > 0;
 }
 
+bool State::has_filepath() {
+    return filename.has_filename();
+}
+
 void State::update() {
     viewport_size = ImGui::GetMainViewport()->Size;
     viewport_pos = ImGui::GetMainViewport()->WorkPos;

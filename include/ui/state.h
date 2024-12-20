@@ -68,6 +68,7 @@ class State {
         void set_absolute_pos(iVec2 new_pos);
 
         bool is_modified();
+        bool has_filepath();
 
         void update();
 

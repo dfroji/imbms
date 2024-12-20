@@ -28,7 +28,16 @@ void MenuBar::render(State* state) {
             state->load_bms(filepath);
         }
         if (ImGui::MenuItem("Save", "Ctrl+S")) {
-            state->save_bms(state->get_filename());
+            if (state->is_modified()) {
+                if (!state->has_filepath()) {
+                    FileDialog fd(state);
+                    fs::path filepath = fd.save_file(current_path, FDMode::BMSFiles);
+                    state->save_bms(filepath);
+
+                } else {
+                    state->save_bms(state->get_filename());
+                }
+            }
         }
         if (ImGui::MenuItem("Save as", "Ctrl+Shift+S")) {
             FileDialog fd(state);

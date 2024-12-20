@@ -184,8 +184,15 @@ void EventHandler::key_pressed_event(sf::Event event) {
                 fs::path filepath = fd.save_file(state->get_current_path(), FDMode::BMSFiles);
                 state->save_bms(filepath);
 
-            } else {
-                state->save_bms(state->get_filename());
+            } else if (state->is_modified()) {
+                if (!state->has_filepath()) {
+                    FileDialog fd(state);
+                    fs::path filepath = fd.save_file(state->get_current_path(), FDMode::BMSFiles);
+                    state->save_bms(filepath);
+
+                } else {
+                    state->save_bms(state->get_filename());
+                }
             }
         } 
     }
