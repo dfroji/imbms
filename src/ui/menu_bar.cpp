@@ -41,6 +41,13 @@ void MenuBar::render(State* state) {
     if (ImGui::BeginMenu("Edit")) {
         state->set_menu_bar_interacted(true);
 
+        if (ImGui::MenuItem("Undo", "Ctrl+Z")) {
+            state->undo();
+        }
+        if (ImGui::MenuItem("Redo", "Ctrl+Y")) {
+            state->redo();
+        }
+
         ImGui::EndMenu();
     }
     
