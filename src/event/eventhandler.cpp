@@ -259,6 +259,8 @@ void EventHandler::mouse_button_released_event(sf::Event event) {
 }
 
 void EventHandler::mouse_wheel_scrolled_event(sf::Event event) {
+    if (!is_mouse_on_main_field()) {return;}
+
     iVec2 pos = state->get_absolute_pos();
     ImVec2 viewport_size = state->get_viewport_size();
 
