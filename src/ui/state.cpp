@@ -35,6 +35,7 @@ State::State() {
     is_selected_notes_moved_ = false;
     is_movable_ = false;
     is_menu_bar_interacted_ = false;
+    is_modified_ = false;
 
     bms = new BMS();
 
@@ -94,15 +95,6 @@ iVec2 State::get_absolute_pos() {
 
 void State::set_absolute_pos(iVec2 new_pos) {
     absolute_pos = new_pos;
-}
-
-// todo: reflect changes in metadata here as well
-bool State::is_modified() {
-    return undo_list.size() > 0;
-}
-
-bool State::has_filepath() {
-    return filename.has_filename();
 }
 
 void State::update() {
@@ -218,6 +210,18 @@ void State::set_menu_bar_interacted(bool b) {
     is_menu_bar_interacted_ = b;
 }
 
+bool State::is_modified() {
+    return is_modified_;
+}
+
+void State::set_modified(bool b) {
+    is_modified_ = b;
+}
+
+bool State::has_filepath() {
+    return filename.has_filename();
+}
+
 BMS* State::get_bms() {
     return bms;
 }
@@ -239,6 +243,7 @@ bool State::load_bms(fs::path filepath) {
 
     filename = filepath;
     current_path = filepath.parent_path();
+    set_modified(false);
 
     undo_list.clear();
     
@@ -251,12 +256,14 @@ bool State::save_bms(fs::path filepath) {
     ImBMS::write(bms, filepath.string());
     filename = filepath;
     current_path == filepath.parent_path();
+    set_modified(false);
 
     return true;
 }
 
 void State::add_undo(std::function<void()> command) {
     undo_list.push_back(command);
+    set_modified(true);
 }
 
 void State::pop_undo() {
@@ -273,6 +280,7 @@ void State::undo(bool pop) {
 
 void State::add_redo(std::function<void()> command) {
     redo_list.push_back(command);
+    set_modified(true);
 }
 
 void State::pop_redo() {

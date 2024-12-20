@@ -67,9 +67,6 @@ class State {
         iVec2 get_absolute_pos();
         void set_absolute_pos(iVec2 new_pos);
 
-        bool is_modified();
-        bool has_filepath();
-
         void update();
 
         ImVec2 get_viewport_size();
@@ -99,6 +96,11 @@ class State {
 
         bool is_menu_bar_interacted();
         void set_menu_bar_interacted(bool b);
+
+        bool is_modified();
+        void set_modified(bool b);
+
+        bool has_filepath();
 
         BMS* get_bms();
         void set_bms(BMS* new_bms);
@@ -146,6 +148,7 @@ class State {
         bool is_selected_notes_moved_;
         bool is_movable_;
         bool is_menu_bar_interacted_;
+        bool is_modified_;
 
         BMS* bms;
 
