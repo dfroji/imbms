@@ -1,5 +1,7 @@
 #include "grid.h"
 
+#include "channels_and_colors.h"
+
 Grid::Grid() {
 
 }
@@ -18,8 +20,12 @@ void Grid::render(State* state, sf::RenderWindow* window) {
     int visible_measures = state->get_visible_measures();
     int measures_wrapped = state->get_measures_wrapped();
     fVec2 relative_pos = state->get_relative_pos();
+    iVec2 absolute_pos = state->get_absolute_pos();
     iVec2 wraps = state->get_wraps();
     fVec2 wrapping_offset = state->get_wrapping_offset();
+    float note_width = state->get_note_width();
+    std::vector<std::string> play_channels = state->get_bms()->get_play_channels();
+    Playstyle playstyle = state->get_bms()->get_playstyle();
 
     // Setup horizontal lines for drawing
     int horizontal_line_count = visible_measures*quantization;
@@ -105,6 +111,44 @@ void Grid::render(State* state, sf::RenderWindow* window) {
         texts.push_back(text);
     }
 
+    // Setup column labels
+    int first_visible_c = (absolute_pos.x*grid_scale.x - wrapping_offset.x) / note_width;
+    if (first_visible_c < 0) {first_visible_c = 0;}
+    int last_visible_c = first_visible_c + viewport_size.x / note_width;
+    for (int i = first_visible_c; i < last_visible_c; i++) {
+        sf::Text column_label;
+        if (i < play_channels.size()) {
+            std::map<std::string, std::string> labels;
+            switch (playstyle) {
+                case Playstyle::SP:
+                    labels = SP_LABELS;
+                    break;
+                case Playstyle::DP:
+                    labels = DP_LABELS;
+                    break;
+                case Playstyle::PM:
+                    labels = PM_LABELS;
+                    break;
+            }
+
+            column_label.setString(labels.at(play_channels[i]));
+
+        } else if (i < play_channels.size() + BGA_CHANNELS.size()) {
+            column_label.setString(BGA_LABELS.at(BGA_CHANNELS[i - play_channels.size()]));
+        
+        } else {
+            column_label.setString("B" + std::to_string(i - play_channels.size() - BGA_CHANNELS.size() + 1));
+        }
+        
+        column_label.setFont(*state->get_font());
+        column_label.setPosition(viewport_pos.x + note_width*i - absolute_pos.x*grid_scale.x + wrapping_offset.x + 2,
+                20
+                );
+        column_label.setCharacterSize(FONT_SIZE);
+        column_label.setFillColor(sf::Color::White);
+        texts.push_back(column_label);
+    }
+
     window->draw(horizontal_lines);
     window->draw(vertical_lines);
     window->draw(measure_lines);
@@ -112,5 +156,3 @@ void Grid::render(State* state, sf::RenderWindow* window) {
         window->draw(text);
     }
 }
-
-
