@@ -22,6 +22,9 @@ void MenuBar::render(State* state) {
     if (ImGui::BeginMenu("File")) {
         state->set_menu_bar_interacted(true);
 
+        if (ImGui::MenuItem("New", "Ctrl+N")) {
+            state->new_bms();
+        }
         if (ImGui::MenuItem("Open", "Ctrl+O")) {
             FileDialog fd(state);
             fs::path filepath = fd.open_file(current_path, FDMode::BMSFiles);

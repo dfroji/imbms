@@ -106,6 +106,7 @@ class State {
         void set_bms(BMS* new_bms);
         bool load_bms(fs::path filepath);
         bool save_bms(fs::path filepath);
+        void new_bms();
 
         void add_undo(std::function<void()> command);
         void pop_undo();

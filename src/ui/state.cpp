@@ -261,6 +261,34 @@ bool State::save_bms(fs::path filepath) {
     return true;
 }
 
+void State::new_bms() {
+    absolute_pos = {0, 0};
+
+    viewport_size = {0, 0};
+    viewport_pos = {0, 0};
+    default_scaling = {0, 0};
+    visible_measures = 0;
+    measures_wrapped = 0;
+    relative_pos = {0, 0};
+    wraps = {0, 0};
+    wrapping_offset = {0, 0};
+
+    is_shift_ = false;
+    is_control_ = false;
+    is_mouse_left_ = false;
+    is_selected_notes_moved_ = false;
+    is_movable_ = false;
+    is_menu_bar_interacted_ = false;
+    is_modified_ = false;
+
+    filename = "";
+
+    delete bms;
+    bms = new BMS();
+
+    undo_list = {};
+}
+
 void State::add_undo(std::function<void()> command) {
     undo_list.push_back(command);
     set_modified(true);

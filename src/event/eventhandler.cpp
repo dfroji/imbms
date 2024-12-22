@@ -169,6 +169,12 @@ void EventHandler::key_pressed_event(sf::Event event) {
         state->set_control(true);
     }
 
+    if (event.key.scancode == sf::Keyboard::Scan::N) {
+        if (state->is_control()) {
+            state->new_bms();
+        }
+    }
+
     if (event.key.scancode == sf::Keyboard::Scan::O) {
         if (state->is_control()) {
             FileDialog fd(state);
