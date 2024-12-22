@@ -12,7 +12,7 @@ BMS* ImBMS::parse_bms(std::string filename) {
     BMS* p_bms = new BMS(); 
     p_bms->resize_measure_v(1);
 
-    DataField current_field = DataField::field_header;
+    DataField current_field = DataField::null;
     std::ifstream file(filename);
 
     if (!file.is_open()) {
@@ -22,38 +22,44 @@ BMS* ImBMS::parse_bms(std::string filename) {
 
     std::string line;
     while (std::getline(file, line)) {
+        std::string type = "";
+        std::string argument = "";
+
+        std::vector<std::string> splits = split_line(line, " ", 2);
+        if (splits.size() < 2 && current_field == DataField::field_header) {continue;}
+        else if (splits.size() == 2) {
+            type = splits[0];
+            argument = ImBMS::rtrim(splits[1]);
+        }
+
+        if (type == DATA_FIELD_TAG) {
+            if (argument == "HEADER FIELD") {current_field = DataField::field_header;}
+            else if (argument == "MAIN DATA FIELD") {current_field = DataField::field_main;}
+        }
+
         if (current_field == DataField::field_header) {
-            std::vector<std::string> splits = split_line(line, " ", 2);
-            if (splits.size() < 2 && current_field == DataField::field_header) {continue;}
-
-            std::string type = splits[0];
-            std::string argument = ImBMS::rtrim(splits[1]);
-            if (type == DATA_FIELD_TAG) {
-                if (argument == "MAIN DATA FIELD") {current_field = DataField::field_main;}
-
-            } else {
-                if (type == "#ARTIST") {p_bms->set_artist(argument);}
-                else if (type == "#SUBARTIST") {p_bms->set_subartist(argument);}
-                else if (type == "#TITLE") {p_bms->set_title(argument);}
-                else if (type == "#SUBTITLE") {p_bms->set_subtitle(argument);}
-                else if (type == "#BPM") {p_bms->set_bpm(std::stod(argument));}
-                else if (type == "#GENRE") {p_bms->set_genre(argument);}
-                else if (type == "#PLAYER") {p_bms->set_player(static_cast<Player>(std::stoi(argument)));}
-                else if (type == "#DIFFICULTY") {p_bms->set_difficulty(static_cast<Difficulty>(std::stoi(argument)));}
-                else if (type == "#RANK") {p_bms->set_rank(static_cast<Rank>(std::stoi(argument)));}
-                else if (type == "#TOTAL") {p_bms->set_total(std::stod(argument));}
-                else if (type == "#STAGEFILE") {p_bms->set_stagefile(argument);}
-                else if (type == "#BANNER") {p_bms->set_banner(argument);}
-                else {
-                    std::string tag_type = get_tag_type(type);
-                    int tag_index = get_tag_index(type);
-                    if (AUDIO_FORMATS.contains(tag_type) && tag_index >= 0) {
-                        p_bms->set_keysound(argument, tag_index);
-                    } else if (tag_type == "BMP") {
-                        p_bms->set_graphic(argument, tag_index);
-                    }
+            if (type == "#ARTIST") {p_bms->set_artist(argument);}
+            else if (type == "#SUBARTIST") {p_bms->set_subartist(argument);}
+            else if (type == "#TITLE") {p_bms->set_title(argument);}
+            else if (type == "#SUBTITLE") {p_bms->set_subtitle(argument);}
+            else if (type == "#BPM") {p_bms->set_bpm(std::stod(argument));}
+            else if (type == "#GENRE") {p_bms->set_genre(argument);}
+            else if (type == "#PLAYER") {p_bms->set_player(static_cast<Player>(std::stoi(argument)));}
+            else if (type == "#DIFFICULTY") {p_bms->set_difficulty(static_cast<Difficulty>(std::stoi(argument)));}
+            else if (type == "#RANK") {p_bms->set_rank(static_cast<Rank>(std::stoi(argument)));}
+            else if (type == "#TOTAL") {p_bms->set_total(std::stod(argument));}
+            else if (type == "#STAGEFILE") {p_bms->set_stagefile(argument);}
+            else if (type == "#BANNER") {p_bms->set_banner(argument);}
+            else {
+                std::string tag_type = get_tag_type(type);
+                int tag_index = get_tag_index(type);
+                if (AUDIO_FORMATS.contains(tag_type) && tag_index >= 0) {
+                    p_bms->set_keysound(argument, tag_index);
+                } else if (tag_type == "BMP") {
+                    p_bms->set_graphic(argument, tag_index);
                 }
             }
+            
         } else if (current_field == DataField::field_main) {
             parse_data(p_bms, line);
         }

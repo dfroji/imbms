@@ -11,7 +11,7 @@ const std::set<std::string> TAG_TYPES = {"WAV", "OGG", "BMP", "BPM"};
 const std::set<std::string> AUDIO_FORMATS = {"WAV", "OGG"};
 const std::vector<std::string> INVALID_TAG = {"", "-1"};
 
-enum DataField {field_header, field_main};
+enum DataField {null, field_header, field_main};
 
 namespace ImBMS {
     BMS* parse_bms(std::string filename);
