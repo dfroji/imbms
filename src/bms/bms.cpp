@@ -18,6 +18,7 @@ BMS::BMS() {
 
     this->keysounds.resize(DATA_LIMIT, "");
     this->graphics.resize(DATA_LIMIT, "");
+    this->bpm_changes.resize(DATA_LIMIT, "");
 
     resize_measure_v(1);
 }
@@ -152,6 +153,13 @@ std::vector<Measure*> BMS::get_measures() {
     return this->measures;
 }
 
+std::vector<std::string> BMS::get_bpm_changes() {
+    return this->bpm_changes;
+}
+
+void BMS::set_bpm_change(std::string filepath, int index) {
+    this->bpm_changes[index] = filepath;
+}
 void BMS::new_measure(int index) {
     Measure* to_be_deleted = this->measures[index];
     this->measures[index] = new Measure();

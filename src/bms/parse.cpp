@@ -57,6 +57,8 @@ BMS* ImBMS::parse_bms(std::string filename) {
                     p_bms->set_keysound(argument, tag_index);
                 } else if (tag_type == "BMP") {
                     p_bms->set_graphic(argument, tag_index);
+                } else if (tag_type == "BPM") {
+                    p_bms->set_bpm_change(argument, tag_index);
                 }
             }
             

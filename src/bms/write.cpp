@@ -22,6 +22,7 @@ void ImBMS::write(BMS* bms, std::string filename) {
 
     std::vector<std::string> keysounds = bms->get_keysounds();
     std::vector<std::string> graphics = bms->get_graphics();
+    std::vector<std::string> bpm_changes = bms->get_bpm_changes();
 
     file << "" << std::endl;
     file << DATA_FIELD_TAG + " HEADER FIELD" << std::endl;
@@ -53,6 +54,14 @@ void ImBMS::write(BMS* bms, std::string filename) {
     for (int i = 1; i < graphics.size(); i++) {
         if (graphics[i] != "") {
             file << "#BMP" << ImBMS::format_base36(i, 2) << " " << graphics[i] << std::endl;
+        }
+    }
+
+    file << "" << std::endl;
+
+    for (int i = 1; i < bpm_changes.size(); i++) {
+        if (bpm_changes[i] != "") {
+            file << "#BPM" << ImBMS::format_base36(i, 2) << " " << bpm_changes[i] << std::endl;
         }
     }
 

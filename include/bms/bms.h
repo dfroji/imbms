@@ -90,6 +90,9 @@ public:
     std::vector<std::string> get_graphics();
     void set_graphic(std::string filepath, int index);
 
+    std::vector<std::string> get_bpm_changes();
+    void set_bpm_change(std::string filepath, int index);
+
     std::vector<Measure*> get_measures();
     void new_measure(int index);
     void resize_measure_v(int new_size);
@@ -117,6 +120,7 @@ private:
 
     std::vector<std::string> keysounds;
     std::vector<std::string> graphics;
+    std::vector<std::string> bpm_changes;
 
     std::vector<Measure*> measures;
 };
