@@ -135,11 +135,11 @@ Note EventHandler::get_pointed_note(sf::Vector2i mouse_pos, State* state) {
     if (channel_i < play_channels.size()) {
         channel = measure->channels[ImBMS::base36_to_int(play_channels[channel_i])];
 
-    } else if (channel_i < play_channels.size() + BGA_CHANNELS.size()) {
-        channel = measure->channels[ImBMS::base36_to_int(BGA_CHANNELS[channel_i - play_channels.size()])];
+    } else if (channel_i < play_channels.size() + OTHER_CHANNELS.size()) {
+        channel = measure->channels[ImBMS::base36_to_int(OTHER_CHANNELS[channel_i - play_channels.size()])];
 
-    } else if (channel_i - play_channels.size() - BGA_CHANNELS.size() < measure->bgm_channels.size()) {
-        channel = measure->bgm_channels[channel_i - play_channels.size() - BGA_CHANNELS.size()];
+    } else if (channel_i - play_channels.size() - OTHER_CHANNELS.size() < measure->bgm_channels.size()) {
+        channel = measure->bgm_channels[channel_i - play_channels.size() - OTHER_CHANNELS.size()];
     }
 
     if (channel == nullptr) {return NULL_NOTE;}

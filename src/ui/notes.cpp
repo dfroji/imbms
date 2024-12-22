@@ -58,8 +58,8 @@ void Notes::render(State* state, sf::RenderWindow* window, sf::Vector2i mouse_po
 
 void Notes::render_thread(int measure_i, std::vector<std::string> channels, State* state) {
     render_play_channels(measure_i, channels, state);
-    render_bga_channels(measure_i, BGA_CHANNELS, channels.size(), state);
-    render_bgm_channels(measure_i, channels.size()+BGA_CHANNELS.size(), state);
+    render_bga_channels(measure_i, OTHER_CHANNELS, channels.size(), state);
+    render_bgm_channels(measure_i, channels.size()+OTHER_CHANNELS.size(), state);
 }
 
 void Notes::render_play_channels(int measure_i, std::vector<std::string> channels, State* state) {
@@ -84,7 +84,7 @@ void Notes::render_bga_channels(int measure_i, std::vector<std::string> channels
     for (int channel_i = 0; channel_i < channels.size(); channel_i++) {
         Channel* channel = measure->channels[ImBMS::base36_to_int(channels[channel_i])];
         if (channel == nullptr) {continue;}
-        render_channel_notes(measure_i, channel_i + offset, channel, BGA_COLOR, state);
+        render_channel_notes(measure_i, channel_i + offset, channel, OTHER_COLOR, state);
     }
 }
 
@@ -170,7 +170,7 @@ sf::Color Notes::get_channel_color(int channel_i, State* state) {
     }
 
     if (channel_i < play_channel_colors.size()) {return play_channel_colors[channel_i];}
-    else if (channel_i < play_channel_colors.size() + BGA_CHANNELS.size()) {return BGA_COLOR;}
+    else if (channel_i < play_channel_colors.size() + OTHER_CHANNELS.size()) {return OTHER_COLOR;}
     else {return BGM_COLOR;}
 }
 

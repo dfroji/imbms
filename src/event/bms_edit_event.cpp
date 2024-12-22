@@ -26,12 +26,12 @@ bool BMSEditEvent::add_note(int component, sf::Vector2i mouse_pos, State* state)
         channel_i = ImBMS::base36_to_int(play_channels[channel_i]);
         return BMSEditEvent::add_play_or_bga_note(component, mouse_pos, measure_i, channel_i, cell, state);
 
-    } else if (channel_i < play_channels.size() + BGA_CHANNELS.size()) {
-        channel_i = ImBMS::base36_to_int(BGA_CHANNELS[channel_i-play_channels.size()]);
+    } else if (channel_i < play_channels.size() + OTHER_CHANNELS.size()) {
+        channel_i = ImBMS::base36_to_int(OTHER_CHANNELS[channel_i-play_channels.size()]);
         return BMSEditEvent::add_play_or_bga_note(component, mouse_pos, measure_i, channel_i, cell, state); 
 
     } else {
-        channel_i = channel_i - play_channels.size() - BGA_CHANNELS.size();
+        channel_i = channel_i - play_channels.size() - OTHER_CHANNELS.size();
         return BMSEditEvent::add_bgm_note(component, mouse_pos, measure_i, channel_i, cell, state); 
     }
 }
@@ -70,11 +70,11 @@ void BMSEditEvent::move_notes(sf::Vector2i mouse_pos, State* state) {
     if (pointed_channel < play_channels.size()) {
         pointed_channel = ImBMS::base36_to_int(play_channels[pointed_channel]);
 
-    } else if (pointed_channel < play_channels.size() + BGA_CHANNELS.size()) {
-        pointed_channel = ImBMS::base36_to_int(BGA_CHANNELS[pointed_channel-play_channels.size()]);
+    } else if (pointed_channel < play_channels.size() + OTHER_CHANNELS.size()) {
+        pointed_channel = ImBMS::base36_to_int(OTHER_CHANNELS[pointed_channel-play_channels.size()]);
 
     } else {
-        pointed_channel = pointed_channel - play_channels.size() - BGA_CHANNELS.size();
+        pointed_channel = pointed_channel - play_channels.size() - OTHER_CHANNELS.size();
         is_bgm = true;
     }
 

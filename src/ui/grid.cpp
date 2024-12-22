@@ -133,11 +133,11 @@ void Grid::render(State* state, sf::RenderWindow* window) {
 
             column_label.setString(labels.at(play_channels[i]));
 
-        } else if (i < play_channels.size() + BGA_CHANNELS.size()) {
-            column_label.setString(BGA_LABELS.at(BGA_CHANNELS[i - play_channels.size()]));
+        } else if (i < play_channels.size() + OTHER_CHANNELS.size()) {
+            column_label.setString(OTHER_LABELS.at(OTHER_CHANNELS[i - play_channels.size()]));
         
         } else {
-            column_label.setString("B" + std::to_string(i - play_channels.size() - BGA_CHANNELS.size() + 1));
+            column_label.setString("B" + std::to_string(i - play_channels.size() - OTHER_CHANNELS.size() + 1));
         }
         
         column_label.setFont(*state->get_font());
