@@ -166,7 +166,9 @@ void FileDialog::render() {
     // close the file dialog when pressed
     if (ImGui::Button(first_button_label.c_str())) {
         this->path = "";
+        this->filename = "";
         this->is_open = false;
+        return;
     }
 
     ImGui::SameLine();
