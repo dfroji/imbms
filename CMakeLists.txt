@@ -8,6 +8,8 @@ project(ImBMS
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(SDL2 REQUIRED)
+
 FetchContent_Declare(sfml
     GIT_REPOSITORY https://github.com/SFML/SFML
     GIT_TAG 2.6.1
