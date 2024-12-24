@@ -114,6 +114,7 @@ void FileDialog::render() {
     ImGui::InputText("##Path", path, IM_ARRAYSIZE(path)); 
 
     bool was_selected = false; // this is used to display the selected file in a widget
+    static char file[1024] = "";
     if (ImGui::BeginListBox("##Files", ImVec2(-FLT_MIN, ImGui::GetMainViewport()->Size.y - FRAMES*ImGui::GetFrameHeight() - INNER_SPACES*ImGui::GetStyle().ItemInnerSpacing.y))) {
         for (int i = 0; i < files.size(); i++) {
             // files that don't have a valid extension are not displayed
@@ -144,7 +145,8 @@ void FileDialog::render() {
                 // play audio file of a valid format when clicked
                 if (fs::is_regular_file(files[i]) && this->mode == FDMode::Keysounds) {
                     state->play_keysound(files[i]);
-                } 
+                }
+
             }
             if (ImGui::IsItemHovered()) {
                 // move to directory on double click
@@ -168,13 +170,13 @@ void FileDialog::render() {
         this->path = "";
         this->filename = "";
         this->is_open = false;
+        std::strcpy(file, ""); // clear file so it is not used the next time a file dialog is opened
         return;
     }
 
     ImGui::SameLine();
     ImGui::SetNextItemWidth(ImGui::GetMainViewport()->WorkSize.x - first_button_width - second_button_width);
 
-    static char file[1024] = ""; // define this within the listbox widget so the label doesn't get cleared every tick
     if (fs::is_regular_file(files[this->selected]) 
             && this->extensions.contains(files[this->selected].extension().string())
             && was_selected
