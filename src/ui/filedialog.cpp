@@ -5,7 +5,7 @@
 
 #include <cstring>
 #include <thread>
-#include <iostream>
+#include <algorithm>
 
 const int FRAMES = 2;
 const int INNER_SPACES = 6;
@@ -216,6 +216,9 @@ std::vector<fs::path> FileDialog::get_files() {
     for (const auto& file : fs::directory_iterator(this->path)) {
         files.push_back(file);
     }
+
+    // sort the files (except for parent path) in alphabetical order
+    std::sort(files.begin() + 1, files.end());
 
     return files;
 }
