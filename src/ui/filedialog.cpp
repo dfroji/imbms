@@ -198,6 +198,7 @@ void FileDialog::render() {
         fs::path fpath = this->path.string() + filename;
         if (this->extensions.contains(fpath.extension().string())) {
             this->is_open = false;
+            std::strcpy(file, ""); // clear file so it is not used the next time a file dialog is opened
         }
     }
 
