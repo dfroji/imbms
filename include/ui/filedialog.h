@@ -14,9 +14,10 @@
 
 namespace fs = std::filesystem;
 
-enum FDMode {BMSFiles, Keysounds};
+enum FDMode {BMSFiles, Keysounds, Graphics};
 const std::set<std::string> BMS_EXTENSIONS = {".bms", ".bme", ".bml", ".pms"};
 const std::set<std::string> KEYSOUND_EXTENSIONS = {".wav", ".ogg"};
+const std::set<std::string> GRAPHIC_EXTENSIONS = {".png", ".jpg", ".gif", ".tga", ".dds", ".mpg", ".avi", ".wma", ".ogv", ".webm", ".mp4"};
 
 class FileDialog {
 public:

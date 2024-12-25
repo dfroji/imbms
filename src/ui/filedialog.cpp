@@ -66,6 +66,9 @@ void FileDialog::set_extensions(FDMode mode) {
         case FDMode::Keysounds:
             this->extensions = KEYSOUND_EXTENSIONS;
             break;
+        case FDMode::Graphics:
+            this->extensions = GRAPHIC_EXTENSIONS;
+            break;
     }
 }
 

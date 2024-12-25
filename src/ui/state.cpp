@@ -12,6 +12,8 @@ State::State() {
     quantization = 16;
     grid_scale = {5, 5};
     selected_keysound = 1;
+    selected_graphic = 1;
+    selected_bpm_change = 1;
 
     font = new sf::Font();
     auto f = b::embed<"fonts/Cousine-Regular.ttf">();
@@ -72,6 +74,14 @@ int State::get_selected_keysound() {
 
 void State::set_selected_keysound(int keysound) {
     selected_keysound = keysound;
+}
+
+int State::get_selected_graphic() {
+    return selected_graphic;
+}
+
+void State::set_selected_graphic(int graphic) {
+    selected_graphic = graphic;
 }
 
 int State::get_selected_bpm_change() {

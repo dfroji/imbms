@@ -98,6 +98,7 @@ void SideMenu::render(State* state, BMS* bms) {
         bms->set_rank(static_cast<Rank>(current_rank));
     }
 
+    // header and listbox for keysounds
     if (ImGui::CollapsingHeader("Keysounds")) {
         std::vector<char*> keysound_labels = get_keysound_labels(DATA_LIMIT, 2);
 
@@ -123,7 +124,37 @@ void SideMenu::render(State* state, BMS* bms) {
             delete c;
         }
     }
+
+    // header and listbox for graphics
+    if (ImGui::CollapsingHeader("Graphics")) {
+        std::vector<char*> graphic_labels = get_graphic_labels(DATA_LIMIT, 2);
+
+        ImGui::SetNextItemWidth(-FLT_MIN);
+        static int selected_graphic = state->get_selected_graphic() - 1;
+        if (ImGui::ListBox("##graphics_list", &selected_graphic, graphic_labels.data(), DATA_LIMIT, 10)) {
+            state->set_selected_graphic(selected_graphic + 1);
+        }
+
+        // open a file dialog if an item is double clicked
+        if (ImGui::IsItemHovered()) {
+            if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                FileDialog fd(state);
+                fs::path filepath = fd.open_file(state->get_current_path(), FDMode::Graphics);
+                std::string file = filepath.filename().string();
+                if (file != "") {
+                    bms->set_graphic(file, state->get_selected_graphic());
+                }
+            }
+        }
+
+        // free allocated memory
+        for (auto c : graphic_labels) {
+            delete c;
+        }
+    }
     
+    // header and listbox for bpm changes
+    // also implementes a modal popup for bpm input
     if (ImGui::CollapsingHeader("exBPM")) {
         std::vector<char*> exbpm_labels = get_exbpm_labels(DATA_LIMIT, 2);
 
@@ -132,6 +163,8 @@ void SideMenu::render(State* state, BMS* bms) {
         if (ImGui::ListBox("##exbpms_list", &selected_exbpm, exbpm_labels.data(), DATA_LIMIT, 10)) {
             state->set_selected_bpm_change(selected_exbpm + 1);
         }
+
+        // open a modal popup when an item is double clicked
         if (ImGui::IsItemHovered()) {
             if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                 ImGui::OpenPopup("Input exBPM"); 
@@ -139,6 +172,7 @@ void SideMenu::render(State* state, BMS* bms) {
             }
         }
 
+        // set the modal popup to always be in the center of the viewport
         ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
         if (ImGui::BeginPopupModal("Input exBPM", NULL, popup_flags)) {
@@ -166,11 +200,13 @@ void SideMenu::render(State* state, BMS* bms) {
             ImGui::EndPopup();
         }
 
+        // free allocated memory
         for (auto c : exbpm_labels) {
             delete c;
         }
     }
 
+    // header for grid settings
     int quantization = state->get_quantization();
     fVec2 grid_scale = state->get_grid_scale();
     if (ImGui::CollapsingHeader("Grid")) {
@@ -224,6 +260,45 @@ std::vector<char*> SideMenu::get_keysound_labels(int size, int digits) {
 
     // transform the vector of strings to vector of char* for imgui's listbox to use
     // ImBMS::cstr allocates memory for each label so it has to be freed wherever this function is called
+    std::vector<char*> labels_c;
+    std::transform(labels.begin(), labels.end(), std::back_inserter(labels_c), ImBMS::cstr);
+
+    return labels_c;
+}
+
+std::vector<char*> SideMenu::get_graphic_labels(int size, int digits) {
+    std::vector<std::string> labels;
+    std::vector<std::string> graphics = bms->get_graphics();
+
+    // push labels into a vector in loop
+    // start at 1 as index 0 is reserved for empty notes
+    for (int i = 1; i < size; i++) {
+        fs::path graphic = "";
+        if (i < graphics.size()) {
+            graphic += graphics[i];
+        }
+
+        // also search for .png and .jpg files if the format defined in the file can't be found
+        fs::path fullpath = state->get_current_path();
+        fullpath /= graphic;
+        if (fs::exists(fullpath)) {
+            labels.push_back(ImBMS::format_base36(i, 2) + " " + graphic.generic_string());
+
+        } else if (fs::exists(fullpath.replace_extension(".png"))) {
+            graphic.replace_extension(".png");
+            labels.push_back(ImBMS::format_base36(i, 2) + " " + graphic.generic_string());
+
+        } else if (fs::exists(fullpath.replace_extension(".jpg"))) {
+            graphic.replace_extension(".jpg");
+            labels.push_back(ImBMS::format_base36(i, 2) + " " + graphic.generic_string());
+
+        } else {
+            labels.push_back(ImBMS::format_base36(i, 2));
+        }
+    }
+
+    // transform the vector of strings to a vector of char*
+    // ImBMS::cstr allocates memory which needs to be freed later
     std::vector<char*> labels_c;
     std::transform(labels.begin(), labels.end(), std::back_inserter(labels_c), ImBMS::cstr);
 
