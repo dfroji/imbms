@@ -197,3 +197,62 @@ std::vector<std::string> BMS::get_play_channels() {
 
     return play_channels;
 }
+
+// creates a copy of this
+// couldn't be arsed to write a cleaner implementation
+BMS* BMS::copy() {
+    BMS* copy = new BMS();
+    copy->measures.clear();
+
+    copy->artist = artist;
+    copy->subartist = subartist;
+    copy->title = title;
+    copy->subtitle = subtitle;
+    copy->bpm = bpm;
+    copy->genre = genre;
+    copy->player = player;
+    copy->difficulty = difficulty;
+    copy->rank = rank;
+    copy->total = total;
+    copy->stagefile = stagefile;
+    copy->banner = banner;
+    copy->playstyle = playstyle;
+    copy->keysounds = keysounds;
+    copy->graphics = graphics;
+    copy->bpm_changes = bpm_changes;
+
+    // copy measures in a loop
+    for (auto m : measures) {
+        if (m == nullptr) {
+            copy->measures.push_back(nullptr);
+        } else {
+            Measure* new_measure = new Measure();
+
+            // copy channels to the currently processed measure
+            for (int i = 0; i < m->channels.size(); i++) {
+                if (m->channels[i] == nullptr) {
+                    new_measure->channels.push_back(nullptr);
+                } else {
+                    Channel* new_channel = new Channel();
+                    new_channel->components = m->channels[i]->components;
+                    new_measure->channels.push_back(new_channel);
+                }
+            }
+
+            // copy bgm channels to the currently processed measure
+            for (int i = 0; i < m->bgm_channels.size(); i++) {
+                if (m->bgm_channels[i] == nullptr) {
+                    new_measure->bgm_channels.push_back(nullptr);
+                } else {
+                    Channel* new_channel = new Channel();
+                    new_channel->components = m->bgm_channels[i]->components;
+                    new_measure->bgm_channels.push_back(new_channel);
+                }
+            }
+
+            copy->measures.push_back(new_measure);
+        }
+    }
+
+    return copy;
+}

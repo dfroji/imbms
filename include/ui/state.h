@@ -98,7 +98,6 @@ class State {
         void set_menu_bar_interacted(bool b);
 
         bool is_modified();
-        void set_modified(bool b);
 
         bool has_filepath();
 
@@ -149,9 +148,9 @@ class State {
         bool is_selected_notes_moved_;
         bool is_movable_;
         bool is_menu_bar_interacted_;
-        bool is_modified_;
 
         BMS* bms;
+        BMS* saved_bms;
 
         std::vector<std::function<void()>> undo_list;
         std::vector<std::function<void()>> redo_list;

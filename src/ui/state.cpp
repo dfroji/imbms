@@ -35,15 +35,16 @@ State::State() {
     is_selected_notes_moved_ = false;
     is_movable_ = false;
     is_menu_bar_interacted_ = false;
-    is_modified_ = false;
 
     bms = new BMS();
+    saved_bms = bms->copy();
 
     undo_list = {};
 }
 
 State::~State() {
     delete bms;
+    delete saved_bms;
     delete font;
     clear_selected_notes();
 }
@@ -211,11 +212,7 @@ void State::set_menu_bar_interacted(bool b) {
 }
 
 bool State::is_modified() {
-    return is_modified_;
-}
-
-void State::set_modified(bool b) {
-    is_modified_ = b;
+    return *bms != saved_bms;
 }
 
 bool State::has_filepath() {
@@ -240,13 +237,14 @@ bool State::load_bms(fs::path filepath) {
     BMS* bms_to_be_deleted = bms;
     delete bms_to_be_deleted;
     bms = new_bms;
+    delete saved_bms;
+    saved_bms = bms->copy();
 
     filename = filepath;
     current_path = filepath.parent_path();
-    set_modified(false);
 
     undo_list.clear();
-    
+
     return true;
 }
 
@@ -256,7 +254,8 @@ bool State::save_bms(fs::path filepath) {
     ImBMS::write(bms, filepath.string());
     filename = filepath;
     current_path == filepath.parent_path();
-    set_modified(false);
+    delete saved_bms;
+    saved_bms = bms->copy();
 
     return true;
 }
@@ -279,19 +278,19 @@ void State::new_bms() {
     is_selected_notes_moved_ = false;
     is_movable_ = false;
     is_menu_bar_interacted_ = false;
-    is_modified_ = false;
 
     filename = "";
 
     delete bms;
     bms = new BMS();
+    delete saved_bms;
+    saved_bms = bms->copy();
 
     undo_list = {};
 }
 
 void State::add_undo(std::function<void()> command) {
     undo_list.push_back(command);
-    set_modified(true);
 }
 
 void State::pop_undo() {
@@ -308,7 +307,6 @@ void State::undo(bool pop) {
 
 void State::add_redo(std::function<void()> command) {
     redo_list.push_back(command);
-    set_modified(true);
 }
 
 void State::pop_redo() {

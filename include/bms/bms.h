@@ -35,6 +35,39 @@ struct Channel {
 struct Measure {
     std::vector<Channel*> channels;
     std::vector<Channel*> bgm_channels;
+
+    bool operator!=(Measure* rhs) {
+        if (this->channels.size() != rhs->channels.size() ||
+            this->bgm_channels.size() != rhs->bgm_channels.size()) {
+            return true;
+        }
+
+        for (int i = 0; i < channels.size(); i++) {
+            if (this->channels[i] == nullptr && rhs->channels[i] == nullptr) {
+                continue;
+            } else if (this->channels[i] == nullptr || rhs->channels[i] == nullptr) {
+                return true;
+            }
+
+            if (this->channels[i]->components != rhs->channels[i]->components) {
+                return true;
+            }
+        }
+
+        for (int i = 0; i < bgm_channels.size(); i++) {
+            if (this->bgm_channels[i] == nullptr && rhs->bgm_channels[i] == nullptr) {
+                continue;
+            } else if (this->bgm_channels[i] == nullptr || rhs->bgm_channels[i] == nullptr) {
+                return true;
+            }
+
+            if (this->bgm_channels[i]->components != rhs->bgm_channels[i]->components) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 };
 
 enum Player {player_null, sp, couple, dp};
@@ -101,6 +134,43 @@ public:
     void set_playstyle(Playstyle playstyle);
 
     std::vector<std::string> get_play_channels();
+
+    BMS* copy();
+
+    bool operator!=(BMS* rhs) {
+        if (this->measures.size() != rhs->measures.size()) {
+            return true;
+        } else {
+            for (int i = 0; i < this->measures.size(); i++) {
+                if (this->measures[i] == nullptr && rhs->measures[i] == nullptr) {
+                    continue;
+                } else if (this->measures[i] == nullptr || rhs->measures[i] == nullptr) {
+                    return true;
+                }
+
+                if (*(this->measures[i]) != rhs->measures[i]) {
+                    return true;
+                }
+            }
+        }
+
+        return this->artist != rhs->artist ||
+            this->subartist != rhs->subartist ||
+            this->title != rhs->title ||
+            this->subtitle != rhs->subtitle ||
+            this->bpm != rhs->bpm ||
+            this->genre != rhs->genre ||
+            this->player != rhs->player ||
+            this->difficulty != rhs->difficulty ||
+            this->rank != rhs->rank ||
+            this->total != rhs->total ||
+            this->stagefile != rhs->stagefile ||
+            this->banner != rhs->banner ||
+            this->playstyle != rhs->playstyle ||
+            this->keysounds != rhs->keysounds ||
+            this->graphics != rhs->graphics ||
+            this->bpm_changes != rhs->bpm_changes;
+    }
 
 private:
     std::string artist;
