@@ -66,7 +66,7 @@ std::string BMS::get_subtitle() {
 }
 
 void BMS::set_subtitle(std::string subtitle) {
-    this->title = title;
+    this->subtitle = subtitle;
 }
 
 double BMS::get_bpm() {
