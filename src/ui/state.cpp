@@ -70,8 +70,16 @@ int State::get_selected_keysound() {
     return selected_keysound;
 }
 
-void State::set_selected_keysound(int new_keysound) {
-    selected_keysound = new_keysound;
+void State::set_selected_keysound(int keysound) {
+    selected_keysound = keysound;
+}
+
+int State::get_selected_bpm_change() {
+    return selected_bpm_change;
+}
+
+void State::set_selected_bpm_change(int bpm_change) {
+    selected_bpm_change = bpm_change;
 }
 
 fs::path State::get_current_path() {
@@ -209,6 +217,14 @@ bool State::is_menu_bar_interacted() {
 
 void State::set_menu_bar_interacted(bool b) {
     is_menu_bar_interacted_ = b;
+}
+
+bool State::is_popup() {
+    return is_popup_;
+}
+
+void State::set_popup(bool b) {
+    is_popup_ = b;
 }
 
 bool State::is_modified() {

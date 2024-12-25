@@ -124,7 +124,7 @@ public:
     void set_graphic(std::string filepath, int index);
 
     std::vector<std::string> get_bpm_changes();
-    void set_bpm_change(std::string filepath, int index);
+    void set_bpm_change(std::string bpm, int index);
 
     std::vector<Measure*> get_measures();
     void new_measure(int index);

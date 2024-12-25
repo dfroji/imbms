@@ -57,6 +57,9 @@ class State {
         int get_selected_keysound();
         void set_selected_keysound(int keysound);
 
+        int get_selected_bpm_change();
+        void set_selected_bpm_change(int bpm_change);
+        
         fs::path get_current_path();
         void set_current_path(fs::path path);
 
@@ -97,6 +100,9 @@ class State {
         bool is_menu_bar_interacted();
         void set_menu_bar_interacted(bool b);
 
+        bool is_popup();
+        void set_popup(bool b);
+
         bool is_modified();
 
         bool has_filepath();
@@ -127,6 +133,7 @@ class State {
         int quantization;
         fVec2 grid_scale;
         int selected_keysound;
+        int selected_bpm_change;
         fs::path current_path;
         fs::path filename;
         sf::Font* font;
@@ -148,6 +155,7 @@ class State {
         bool is_selected_notes_moved_;
         bool is_movable_;
         bool is_menu_bar_interacted_;
+        bool is_popup_;
 
         BMS* bms;
         BMS* saved_bms;

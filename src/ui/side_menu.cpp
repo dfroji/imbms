@@ -21,6 +21,10 @@ void SideMenu::render(State* state, BMS* bms) {
     window_flags |= ImGuiWindowFlags_NoTitleBar;
     window_flags |= ImGuiWindowFlags_NoResize;
 
+    ImGuiWindowFlags popup_flags = 0;
+    popup_flags |= ImGuiWindowFlags_AlwaysAutoResize;
+    popup_flags |= ImGuiWindowFlags_NoMove;
+
     ImVec2 viewport_pos = ImGui::GetMainViewport()->GetWorkCenter();
     ImVec2 viewport_size = ImGui::GetMainViewport()->WorkSize;
 
@@ -112,11 +116,57 @@ void SideMenu::render(State* state, BMS* bms) {
                     bms->set_keysound(file, state->get_selected_keysound());
                 }
             }
-        } else {
         }
 
         // free the memory allocated for the labels
         for (auto c : keysound_labels) {
+            delete c;
+        }
+    }
+    
+    if (ImGui::CollapsingHeader("exBPM")) {
+        std::vector<char*> exbpm_labels = get_exbpm_labels(DATA_LIMIT, 2);
+
+        ImGui::SetNextItemWidth(-FLT_MIN);
+        static int selected_exbpm = state->get_selected_bpm_change() - 1;
+        if (ImGui::ListBox("##exbpms_list", &selected_exbpm, exbpm_labels.data(), DATA_LIMIT, 10)) {
+            state->set_selected_bpm_change(selected_exbpm + 1);
+        }
+        if (ImGui::IsItemHovered()) {
+            if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                ImGui::OpenPopup("Input exBPM"); 
+                state->set_popup(true);
+            }
+        }
+
+        ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+
+        if (ImGui::BeginPopupModal("Input exBPM", NULL, popup_flags)) {
+            static double exbpm = 130;
+            std::string selected_exbpm_str = bms->get_bpm_changes()[selected_exbpm + 1];
+            if (selected_exbpm_str != "") {
+                static double exbpm = std::stod(selected_exbpm_str);
+            }
+
+            (ImGui::InputDouble("BPM", &exbpm, 0.0f, 10000.0f, "%.00000f"));
+
+            if (ImGui::Button("Cancel")) {
+                ImGui::CloseCurrentPopup();
+                state->set_popup(false);
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("OK")) {
+                bms->set_bpm_change(std::to_string(exbpm), selected_exbpm + 1);
+                ImGui::CloseCurrentPopup();
+                state->set_popup(false);
+            }
+
+            ImGui::EndPopup();
+        }
+
+        for (auto c : exbpm_labels) {
             delete c;
         }
     }
@@ -174,6 +224,33 @@ std::vector<char*> SideMenu::get_keysound_labels(int size, int digits) {
 
     // transform the vector of strings to vector of char* for imgui's listbox to use
     // ImBMS::cstr allocates memory for each label so it has to be freed wherever this function is called
+    std::vector<char*> labels_c;
+    std::transform(labels.begin(), labels.end(), std::back_inserter(labels_c), ImBMS::cstr);
+
+    return labels_c;
+}
+
+std::vector<char*> SideMenu::get_exbpm_labels(int size, int digits) {
+    std::vector<std::string> labels;
+    std::vector<std::string> exbpms = bms->get_bpm_changes();
+
+    // push labels into a vector in a loop
+    // start at 1 as index 0 is reserved for empty notes
+    for (int i = 1; i < size; i++) {
+        fs::path exbpm = "";
+        if (i < exbpms.size()) {
+            exbpm += exbpms[i];
+        }
+
+        if (exbpm == "") {
+            labels.push_back(ImBMS::format_base36(i, 2));
+        } else {
+            labels.push_back(ImBMS::format_base36(i, 2) + " " + exbpm.generic_string());
+        }
+    }
+
+    // transform strings to char*
+    // ImBMS::cstr allocates memory that needs to be freed later
     std::vector<char*> labels_c;
     std::transform(labels.begin(), labels.end(), std::back_inserter(labels_c), ImBMS::cstr);
 

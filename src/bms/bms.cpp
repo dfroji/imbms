@@ -157,8 +157,8 @@ std::vector<std::string> BMS::get_bpm_changes() {
     return this->bpm_changes;
 }
 
-void BMS::set_bpm_change(std::string filepath, int index) {
-    this->bpm_changes[index] = filepath;
+void BMS::set_bpm_change(std::string bpm, int index) {
+    this->bpm_changes[index] = bpm;
 }
 void BMS::new_measure(int index) {
     Measure* to_be_deleted = this->measures[index];
