@@ -26,4 +26,6 @@ class BMSEditEvent {
 
         static void undo_move_notes(int moved_notes, State* state);
         static void redo_move_notes(int moved_notes, State* state);
+
+        static void adjust_quantization(int& cell, int quantization, Channel* channel);
 };

@@ -173,24 +173,7 @@ bool BMSEditEvent::add_play_or_bga_note(int component, sf::Vector2i mouse_pos, i
         old_components = channel->components;
 
         // change the channel's quantization if it doesn't match with the quantization used
-        if (quantization != channel->components.size()) {
-            int common_divisor = ImBMS::get_gcd(quantization, channel->components.size());
-
-            if (channel->components.size() < quantization || 
-               (quantization != common_divisor && channel->components.size() != common_divisor)) {
-                    int components_old_size = channel->components.size();
-                    channel->resize(quantization/common_divisor);
-
-                    if (quantization < components_old_size) {
-                        cell *= common_divisor;
-                    } else {
-                        cell *= components_old_size/common_divisor;
-                    }
-
-            } else if (quantization < channel->components.size()) {
-                cell *= channel->components.size()/common_divisor;
-            }
-        }
+        BMSEditEvent::adjust_quantization(cell, quantization, channel);
 
         // channel is not modified if a note on the specific cell already exists
         if (channel->components[cell] != 0) {return false;}
@@ -228,25 +211,8 @@ bool BMSEditEvent::add_bgm_note(int component, sf::Vector2i mouse_pos, int measu
     channel = measure->bgm_channels[channel_i];
     old_components = channel->components;
 
-    // same deal with quantization as play and bga notes
-    if (quantization != channel->components.size()) {
-        int common_divisor = ImBMS::get_gcd(quantization, channel->components.size());
-        if (channel->components.size() < quantization || 
-            (quantization != common_divisor && channel->components.size() != common_divisor)) 
-        {
-            int components_old_size = channel->components.size();
-            channel->resize(quantization/common_divisor);
-            if (quantization < components_old_size) {
-                cell *= common_divisor;
-
-            } else {
-                cell *= components_old_size/common_divisor;
-            }
-
-        } else if (quantization < channel->components.size()) {
-            cell *= channel->components.size()/common_divisor;
-        }
-    }
+    // adjust quantization if needed
+    BMSEditEvent::adjust_quantization(cell, quantization, channel);
 
     if (channel->components[cell] != 0)  {return false;}
     channel->components[cell] = component;
@@ -311,4 +277,20 @@ void BMSEditEvent::redo_move_notes(int moved_notes, State* state) {
     }
     state->redo(false);
     state->add_undo(std::bind(undo_move_notes, moved_notes, state));
+}
+
+void BMSEditEvent::adjust_quantization(int& cell, int quantization, Channel* channel) {
+    int components_size = channel->components.size();
+
+    if (quantization != components_size) {
+        int common_divisor = ImBMS::get_gcd(quantization, components_size);
+        cell *= components_size/common_divisor; // adjust the cell to match the resulting quantization
+
+        // adjust the quantization of the channel if the used quantization is higher
+        // or if either the used quantization or the quantization of the channel is not the common divisor
+        if (components_size < quantization || 
+           (quantization != common_divisor && components_size != common_divisor)) {
+                channel->resize(quantization/common_divisor);
+        }
+    }
 }
