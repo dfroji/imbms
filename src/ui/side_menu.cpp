@@ -48,6 +48,7 @@ void SideMenu::render(State* state, BMS* bms) {
     static double bpm = bms->get_bpm();
     static int total = bms->get_total();
     static int current_rank = bms->get_rank();
+    static int selected_keysound = state->get_selected_keysound() - 1;
     if (ImGui::CollapsingHeader("Metadata")) {
         static char title[1024] =  "", subtitle[1024] = "";
         static char artist[1024] = "", subartist[1024] = "";
@@ -103,7 +104,6 @@ void SideMenu::render(State* state, BMS* bms) {
         std::vector<char*> keysound_labels = get_keysound_labels(DATA_LIMIT, 2);
 
         ImGui::SetNextItemWidth(-FLT_MIN);
-        static int selected_keysound = state->get_selected_keysound() - 1;
         if (ImGui::ListBox("##keysounds_list", &selected_keysound, keysound_labels.data(), DATA_LIMIT, 10)) {
             state->set_selected_keysound(selected_keysound + 1);
         }
@@ -130,9 +130,8 @@ void SideMenu::render(State* state, BMS* bms) {
         std::vector<char*> graphic_labels = get_graphic_labels(DATA_LIMIT, 2);
 
         ImGui::SetNextItemWidth(-FLT_MIN);
-        static int selected_graphic = state->get_selected_graphic() - 1;
-        if (ImGui::ListBox("##graphics_list", &selected_graphic, graphic_labels.data(), DATA_LIMIT, 10)) {
-            state->set_selected_graphic(selected_graphic + 1);
+        if (ImGui::ListBox("##graphics_list", &selected_keysound, graphic_labels.data(), DATA_LIMIT, 10)) {
+            state->set_selected_keysound(selected_keysound + 1);
         }
 
         // open a file dialog if an item is double clicked
@@ -142,7 +141,7 @@ void SideMenu::render(State* state, BMS* bms) {
                 fs::path filepath = fd.open_file(state->get_current_path(), FDMode::Graphics);
                 std::string file = filepath.filename().string();
                 if (file != "") {
-                    bms->set_graphic(file, state->get_selected_graphic());
+                    bms->set_graphic(file, state->get_selected_keysound());
                 }
             }
         }
@@ -160,9 +159,8 @@ void SideMenu::render(State* state, BMS* bms) {
         std::vector<char*> exbpm_labels = get_exbpm_labels(DATA_LIMIT, 2);
 
         ImGui::SetNextItemWidth(-FLT_MIN);
-        static int selected_exbpm = state->get_selected_bpm_change() - 1;
-        if (ImGui::ListBox("##exbpms_list", &selected_exbpm, exbpm_labels.data(), DATA_LIMIT, 10)) {
-            state->set_selected_bpm_change(selected_exbpm + 1);
+        if (ImGui::ListBox("##exbpms_list", &selected_keysound, exbpm_labels.data(), DATA_LIMIT, 10)) {
+            state->set_selected_keysound(selected_keysound + 1);
         }
 
         // open a modal popup when an item is double clicked
@@ -177,7 +175,7 @@ void SideMenu::render(State* state, BMS* bms) {
         ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
         if (ImGui::BeginPopupModal("Input exBPM", NULL, popup_flags)) {
-            std::string selected_exbpm_str = bms->get_bpm_changes()[selected_exbpm + 1];
+            std::string selected_exbpm_str = bms->get_bpm_changes()[selected_keysound + 1];
             if (selected_exbpm_str != "") {
                 static double exbpm = std::stod(selected_exbpm_str);
             }
@@ -192,7 +190,7 @@ void SideMenu::render(State* state, BMS* bms) {
             ImGui::SameLine();
 
             if (ImGui::Button("OK")) {
-                bms->set_bpm_change(std::to_string(exbpm), selected_exbpm + 1);
+                bms->set_bpm_change(std::to_string(exbpm), selected_keysound + 1);
                 ImGui::CloseCurrentPopup();
                 state->set_popup(false);
             }

@@ -57,12 +57,6 @@ class State {
         int get_selected_keysound();
         void set_selected_keysound(int keysound);
 
-        int get_selected_graphic();
-        void set_selected_graphic(int graphic);
-
-        int get_selected_bpm_change();
-        void set_selected_bpm_change(int bpm_change);
-        
         fs::path get_current_path();
         void set_current_path(fs::path path);
 
@@ -136,8 +130,6 @@ class State {
         int quantization;
         fVec2 grid_scale;
         int selected_keysound;
-        int selected_graphic;
-        int selected_bpm_change;
         fs::path current_path;
         fs::path filename;
         sf::Font* font;
