@@ -19,16 +19,20 @@ std::vector<std::string> ImBMS::split_line(std::string line, const char* delimit
     return splits;
 }
 
-int ImBMS::base36_to_int(std::string number) {
+int ImBMS::to_decimal(int base, std::string number) {
     int dec = 0;
     int exp = number.length() - 1;
     for (auto& c : number) {
         if (c < 'A') {c += 'A' - '9' - 1;}
-        dec += (c - '0' - ('A' - '9' - 1)) * std::pow(36, exp);
+        dec += (c - '0' - ('A' - '9' - 1)) * std::pow(base, exp);
         exp -= 1;
     }
 
     return dec;
+}
+
+int ImBMS::base36_to_int(std::string number) {
+    return to_decimal(36, number);
 }
 
 std::string ImBMS::int_to_base36(int number) {
@@ -59,6 +63,18 @@ std::string ImBMS::format_base36(int number, int digits) {
         }
     }
     return base36;
+}
+
+// silly function for casting base36 to hexadecimal
+// shouldn't really be used with anything except basic bpm channel
+int ImBMS::hexify(int number) {
+    std::string base36 = int_to_base36(number);
+
+    for (const auto& c : base36) {
+        if (c > 'F') {return -1;}
+    }
+
+    return to_decimal(16, base36);
 }
 
 std::string ImBMS::rtrim(std::string s) {

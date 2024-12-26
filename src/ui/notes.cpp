@@ -177,11 +177,17 @@ sf::Color Notes::get_channel_color(int channel_i, State* state) {
 
 std::string Notes::get_note_label(int component, int channel_i, State* state) {
     int play_channels_size = state->get_bms()->get_play_channels().size();
+
+    // bpm channels get unique labels that show the bpm value instead of base36 index
     if (play_channels_size <= channel_i && channel_i < play_channels_size + BPM_CHANNELS.size()) {
+        // channel 3 components need to be hexified because they're parsed in base36 despite being hexadecimal
+        // case 0 is basic bpm (channel 3)
+        // case 1 is extended bpm (channel 8)
+        int hex = ImBMS::hexify(component);
         switch (channel_i - play_channels_size) {
             case 0:
-                if (component < HEX_LIMIT) {
-                    return std::to_string(component);
+                if (hex < HEX_LIMIT && hex != -1) {
+                    return std::to_string(hex);
                 } else {
                     return "ERROR";
                 }
