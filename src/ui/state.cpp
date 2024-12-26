@@ -35,6 +35,7 @@ State::State() {
     is_selected_notes_moved_ = false;
     is_movable_ = false;
     is_menu_bar_interacted_ = false;
+    is_popup_ = false;
 
     bms = new BMS();
     saved_bms = bms->copy();
