@@ -9,6 +9,9 @@
 const int DATA_LIMIT = ImBMS::base36_to_int("ZZ");
 const int HEX_LIMIT = 256;
 
+const int DEFAULT_BPM = 130;
+const int DEFAULT_TOTAL = 300;
+
 struct Channel {
     std::vector<int> components;
     void resize(int factor) {

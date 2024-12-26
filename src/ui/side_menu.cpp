@@ -154,13 +154,22 @@ void SideMenu::render(State* state, BMS* bms) {
     
     // header and listbox for bpm changes
     // also implementes a modal popup for bpm input
-    static double exbpm = 130;
+    static double exbpm;
     if (ImGui::CollapsingHeader("exBPM")) {
         std::vector<char*> exbpm_labels = get_exbpm_labels(DATA_LIMIT, 2);
 
         ImGui::SetNextItemWidth(-FLT_MIN);
         if (ImGui::ListBox("##exbpms_list", &selected_keysound, exbpm_labels.data(), DATA_LIMIT, 10)) {
             state->set_selected_keysound(selected_keysound + 1);
+
+            // set exbpm here so the correct value is shown in the modal popup
+            std::string exbpm_str = bms->get_bpm_changes()[selected_keysound + 1];
+            if (exbpm_str != "") {
+                exbpm = std::stod(exbpm_str);
+
+            } else {
+                exbpm = DEFAULT_BPM;
+            }
         }
 
         // open a modal popup when an item is double clicked

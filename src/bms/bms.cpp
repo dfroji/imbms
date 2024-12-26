@@ -1,18 +1,16 @@
 #include "bms.h"
 
-#include <iostream>
-
 BMS::BMS() {
     this->artist = "";
     this->subartist = "";
     this->title = "";
     this->subtitle = "";
-    this->bpm = 130;
+    this->bpm = DEFAULT_BPM;
     this->genre = "";
     this->player = Player::sp;
     this->difficulty = Difficulty::easy;
     this->rank = Rank::rank_easy;
-    this->total = 300;
+    this->total = DEFAULT_TOTAL;
     this->stagefile = "";
     this->banner = "";
 
