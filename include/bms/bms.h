@@ -7,6 +7,7 @@
 #include "channels_and_colors.h"
 
 const int DATA_LIMIT = ImBMS::base36_to_int("ZZ");
+const int HEX_LIMIT = 256;
 
 struct Channel {
     std::vector<int> components;

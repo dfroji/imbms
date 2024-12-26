@@ -17,7 +17,6 @@ using VText = std::vector<sf::Text>;
 const int NOTE_PADDING = 2;
 const int NOTE_HEIGHT = 10;
 const int SELECTION_OUTLINE_THICKNESS = 2;
-const sf::Color SELECTION_OUTLINE_COLOR = sf::Color(255,100,100);
 
 class Notes {
     public:
@@ -34,6 +33,7 @@ class Notes {
         void render_moving_selection(State* state, sf::RenderWindow* window, sf::Vector2i mouse_pos);
 
         sf::Color get_channel_color(int channel_i, State* state);
+        std::string get_note_label(int component, int channel_i, State* state);
 
         VRectangleShape notes_render_v;
         VText labels_render_v;

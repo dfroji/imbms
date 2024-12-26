@@ -13,6 +13,7 @@ namespace ImBMS {
     int get_gcd(int lhs, int rhs);
     std::string fint(int number, int digits);
     char* cstr(std::string& str);
+    std::string trim_dstr(std::string d);
 
     template<typename T>
     void insert(std::vector<T>& target, std::vector<T> v, int elements_added) {

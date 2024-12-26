@@ -155,6 +155,7 @@ void SideMenu::render(State* state, BMS* bms) {
     
     // header and listbox for bpm changes
     // also implementes a modal popup for bpm input
+    static double exbpm = 130;
     if (ImGui::CollapsingHeader("exBPM")) {
         std::vector<char*> exbpm_labels = get_exbpm_labels(DATA_LIMIT, 2);
 
@@ -176,13 +177,12 @@ void SideMenu::render(State* state, BMS* bms) {
         ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
         if (ImGui::BeginPopupModal("Input exBPM", NULL, popup_flags)) {
-            static double exbpm = 130;
             std::string selected_exbpm_str = bms->get_bpm_changes()[selected_exbpm + 1];
             if (selected_exbpm_str != "") {
                 static double exbpm = std::stod(selected_exbpm_str);
             }
 
-            (ImGui::InputDouble("BPM", &exbpm, 0.0f, 10000.0f, "%.00000f"));
+            (ImGui::InputDouble("BPM", &exbpm, 0.0f, 10000.0f, "%.2f"));
 
             if (ImGui::Button("Cancel")) {
                 ImGui::CloseCurrentPopup();

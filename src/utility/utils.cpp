@@ -1,6 +1,7 @@
 #include "utils.h"
 
 #include <cmath>
+#include <algorithm>
 
 std::vector<std::string> ImBMS::split_line(std::string line, const char* delimiter, int number_of_splits) {
     std::vector<std::string> splits;
@@ -110,3 +111,31 @@ char* ImBMS::cstr(std::string& str) {
     return c;
 }
 
+// trim trailing zeros from a double formatted string
+std::string ImBMS::trim_dstr(std::string d) {
+    std::string str = "";
+
+    bool trim = true;
+    for (int i = d.size() - 1; i >= 0; i--) {
+        if (trim) {
+            if (d[i] == '0') {
+                continue;
+
+            } else if (d[i] == '.') {
+                trim = false;
+                continue;
+
+            } else {
+                trim = false;
+                str.push_back(d[i]);
+            }
+
+        } else {
+            str.push_back(d[i]);
+        }
+    }
+
+    std::reverse(str.begin(), str.end());
+
+    return str;
+}

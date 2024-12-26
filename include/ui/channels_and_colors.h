@@ -11,6 +11,8 @@ const std::vector<std::string> P1_VISIBLE = {"16", "11", "12", "13", "14", "15",
 const std::vector<std::string> P2_VISIBLE = {"21", "22", "23", "24", "25", "28", "29", "26"};
 const std::vector<std::string> PM_VISIBLE = {"11", "12", "13", "14", "15", "22", "23", "24", "25"};
 const std::vector<std::string> OTHER_CHANNELS = {"03", "08", "04", "07", "06"};
+const std::vector<std::string> BPM_CHANNELS = {"03", "08"};
+const std::vector<std::string> BGA_CHANNELS = {"04", "07", "06"};
 
 const std::map<std::string, std::string> SP_LABELS = {
     {"16", "SCR"},
@@ -73,3 +75,4 @@ const sf::Color PM_BLUE_COLOR = sf::Color(0,0,255);
 const sf::Color PM_RED_COLOR = sf::Color(255,0,0);
 const sf::Color BGM_COLOR = sf::Color(255,0,0);
 const sf::Color OTHER_COLOR = sf::Color(0,255,0);
+const sf::Color SELECTION_OUTLINE_COLOR = sf::Color(255,100,100);

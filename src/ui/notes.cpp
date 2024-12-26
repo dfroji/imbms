@@ -125,8 +125,9 @@ void Notes::render_channel_notes(int measure_i, int channel_i, Channel* channel,
         }
 
         // label for the note
+        std::string note_label = get_note_label(components[i], channel_i, state);
         sf::Text component_text;
-        component_text.setString(ImBMS::format_base36(components[i], 2));
+        component_text.setString(note_label);
         component_text.setFont(*state->get_font());
         component_text.setPosition(note.getPosition().x, note.getPosition().y - 12);
         component_text.setCharacterSize(FONT_SIZE);
@@ -172,6 +173,34 @@ sf::Color Notes::get_channel_color(int channel_i, State* state) {
     if (channel_i < play_channel_colors.size()) {return play_channel_colors[channel_i];}
     else if (channel_i < play_channel_colors.size() + OTHER_CHANNELS.size()) {return OTHER_COLOR;}
     else {return BGM_COLOR;}
+}
+
+std::string Notes::get_note_label(int component, int channel_i, State* state) {
+    int play_channels_size = state->get_bms()->get_play_channels().size();
+    if (play_channels_size <= channel_i && channel_i < play_channels_size + BPM_CHANNELS.size()) {
+        switch (channel_i - play_channels_size) {
+            case 0:
+                if (component < HEX_LIMIT) {
+                    return std::to_string(component);
+                } else {
+                    return "ERROR";
+                }
+            case 1:
+                std::string label = "N/A";
+                std::vector<std::string> bpm_changes = state->get_bms()->get_bpm_changes();
+                if (component < bpm_changes.size()) {
+                    std::string bpm_change = bpm_changes[component];
+                    if (bpm_change != "") {
+                        label = bpm_change;
+                    }
+                }
+
+                return label;
+        }
+
+    } else {
+        return ImBMS::format_base36(component, 2);
+    }
 }
 
 void Notes::render_moving_selection(State* state, sf::RenderWindow* window, sf::Vector2i mouse_pos) {

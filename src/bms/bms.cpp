@@ -1,5 +1,7 @@
 #include "bms.h"
 
+#include <iostream>
+
 BMS::BMS() {
     this->artist = "";
     this->subartist = "";
@@ -158,7 +160,7 @@ std::vector<std::string> BMS::get_bpm_changes() {
 }
 
 void BMS::set_bpm_change(std::string bpm, int index) {
-    this->bpm_changes[index] = bpm;
+    this->bpm_changes[index] = ImBMS::trim_dstr(bpm);
 }
 void BMS::new_measure(int index) {
     Measure* to_be_deleted = this->measures[index];
