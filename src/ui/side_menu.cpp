@@ -261,7 +261,7 @@ std::vector<char*> SideMenu::get_keysound_labels(int size, int digits) {
 
         // if the keysound file doesn't exist push the same label as if it was unassigned
         } else {
-            labels.push_back(ImBMS::format_base36(i, 2));
+            labels.push_back(ImBMS::format_base36(i, 2) + " MISSING FILE");
         }
     }
 
@@ -285,6 +285,11 @@ std::vector<char*> SideMenu::get_graphic_labels(int size, int digits) {
             graphic += graphics[i];
         }
 
+        if (graphic == "") {
+            labels.push_back(ImBMS::format_base36(i, 2));
+            continue;
+        } 
+
         // also search for .png and .jpg files if the format defined in the file can't be found
         fs::path fullpath = state->get_current_path();
         fullpath /= graphic;
@@ -300,7 +305,7 @@ std::vector<char*> SideMenu::get_graphic_labels(int size, int digits) {
             labels.push_back(ImBMS::format_base36(i, 2) + " " + graphic.generic_string());
 
         } else {
-            labels.push_back(ImBMS::format_base36(i, 2));
+            labels.push_back(ImBMS::format_base36(i, 2) + " MISSING FILE");
         }
     }
 
