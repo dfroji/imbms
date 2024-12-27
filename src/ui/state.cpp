@@ -36,6 +36,8 @@ State::State() {
     is_movable_ = false;
     is_menu_bar_interacted_ = false;
     is_popup_ = false;
+    view_bpm_ = true;
+    view_bga_ = true;
 
     bms = new BMS();
     saved_bms = bms->copy();
@@ -220,6 +222,22 @@ void State::set_popup(bool b) {
     is_popup_ = b;
 }
 
+bool State::view_bpm() {
+    return view_bpm_;
+}
+
+void State::set_view_bpm(bool b) {
+    view_bpm_ = b;
+}
+
+bool State::view_bga() {
+    return view_bga_;
+}
+
+void State::set_view_bga(bool b) {
+    view_bga_ = b;
+}
+
 bool State::is_modified() {
     return *bms != saved_bms;
 }
@@ -375,4 +393,16 @@ void State::play_keysound(fs::path keysound) {
     } else if (fs::exists(filepath.replace_extension(".ogg"))) {
         audio_player.play_sample(filepath.string());
     }
+}
+
+std::vector<std::string> State::get_other_channels() {
+    if (view_bpm_ && view_bga_) {
+        return OTHER_CHANNELS;
+    } else if (view_bpm_) {
+        return BPM_CHANNELS;
+    } else if (view_bga_) {
+        return BGA_CHANNELS;
+    }
+
+    return {};
 }

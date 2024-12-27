@@ -58,8 +58,8 @@ void Notes::render(State* state, sf::RenderWindow* window, sf::Vector2i mouse_po
 
 void Notes::render_thread(int measure_i, std::vector<std::string> channels, State* state) {
     render_play_channels(measure_i, channels, state);
-    render_bga_channels(measure_i, OTHER_CHANNELS, channels.size(), state);
-    render_bgm_channels(measure_i, channels.size()+OTHER_CHANNELS.size(), state);
+    render_bga_channels(measure_i, state->get_other_channels(), channels.size(), state);
+    render_bgm_channels(measure_i, channels.size()+state->get_other_channels().size(), state);
 }
 
 void Notes::render_play_channels(int measure_i, std::vector<std::string> channels, State* state) {
@@ -171,7 +171,7 @@ sf::Color Notes::get_channel_color(int channel_i, State* state) {
     }
 
     if (channel_i < play_channel_colors.size()) {return play_channel_colors[channel_i];}
-    else if (channel_i < play_channel_colors.size() + OTHER_CHANNELS.size()) {return OTHER_COLOR;}
+    else if (channel_i < play_channel_colors.size() + state->get_other_channels().size()) {return OTHER_COLOR;}
     else {return BGM_COLOR;}
 }
 
@@ -179,7 +179,7 @@ std::string Notes::get_note_label(int component, int channel_i, State* state) {
     int play_channels_size = state->get_bms()->get_play_channels().size();
 
     // bpm channels get unique labels that show the bpm value instead of base36 index
-    if (play_channels_size <= channel_i && channel_i < play_channels_size + BPM_CHANNELS.size()) {
+    if (state->view_bpm() && play_channels_size <= channel_i && channel_i < play_channels_size + BPM_CHANNELS.size()) {
         // channel 3 components need to be hexified because they're parsed in base36 despite being hexadecimal
         // case 0 is basic bpm (channel 3)
         // case 1 is extended bpm (channel 8)

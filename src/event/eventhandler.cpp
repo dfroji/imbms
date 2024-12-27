@@ -132,14 +132,15 @@ Note EventHandler::get_pointed_note(sf::Vector2i mouse_pos, State* state) {
     Channel* channel = nullptr;
 
     std::vector<std::string> play_channels = bms->get_play_channels();
+    std::vector<std::string> other_channels = state->get_other_channels();
     if (channel_i < play_channels.size()) {
         channel = measure->channels[ImBMS::base36_to_int(play_channels[channel_i])];
 
-    } else if (channel_i < play_channels.size() + OTHER_CHANNELS.size()) {
-        channel = measure->channels[ImBMS::base36_to_int(OTHER_CHANNELS[channel_i - play_channels.size()])];
+    } else if (channel_i < play_channels.size() + other_channels.size()) {
+        channel = measure->channels[ImBMS::base36_to_int(other_channels[channel_i - play_channels.size()])];
 
-    } else if (channel_i - play_channels.size() - OTHER_CHANNELS.size() < measure->bgm_channels.size()) {
-        channel = measure->bgm_channels[channel_i - play_channels.size() - OTHER_CHANNELS.size()];
+    } else if (channel_i - play_channels.size() - other_channels.size() < measure->bgm_channels.size()) {
+        channel = measure->bgm_channels[channel_i - play_channels.size() - other_channels.size()];
     }
 
     if (channel == nullptr) {return NULL_NOTE;}

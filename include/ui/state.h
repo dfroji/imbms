@@ -7,6 +7,7 @@
 #include "imgui-SFML.h"
 #include "SFML/Graphics/Text.hpp"
 
+#include "channels_and_colors.h"
 #include "bms.h"
 #include "audio.h"
 
@@ -100,6 +101,12 @@ class State {
         bool is_popup();
         void set_popup(bool b);
 
+        bool view_bpm();
+        void set_view_bpm(bool b);
+
+        bool view_bga();
+        void set_view_bga(bool b);
+
         bool is_modified();
 
         bool has_filepath();
@@ -125,6 +132,8 @@ class State {
         void clear_selected_notes(); 
 
         void play_keysound(fs::path keysound);
+
+        std::vector<std::string> get_other_channels();
 
     private:
         int quantization;
@@ -152,6 +161,8 @@ class State {
         bool is_movable_;
         bool is_menu_bar_interacted_;
         bool is_popup_;
+        bool view_bpm_;
+        bool view_bga_;
 
         BMS* bms;
         BMS* saved_bms;

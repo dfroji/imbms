@@ -22,16 +22,17 @@ bool BMSEditEvent::add_note(int component, sf::Vector2i mouse_pos, State* state)
     }
 
     std::vector<std::string> play_channels = bms->get_play_channels();
+    std::vector<std::string> other_channels = state->get_other_channels();
     if (channel_i < play_channels.size()) {
         channel_i = ImBMS::base36_to_int(play_channels[channel_i]);
         return BMSEditEvent::add_play_or_bga_note(component, mouse_pos, measure_i, channel_i, cell, state);
 
-    } else if (channel_i < play_channels.size() + OTHER_CHANNELS.size()) {
-        channel_i = ImBMS::base36_to_int(OTHER_CHANNELS[channel_i-play_channels.size()]);
+    } else if (channel_i < play_channels.size() + other_channels.size()) {
+        channel_i = ImBMS::base36_to_int(other_channels[channel_i-play_channels.size()]);
         return BMSEditEvent::add_play_or_bga_note(component, mouse_pos, measure_i, channel_i, cell, state); 
 
     } else {
-        channel_i = channel_i - play_channels.size() - OTHER_CHANNELS.size();
+        channel_i = channel_i - play_channels.size() - other_channels.size();
         return BMSEditEvent::add_bgm_note(component, mouse_pos, measure_i, channel_i, cell, state); 
     }
 }
@@ -67,14 +68,15 @@ void BMSEditEvent::move_notes(sf::Vector2i mouse_pos, State* state) {
 
     // get the pointed channel adjusting for the type of channel and playstyle
     std::vector<std::string> play_channels = bms->get_play_channels();
+    std::vector<std::string> other_channels = state->get_other_channels();
     if (pointed_channel < play_channels.size()) {
         pointed_channel = ImBMS::base36_to_int(play_channels[pointed_channel]);
 
-    } else if (pointed_channel < play_channels.size() + OTHER_CHANNELS.size()) {
-        pointed_channel = ImBMS::base36_to_int(OTHER_CHANNELS[pointed_channel-play_channels.size()]);
+    } else if (pointed_channel < play_channels.size() + other_channels.size()) {
+        pointed_channel = ImBMS::base36_to_int(other_channels[pointed_channel-play_channels.size()]);
 
     } else {
-        pointed_channel = pointed_channel - play_channels.size() - OTHER_CHANNELS.size();
+        pointed_channel = pointed_channel - play_channels.size() - other_channels.size();
         is_bgm = true;
     }
 

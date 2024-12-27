@@ -155,7 +155,7 @@ void SideMenu::render(State* state, BMS* bms) {
     // header and listbox for bpm changes
     // also implementes a modal popup for bpm input
     static double exbpm;
-    if (ImGui::CollapsingHeader("exBPM")) {
+    if (ImGui::CollapsingHeader("Extended BPM")) {
         std::vector<char*> exbpm_labels = get_exbpm_labels(DATA_LIMIT, 2);
 
         ImGui::SetNextItemWidth(-FLT_MIN);

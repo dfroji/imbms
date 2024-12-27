@@ -65,6 +65,14 @@ void MenuBar::render(State* state) {
     
     if (ImGui::BeginMenu("View")) {
         state->set_menu_bar_interacted(true);
+        static bool view_bpm = state->view_bpm();
+        static bool view_bga = state->view_bga();
+
+        ImGui::MenuItem("BPM Channels", "", &view_bpm);
+        ImGui::MenuItem("BGA Channels", "", &view_bga);
+
+        state->set_view_bpm(view_bpm);
+        state->set_view_bga(view_bga);
 
         ImGui::EndMenu();
     }

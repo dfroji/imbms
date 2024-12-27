@@ -25,6 +25,7 @@ void Grid::render(State* state, sf::RenderWindow* window) {
     fVec2 wrapping_offset = state->get_wrapping_offset();
     float note_width = state->get_note_width();
     std::vector<std::string> play_channels = state->get_bms()->get_play_channels();
+    std::vector<std::string> other_channels = state->get_other_channels();
     Playstyle playstyle = state->get_bms()->get_playstyle();
 
     // Setup horizontal lines for drawing
@@ -87,7 +88,6 @@ void Grid::render(State* state, sf::RenderWindow* window) {
         
 
         // Calculate the position of the given measure line
-
         float measure_distance = i*default_scaling.y*grid_scale.y;
         float measure_y_position = relative_pos.y + viewport_size.y - viewport_pos.y - measure_distance - wrapping_offset.y;
 
@@ -133,11 +133,11 @@ void Grid::render(State* state, sf::RenderWindow* window) {
 
             column_label.setString(labels.at(play_channels[i]));
 
-        } else if (i < play_channels.size() + OTHER_CHANNELS.size()) {
-            column_label.setString(OTHER_LABELS.at(OTHER_CHANNELS[i - play_channels.size()]));
+        } else if (i < play_channels.size() + other_channels.size()) {
+            column_label.setString(OTHER_LABELS.at(other_channels[i - play_channels.size()]));
         
         } else {
-            column_label.setString("B" + std::to_string(i - play_channels.size() - OTHER_CHANNELS.size() + 1));
+            column_label.setString("B" + std::to_string(i - play_channels.size() - other_channels.size() + 1));
         }
         
         column_label.setFont(*state->get_font());
