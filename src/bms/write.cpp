@@ -7,19 +7,6 @@
 void ImBMS::write(BMS* bms, std::string filename) {
     std::ofstream file(filename);
 
-    std::string artist = bms->get_artist();
-    std::string subartist = bms ->get_subartist();
-    std::string title = bms->get_title();
-    std::string subtitle = bms->get_subtitle();
-    double bpm = bms->get_bpm();
-    std::string genre = bms->get_genre();
-    int player = static_cast<int>(bms->get_player());
-    int difficulty = static_cast<int>(bms->get_difficulty());
-    int rank = static_cast<int>(bms->get_rank());
-    double total = bms->get_total();
-    std::string stagefile = bms->get_stagefile();
-    std::string banner = bms->get_banner();
-
     std::vector<std::string> keysounds = bms->get_keysounds();
     std::vector<std::string> graphics = bms->get_graphics();
     std::vector<std::string> bpm_changes = bms->get_bpm_changes();
@@ -28,18 +15,9 @@ void ImBMS::write(BMS* bms, std::string filename) {
     file << DATA_FIELD_TAG + " HEADER FIELD" << std::endl;
     file << "" << std::endl;
     
-    file << "#ARTIST " << artist << std::endl;
-    file << "#SUBARTIST " << subartist << std::endl;
-    file << "#TITLE " << title << std::endl;
-    file << "#SUBTITLE " << subtitle << std::endl;
-    file << "#BPM " << bpm << std::endl;
-    file << "#GENRE " << genre << std::endl;
-    file << "#PLAYER " << player << std::endl;
-    file << "#DIFFICULTY " << difficulty << std::endl;
-    file << "#RANK " << rank << std::endl;
-    file << "#TOTAL " << total << std::endl;
-    file << "#STAGEFILE " << stagefile << std::endl;
-    file << "#BANNER " << banner << std::endl;
+    for (const auto& item : bms->get_header_data()) {
+        file << item.first << " " << item.second << std::endl;
+    }
 
     file << "" << std::endl;
 

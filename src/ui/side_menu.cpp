@@ -45,25 +45,34 @@ void SideMenu::render(State* state, BMS* bms) {
     // static values used in a collapsing header are initialized outside of it
     // as they wouldn't update propely when loading a file and the header is open
     static int current_mode = bms->get_playstyle();
-    static double bpm = bms->get_bpm();
-    static int total = bms->get_total();
-    static int current_rank = bms->get_rank();
+    static double bpm = std::stod(bms->get_header_data("#BPM"));
+    static int total = std::stoi(bms->get_header_data("#TOTAL"));
+    static int current_rank = std::stoi(bms->get_header_data("#RANK"));
     static int selected_keysound = state->get_selected_keysound() - 1;
     if (ImGui::CollapsingHeader("Metadata")) {
         static char title[1024] =  "", subtitle[1024] = "";
         static char artist[1024] = "", subartist[1024] = "";
         static char genre[1024] = "";
-        std::strcpy(title, bms->get_title().c_str());
-        std::strcpy(subtitle, bms->get_subtitle().c_str());
-        std::strcpy(artist, bms->get_artist().c_str());
-        std::strcpy(subartist, bms->get_subartist().c_str());
-        std::strcpy(genre, bms->get_genre().c_str());
+        std::strcpy(title, bms->get_header_data("#TITLE").c_str());
+        std::strcpy(subtitle, bms->get_header_data("#SUBTITLE").c_str());
+        std::strcpy(artist, bms->get_header_data("#ARTIST").c_str());
+        std::strcpy(subartist, bms->get_header_data("#SUBARTIST").c_str());
+        std::strcpy(genre, bms->get_header_data("#GENRE").c_str());
 
         ImGui::InputText("Title", title, IM_ARRAYSIZE(title));
+        bms->insert_header_data("#TITLE", title);
+
         ImGui::InputText("Subtitle", subtitle, IM_ARRAYSIZE(subtitle));        
+        bms->insert_header_data("#SUBTITLE", subtitle);
+
         ImGui::InputText("Artist", artist, IM_ARRAYSIZE(title));
+        bms->insert_header_data("#ARTIST", artist);
+
         ImGui::InputText("Subartist", subartist, IM_ARRAYSIZE(subtitle));
+        bms->insert_header_data("#SUBARTIST", subartist);
+
         ImGui::InputText("Genre", genre, IM_ARRAYSIZE(title));
+        bms->insert_header_data("#GENRE", genre);
 
         const char* modes[] = {"SP", "DP", "PM"};
         current_mode = bms->get_playstyle();
@@ -71,32 +80,21 @@ void SideMenu::render(State* state, BMS* bms) {
             bms->set_playstyle(static_cast<Playstyle>(current_mode));
         }
 
-        bpm = bms->get_bpm();
+        bpm = std::stod(bms->get_header_data("#BPM"));
         if (ImGui::InputDouble("BPM", &bpm, 1.0f, 10.0f, "%.0f")) {
-            bms->set_bpm(bpm);
+            bms->insert_header_data("#BPM", std::to_string(bpm));
         }
 
-        total = bms->get_total();
+        total = std::stoi(bms->get_header_data("#TOTAL"));
         if (ImGui::InputInt("Total", &total)) {
-            bms->set_total(total);
+            bms->insert_header_data("#TOTAL", std::to_string(total));
         }
 
         const char* ranks[] = {"Very Hard", "Hard", "Normal", "Easy"};
-        current_rank = bms->get_rank();
+        current_rank = std::stoi(bms->get_header_data("#RANK"));
         if (ImGui::Combo("Rank", &current_rank, ranks, IM_ARRAYSIZE(ranks))) {
-            bms->set_rank(static_cast<Rank>(current_rank));
+            bms->insert_header_data("#RANK", std::to_string(static_cast<Rank>(current_rank)));
         }
-
-        bms->set_title(title);
-        bms->set_subtitle(subtitle);
-        bms->set_artist(artist);
-        bms->set_subartist(subartist);
-        bms->set_genre(genre);
-
-
-        bms->set_bpm(bpm);
-
-        bms->set_rank(static_cast<Rank>(current_rank));
     }
 
     // header and listbox for keysounds

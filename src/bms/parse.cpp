@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <cmath>
-
 #include <filesystem>
 #include <iostream>
 
@@ -35,31 +34,22 @@ BMS* ImBMS::parse_bms(std::string filename) {
         if (type == DATA_FIELD_TAG) {
             if (argument == "HEADER FIELD") {current_field = DataField::field_header;}
             else if (argument == "MAIN DATA FIELD") {current_field = DataField::field_main;}
-        }
 
-        if (current_field == DataField::field_header) {
-            if (type == "#ARTIST") {p_bms->set_artist(argument);}
-            else if (type == "#SUBARTIST") {p_bms->set_subartist(argument);}
-            else if (type == "#TITLE") {p_bms->set_title(argument);}
-            else if (type == "#SUBTITLE") {p_bms->set_subtitle(argument);}
-            else if (type == "#BPM") {p_bms->set_bpm(std::stod(argument));}
-            else if (type == "#GENRE") {p_bms->set_genre(argument);}
-            else if (type == "#PLAYER") {p_bms->set_player(static_cast<Player>(std::stoi(argument)));}
-            else if (type == "#DIFFICULTY") {p_bms->set_difficulty(static_cast<Difficulty>(std::stoi(argument)));}
-            else if (type == "#RANK") {p_bms->set_rank(static_cast<Rank>(std::stoi(argument)));}
-            else if (type == "#TOTAL") {p_bms->set_total(std::stod(argument));}
-            else if (type == "#STAGEFILE") {p_bms->set_stagefile(argument);}
-            else if (type == "#BANNER") {p_bms->set_banner(argument);}
-            else {
-                std::string tag_type = get_tag_type(type);
-                int tag_index = get_tag_index(type);
-                if (AUDIO_FORMATS.contains(tag_type) && tag_index >= 0) {
-                    p_bms->set_keysound(argument, tag_index);
-                } else if (tag_type == "BMP") {
-                    p_bms->set_graphic(argument, tag_index);
-                } else if (tag_type == "BPM") {
-                    p_bms->set_bpm_change(argument, tag_index);
-                }
+        } else if (current_field == DataField::field_header) {
+            std::string tag_type = get_tag_type(type);
+            int tag_index = get_tag_index(type);
+
+            if (tag_type == "" && type != "") {
+                p_bms->insert_header_data(type, argument);
+
+            } else if (AUDIO_FORMATS.contains(tag_type) && tag_index >= 0) {
+                p_bms->set_keysound(argument, tag_index);
+
+            } else if (tag_type == "BMP") {
+                p_bms->set_graphic(argument, tag_index);
+
+            } else if (tag_type == "BPM") {
+                p_bms->set_bpm_change(argument, tag_index);
             }
             
         } else if (current_field == DataField::field_main) {
@@ -69,7 +59,8 @@ BMS* ImBMS::parse_bms(std::string filename) {
 
     file.close();
 
-    if (p_bms->get_player() == Player::dp) {
+    Player plr = static_cast<Player>(std::stoi(p_bms->get_header_data("#PLAYER")));
+    if (plr == Player::dp) {
         if (ImBMS::split_line(filename, ".", 2)[1] != "pms") {
             p_bms->set_playstyle(Playstyle::DP);
         } else {
