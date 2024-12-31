@@ -50,7 +50,7 @@ void SideMenu::render(State* state, BMS* bms) {
     static int current_rank = std::stoi(bms->get_header_data("#RANK"));
     static int selected_keysound = state->get_selected_keysound() - 1;
     if (ImGui::CollapsingHeader("Metadata")) {
-        static char title[1024] =  "", subtitle[1024] = "";
+        static char title[1024] = "", subtitle[1024] = "";
         static char artist[1024] = "", subartist[1024] = "";
         static char genre[1024] = "";
         std::strcpy(title, bms->get_header_data("#TITLE").c_str());

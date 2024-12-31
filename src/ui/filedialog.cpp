@@ -77,7 +77,9 @@ void FileDialog::init_window(std::string window_name) {
     this->window->setVerticalSyncEnabled(true);
     ImGui::SFML::Init(*(this->window));
 
-    ImGui::GetIO().IniFilename = NULL; // disable the generation of imgui.ini
+    ImGuiIO& io = ImGui::GetIO();
+    io.IniFilename = NULL; // disable the generation of imgui.ini
+    ImBMS::load_font(io);
 }
 
 void FileDialog::render() {

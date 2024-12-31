@@ -55,7 +55,7 @@ include_directories(soloud
     ${soloud_SOURCE_DIR}/include
 )
 
-include_directories(include/audio include/bms include/event include/filedialog include/ui include/utility)
+include_directories(include/audio include/bms include/event include/filedialog include/ui include/utility fonts/compressed)
 
 file(GLOB imbms_src CONFIGURE_DEPENDS
     src/*.cpp
@@ -66,7 +66,7 @@ add_executable(imbms
     ${imbms_src}
 )
 
-b_embed(imbms fonts/Cousine-Regular.ttf)
+b_embed(imbms fonts/NotoSansMonoCJKjp-Regular.otf)
 
 target_link_libraries(imbms
     PUBLIC ImGui-SFML::ImGui-SFML

@@ -14,7 +14,7 @@ State::State() {
     selected_keysound = 1;
 
     font = new sf::Font();
-    auto f = b::embed<"fonts/Cousine-Regular.ttf">();
+    auto f = b::embed<"fonts/NotoSansMonoCJKjp-Regular.otf">();
     font->loadFromMemory(f.data(), f.size());
 
     current_path = fs::current_path();

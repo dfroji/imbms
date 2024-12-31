@@ -3,13 +3,16 @@
 #include "SFML/System/Clock.hpp"
 
 #include "eventhandler.h"
+#include "utils.h"
 
 UI::UI() {
     window = new sf::RenderWindow(sf::VideoMode(640, 480), "ImBMS");
     window->setVerticalSyncEnabled(true);
     ImGui::SFML::Init(*window);
 
-    ImGui::GetIO().IniFilename = NULL; // disable the generation of imgui.ini
+    ImGuiIO& io = ImGui::GetIO();
+    io.IniFilename = NULL; // disable the generation of imgui.ini
+    ImBMS::load_font(io);
 
     state = new State();
 

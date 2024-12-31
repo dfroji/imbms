@@ -130,7 +130,7 @@ void Notes::render_channel_notes(int measure_i, int channel_i, Channel* channel,
         component_text.setString(note_label);
         component_text.setFont(*state->get_font());
         component_text.setPosition(note.getPosition().x, note.getPosition().y - 12);
-        component_text.setCharacterSize(FONT_SIZE);
+        component_text.setCharacterSize(FONT_SIZE_SFML);
         component_text.setFillColor(sf::Color::White);
         component_text.setOutlineThickness(1.f);
         component_text.setOutlineColor(sf::Color::Black);
@@ -235,7 +235,7 @@ void Notes::render_moving_selection(State* state, sf::RenderWindow* window, sf::
             sf::Text component_text;
             component_text.setString(ImBMS::format_base36(note->component, 2));
             component_text.setFont(*state->get_font());
-            component_text.setCharacterSize(FONT_SIZE);
+            component_text.setCharacterSize(FONT_SIZE_SFML);
             component_text.setOrigin(note_width/2, NOTE_HEIGHT/2);
             component_text.setPosition(note_render.getPosition().x, note_render.getPosition().y-3); // i have no idea where the -3 comes from
             component_text.setFillColor(sf::Color::White);

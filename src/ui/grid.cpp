@@ -106,7 +106,7 @@ void Grid::render(State* state, sf::RenderWindow* window) {
         text.setPosition(viewport_pos.x + 2, 
                          relative_pos.y + viewport_size.y - measure_distance - viewport_pos.y*2 - wrapping_offset.y
                         );
-        text.setCharacterSize(FONT_SIZE);
+        text.setCharacterSize(FONT_SIZE_SFML);
         text.setFillColor(sf::Color::White);
         texts.push_back(text);
     }
@@ -142,9 +142,9 @@ void Grid::render(State* state, sf::RenderWindow* window) {
         
         column_label.setFont(*state->get_font());
         column_label.setPosition(viewport_pos.x + note_width*i - absolute_pos.x*grid_scale.x + wrapping_offset.x + 2,
-                20
+                ImGui::GetFrameHeight()
                 );
-        column_label.setCharacterSize(FONT_SIZE);
+        column_label.setCharacterSize(FONT_SIZE_SFML);
         column_label.setFillColor(sf::Color::White);
         texts.push_back(column_label);
     }

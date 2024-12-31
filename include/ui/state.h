@@ -13,7 +13,7 @@
 
 namespace fs = std::filesystem;
 
-const int FONT_SIZE = 12;
+const int FONT_SIZE_SFML = 12;
 const int SCROLL_SPEED = 20;
 const int PADDING = 3;
 const int DEFAULT_SCALING_DIV = 20;

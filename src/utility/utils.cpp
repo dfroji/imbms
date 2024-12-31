@@ -3,6 +3,8 @@
 #include <cmath>
 #include <algorithm>
 
+#include "NotoSansMonoCJKjp-Regular.cpp"
+
 std::vector<std::string> ImBMS::split_line(std::string line, const char* delimiter, int number_of_splits) {
     std::vector<std::string> splits;
 
@@ -154,4 +156,15 @@ std::string ImBMS::trim_dstr(std::string d) {
     std::reverse(str.begin(), str.end());
 
     return str;
+}
+
+void ImBMS::load_font(ImGuiIO& io) {
+    io.Fonts->Clear();
+    io.Fonts->AddFontFromMemoryCompressedTTF(NotoSansMonoCJKjpRegular_compressed_data, 
+                                             NotoSansMonoCJKjpRegular_compressed_size, 
+                                             FONT_SIZE_IMGUI, 
+                                             nullptr, 
+                                             io.Fonts->GetGlyphRangesJapanese()
+                                            );
+    ImGui::SFML::UpdateFontTexture();
 }
