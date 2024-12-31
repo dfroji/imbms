@@ -2,8 +2,6 @@
 
 #include <fstream>
 
-#include <iostream>
-
 void ImBMS::write(BMS* bms, std::string filename) {
     std::ofstream file(filename);
 

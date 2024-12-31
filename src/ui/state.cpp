@@ -1,7 +1,6 @@
 #include "state.h"
 
 #include <cmath>
-#include <iostream>
 
 #include "parse.h"
 #include "write.h"

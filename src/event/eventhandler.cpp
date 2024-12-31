@@ -3,8 +3,6 @@
 #include "filedialog.h"
 #include "bms_edit_event.h"
 
-#include <iostream>
-
 EventHandler::EventHandler() {
 }
 
