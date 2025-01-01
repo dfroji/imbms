@@ -1,8 +1,18 @@
+#if defined(__linux__)
+    #define PLATFORM_NAME "linux"
+#elif define(_WIN32)
+    #define PLATFORM_NAME "windows"
+#endif
+
 #include "font.h"
 
 #include <filesystem>
 
 namespace fs = std::filesystem;
+
+const std::string LINUX_FONT_PATH = "/usr/share/fonts/noto/NotoSansMono-Medium.ttf";
+const std::string LINUX_FONT_PATH_2 = "~/.local/share/fonts/noto/NotoSansMono-Medium.ttf";
+const std::string WIN_FONT_PATH = "fonts/NotoSansMono-Medium.ttf";
 
 std::string ImBMS::Font::get_font() {
     if (PLATFORM_NAME == "linux") {
