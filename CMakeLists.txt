@@ -31,11 +31,6 @@ FetchContent_Declare(soloud
     SOURCE_SUBDIR contrib
 )
 
-FetchContent_Declare(battery-embed
-    GIT_REPOSITORY https://github.com/batterycenter/embed 
-    GIT_TAG v1.2.19
-)
-
 option(SFML_BUILD_AUDIO "Build audio" OFF)
 option(SFML_BUILD_NETWORK "Build network" OFF)
 FetchContent_MakeAvailable(sfml)
@@ -49,13 +44,11 @@ FetchContent_MakeAvailable(imgui-sfml)
 
 FetchContent_MakeAvailable(soloud)
 
-FetchContent_MakeAvailable(battery-embed)
-
 include_directories(soloud
     ${soloud_SOURCE_DIR}/include
 )
 
-include_directories(include/audio include/bms include/event include/filedialog include/ui include/utility fonts/compressed)
+include_directories(include/audio include/bms include/event include/filedialog include/ui include/utility)
 
 file(GLOB imbms_src CONFIGURE_DEPENDS
     src/*.cpp
@@ -65,8 +58,6 @@ file(GLOB imbms_src CONFIGURE_DEPENDS
 add_executable(imbms
     ${imbms_src}
 )
-
-b_embed(imbms fonts/NotoSansMonoCJKjp-Regular.otf)
 
 target_link_libraries(imbms
     PUBLIC ImGui-SFML::ImGui-SFML

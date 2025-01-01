@@ -1,6 +1,7 @@
 #include "notes.h"
 
 #include "eventhandler.h"
+#include "font.h"
 
 Notes::Notes() {
     notes_render_v = {};

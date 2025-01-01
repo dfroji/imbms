@@ -1,5 +1,6 @@
 #include "grid.h"
 
+#include "font.h"
 #include "channels_and_colors.h"
 
 Grid::Grid() {

@@ -4,11 +4,6 @@
 #include <cstring>
 #include <vector>
 
-#include "imgui.h"
-#include "imgui-SFML.h"
-
-const float FONT_SIZE_IMGUI = 18.0f; 
-
 namespace ImBMS {
     std::vector<std::string> split_line(std::string line, const char* delimiter, int number_of_splits);
     int to_decimal(int base, std::string number);
@@ -21,7 +16,6 @@ namespace ImBMS {
     std::string fint(int number, int digits);
     char* cstr(std::string& str);
     std::string trim_dstr(std::string d);
-    void load_font(ImGuiIO& io);
 
     template<typename T>
     void insert(std::vector<T>& target, std::vector<T> v, int elements_added) {

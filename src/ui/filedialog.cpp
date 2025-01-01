@@ -7,6 +7,8 @@
 #include <thread>
 #include <algorithm>
 
+#include "font.h"
+
 const int FRAMES = 2;
 const int INNER_SPACES = 6;
 
@@ -79,7 +81,7 @@ void FileDialog::init_window(std::string window_name) {
 
     ImGuiIO& io = ImGui::GetIO();
     io.IniFilename = NULL; // disable the generation of imgui.ini
-    ImBMS::load_font(io);
+    ImBMS::Font::load_imgui(io);
 }
 
 void FileDialog::render() {

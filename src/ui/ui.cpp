@@ -4,6 +4,7 @@
 
 #include "eventhandler.h"
 #include "utils.h"
+#include "font.h"
 
 UI::UI() {
     window = new sf::RenderWindow(sf::VideoMode(640, 480), "ImBMS");
@@ -12,7 +13,7 @@ UI::UI() {
 
     ImGuiIO& io = ImGui::GetIO();
     io.IniFilename = NULL; // disable the generation of imgui.ini
-    ImBMS::load_font(io);
+    ImBMS::Font::load_imgui(io);
 
     state = new State();
 

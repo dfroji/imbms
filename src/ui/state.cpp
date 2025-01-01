@@ -4,8 +4,7 @@
 
 #include "parse.h"
 #include "write.h"
-
-#include "battery/embed.hpp"
+#include "font.h"
 
 State::State() {
     quantization = 16;
@@ -13,8 +12,7 @@ State::State() {
     selected_keysound = 1;
 
     font = new sf::Font();
-    auto f = b::embed<"fonts/NotoSansMonoCJKjp-Regular.otf">();
-    font->loadFromMemory(f.data(), f.size());
+    ImBMS::Font::load_sfml(font);
 
     current_path = fs::current_path();
     absolute_pos = {0, 0};
