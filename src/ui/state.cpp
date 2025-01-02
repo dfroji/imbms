@@ -96,6 +96,12 @@ iVec2 State::get_absolute_pos() {
 
 void State::set_absolute_pos(iVec2 new_pos) {
     absolute_pos = new_pos;
+    limit_absolute_pos();
+}
+
+void State::limit_absolute_pos() {
+    if (absolute_pos.x < -viewport_size.x/grid_scale.x/2) {absolute_pos.x = -viewport_size.x/grid_scale.x/2;}
+    if (absolute_pos.y < -viewport_size.y/grid_scale.y/2) {absolute_pos.y = -viewport_size.y/grid_scale.y/2;}
 }
 
 void State::update() {
@@ -126,6 +132,8 @@ void State::update() {
                       };
 
     note_width = (default_scaling.x*grid_scale.x)/4;
+
+    limit_absolute_pos();
 }
 
 ImVec2 State::get_viewport_size() {

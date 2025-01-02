@@ -66,6 +66,7 @@ class State {
 
         iVec2 get_absolute_pos();
         void set_absolute_pos(iVec2 new_pos);
+        void limit_absolute_pos();
 
         void update();
 

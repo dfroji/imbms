@@ -284,15 +284,9 @@ void EventHandler::mouse_wheel_scrolled_event(sf::Event event) {
     if (!state->is_shift()) {
         pos.y += event.mouseWheelScroll.delta*SCROLL_SPEED;
 
-        if (pos.y < -viewport_size.y/2) {
-            pos.y = -viewport_size.y/2;
-        }
     } else {
         pos.x -= event.mouseWheelScroll.delta*SCROLL_SPEED;
 
-        if (pos.x < -viewport_size.x/2) {
-            pos.x = -viewport_size.x/2;
-        }
     }
 
     state->set_absolute_pos(pos);
