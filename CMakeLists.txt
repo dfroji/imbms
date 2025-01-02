@@ -27,7 +27,7 @@ FetchContent_Declare(imgui-sfml
 
 FetchContent_Declare(soloud
     GIT_REPOSITORY https://github.com/jarikomppa/soloud
-    GIT_TAG 
+    GIT_TAG origin/master 
     SOURCE_SUBDIR contrib
 )
 
