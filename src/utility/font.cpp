@@ -5,7 +5,7 @@
 namespace fs = std::filesystem;
 
 const std::string FONT_PATH_USR = "/usr/share/fonts/TTF/VL-Gothic-Regular.ttf";
-const std::string FONT_PATH_LOCAL = "~/.local/share/TTF/VL-Gothic-Regular.ttf";
+const std::string FONT_PATH_LOCAL = "~/.local/share/fonts/TTF/VL-Gothic-Regular.ttf";
 
 std::string ImBMS::Font::get_font() {
     if (fs::exists(FONT_PATH_USR)) {
