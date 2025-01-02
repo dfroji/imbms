@@ -3,6 +3,8 @@
 #include <cmath>
 #include <algorithm>
 
+#include "unicode/unistr.h"
+
 std::vector<std::string> ImBMS::split_line(std::string line, const char* delimiter, int number_of_splits) {
     std::vector<std::string> splits;
 
@@ -154,4 +156,24 @@ std::string ImBMS::trim_dstr(std::string d) {
     std::reverse(str.begin(), str.end());
 
     return str;
+}
+
+std::string ImBMS::sjis_to_utf8(const std::string& str) {
+    icu::UnicodeString u8str(str.c_str(), "shift_jis");
+    int size = u8str.extract(0, u8str.length(), NULL, "utf8");
+
+    std::vector<char> sjis(size + 1);
+    u8str.extract(0, u8str.length(), &sjis[0], "utf8");
+
+    return std::string(sjis.begin(), sjis.end() - 1);
+}
+
+std::string ImBMS::utf8_to_sjis(const std::string& str) {
+    icu::UnicodeString sjis(str.c_str(), "utf8");
+    int size = sjis.extract(0, sjis.length(), NULL, "shift_jis");
+
+    std::vector<char> u8str(size + 1);
+    sjis.extract(0, sjis.length(), &u8str[0], "shift_jis");
+
+    return std::string(u8str.begin(), u8str.end() - 1);
 }

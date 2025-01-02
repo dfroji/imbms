@@ -53,26 +53,26 @@ void SideMenu::render(State* state, BMS* bms) {
         static char title[1024] = "", subtitle[1024] = "";
         static char artist[1024] = "", subartist[1024] = "";
         static char genre[1024] = "";
-        std::strcpy(title, bms->get_header_data("#TITLE").c_str());
-        std::strcpy(subtitle, bms->get_header_data("#SUBTITLE").c_str());
-        std::strcpy(artist, bms->get_header_data("#ARTIST").c_str());
-        std::strcpy(subartist, bms->get_header_data("#SUBARTIST").c_str());
-        std::strcpy(genre, bms->get_header_data("#GENRE").c_str());
+        std::strcpy(title, ImBMS::sjis_to_utf8(bms->get_header_data("#TITLE")).c_str());
+        std::strcpy(subtitle, ImBMS::sjis_to_utf8(bms->get_header_data("#SUBTITLE")).c_str());
+        std::strcpy(artist, ImBMS::sjis_to_utf8(bms->get_header_data("#ARTIST")).c_str());
+        std::strcpy(subartist, ImBMS::sjis_to_utf8(bms->get_header_data("#SUBARTIST")).c_str());
+        std::strcpy(genre, ImBMS::sjis_to_utf8(bms->get_header_data("#GENRE")).c_str());
 
         ImGui::InputText("Title", title, IM_ARRAYSIZE(title));
-        bms->insert_header_data("#TITLE", title);
+        bms->insert_header_data("#TITLE", ImBMS::utf8_to_sjis(title));
 
         ImGui::InputText("Subtitle", subtitle, IM_ARRAYSIZE(subtitle));        
-        bms->insert_header_data("#SUBTITLE", subtitle);
+        bms->insert_header_data("#SUBTITLE", ImBMS::utf8_to_sjis(subtitle));
 
-        ImGui::InputText("Artist", artist, IM_ARRAYSIZE(title));
-        bms->insert_header_data("#ARTIST", artist);
+        ImGui::InputText("Artist", artist, IM_ARRAYSIZE(artist));
+        bms->insert_header_data("#ARTIST", ImBMS::utf8_to_sjis(artist));
 
-        ImGui::InputText("Subartist", subartist, IM_ARRAYSIZE(subtitle));
-        bms->insert_header_data("#SUBARTIST", subartist);
+        ImGui::InputText("Subartist", subartist, IM_ARRAYSIZE(subartist));
+        bms->insert_header_data("#SUBARTIST", ImBMS::utf8_to_sjis(subartist));
 
-        ImGui::InputText("Genre", genre, IM_ARRAYSIZE(title));
-        bms->insert_header_data("#GENRE", genre);
+        ImGui::InputText("Genre", genre, IM_ARRAYSIZE(genre));
+        bms->insert_header_data("#GENRE", ImBMS::utf8_to_sjis(genre));
 
         const char* modes[] = {"SP", "DP", "PM"};
         current_mode = bms->get_playstyle();

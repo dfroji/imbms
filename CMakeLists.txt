@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(SDL2 REQUIRED)
+find_package(ICU COMPONENTS uc REQUIRED)
 
 FetchContent_Declare(sfml
     GIT_REPOSITORY https://github.com/SFML/SFML
@@ -62,4 +63,5 @@ add_executable(imbms
 target_link_libraries(imbms
     PUBLIC ImGui-SFML::ImGui-SFML
     PUBLIC soloud
+    PUBLIC ICU::uc
 )

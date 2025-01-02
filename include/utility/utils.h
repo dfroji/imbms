@@ -16,6 +16,8 @@ namespace ImBMS {
     std::string fint(int number, int digits);
     char* cstr(std::string& str);
     std::string trim_dstr(std::string d);
+    std::string sjis_to_utf8(const std::string& str);
+    std::string utf8_to_sjis(const std::string& str);
 
     template<typename T>
     void insert(std::vector<T>& target, std::vector<T> v, int elements_added) {
