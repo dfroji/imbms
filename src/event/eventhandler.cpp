@@ -2,6 +2,7 @@
 
 #include "filedialog.h"
 #include "bms_edit_event.h"
+#include "notes.h"
 
 EventHandler::EventHandler() {
 }
@@ -54,12 +55,13 @@ void EventHandler::poll_event(State* state, sf::RenderWindow* window) {
 }
 
 sf::Vector2i EventHandler::get_mouse_pos() {
+    ImVec2 viewport_pos = state->get_viewport_pos();
     ImVec2 viewport_size = state->get_viewport_size();
     fVec2 relative_pos = state->get_relative_pos();
 
     sf::Vector2i mouse_pos = sf::Mouse::getPosition(*window);
     mouse_pos.x += relative_pos.x;
-    mouse_pos.y = viewport_size.y - mouse_pos.y + relative_pos.y - SCROLL_SPEED; 
+    mouse_pos.y = viewport_pos.y + viewport_size.y - mouse_pos.y + relative_pos.y; 
 
     return mouse_pos;
 }
@@ -113,11 +115,12 @@ Note EventHandler::get_pointed_note(sf::Vector2i mouse_pos, State* state) {
     Note note = Note();
     BMS* bms = state->get_bms();
 
+    ImVec2 viewport_pos = state->get_viewport_pos();
     fVec2 default_scaling = state->get_default_scaling();
     fVec2 grid_scale = state->get_grid_scale();
     iVec2 wraps = state->get_wraps();
     int measures_wrapped = state->get_measures_wrapped();
-    fVec2 wrapping_offset = state->get_wrapping_offset();
+    fVec2 wrapping_offset = state->get_wrapping_offset(); 
 
     int measure_i = EventHandler::get_pointed_measure(mouse_pos, state);
     int channel_i = EventHandler::get_pointed_channel(mouse_pos, state);
@@ -135,6 +138,7 @@ Note EventHandler::get_pointed_note(sf::Vector2i mouse_pos, State* state) {
         channel = measure->channels[ImBMS::base36_to_int(play_channels[channel_i])];
 
     } else if (channel_i < play_channels.size() + other_channels.size()) {
+
         channel = measure->channels[ImBMS::base36_to_int(other_channels[channel_i - play_channels.size()])];
 
     } else if (channel_i - play_channels.size() - other_channels.size() < measure->bgm_channels.size()) {
@@ -147,7 +151,7 @@ Note EventHandler::get_pointed_note(sf::Vector2i mouse_pos, State* state) {
     std::vector<int> components = channel->components;
     for (int i = 0; i < components.size(); i++) {
         float note_pos_y = 2*measure_i*default_scaling.y*grid_scale.y - 2*default_scaling.y*grid_scale.y*wraps.y*measures_wrapped + wrapping_offset.y + 2*i*((default_scaling.y*grid_scale.y)/components.size());
-        if (std::abs(mouse_pos.y - (note_pos_y + 5)) < 5) {
+        if (std::abs(mouse_pos.y - (note_pos_y + NOTE_HEIGHT/2)) < NOTE_HEIGHT/2) {
             note.component_i = i;
             note.component = components[i];
             note.measure_i = measure_i;

@@ -104,7 +104,7 @@ void Notes::render_channel_notes(int measure_i, int channel_i, Channel* channel,
 
         // calculate the position of the note with this hell
         fVec2 note_pos = {-absolute_pos.x*grid_scale.x + channel_i*note_width + wrapping_offset.x,
-                          absolute_pos.y*grid_scale.y + viewport_size.y - viewport_pos.y - wrapping_offset.y - 2*measure_i*default_scaling.y*grid_scale.y - ((2*default_scaling.y*grid_scale.y)/(components.size()))*i
+                          absolute_pos.y*grid_scale.y + viewport_size.y + viewport_pos.y - wrapping_offset.y - 2*measure_i*default_scaling.y*grid_scale.y - ((2*default_scaling.y*grid_scale.y)/(components.size()))*i
                          };
 
         // continue if the note is not visible

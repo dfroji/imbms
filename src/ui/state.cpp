@@ -99,7 +99,7 @@ void State::set_absolute_pos(iVec2 new_pos) {
 }
 
 void State::update() {
-    viewport_size = ImGui::GetMainViewport()->Size;
+    viewport_size = ImGui::GetMainViewport()->WorkSize;
     viewport_pos = ImGui::GetMainViewport()->WorkPos;
 
     default_scaling = {viewport_size.x/DEFAULT_SCALING_DIV, viewport_size.y/DEFAULT_SCALING_DIV};

@@ -36,7 +36,7 @@ void Grid::render(State* state, sf::RenderWindow* window) {
         
         // Calculate the position of the given line
         float line_distance = i*((default_scaling.y*grid_scale.y)/quantization);
-        float line_y_position = relative_pos.y + viewport_size.y - viewport_pos.y - line_distance - wrapping_offset.y;
+        float line_y_position = relative_pos.y + viewport_size.y + viewport_pos.y - line_distance - wrapping_offset.y;
 
         // Offset the left end of the line if scrolled beyond the beginning of the grid
         float x_offset = 0;
@@ -70,13 +70,13 @@ void Grid::render(State* state, sf::RenderWindow* window) {
         // Offset the bottom end of the line if scrolled beyond the beginning of the grid
         float y_offset = 0;
         if (relative_pos.y < viewport_pos.y) {
-            y_offset = relative_pos.y - viewport_pos.y;
+            y_offset = relative_pos.y;
         }
 
         // Set the line in the VertexArray
         // i corresponds to the top end of the line, and i+1 corresponds to the bottom end of the line
         vertical_lines[i].position = {line_x_position, viewport_pos.y};
-        vertical_lines[i+1].position = {line_x_position, viewport_size.y + y_offset};
+        vertical_lines[i+1].position = {line_x_position, viewport_pos.y + viewport_size.y + y_offset};
         vertical_lines[i].color = LINE_COLOR;
         vertical_lines[i+1].color = LINE_COLOR;
     }
@@ -90,7 +90,7 @@ void Grid::render(State* state, sf::RenderWindow* window) {
 
         // Calculate the position of the given measure line
         float measure_distance = i*default_scaling.y*grid_scale.y;
-        float measure_y_position = relative_pos.y + viewport_size.y - viewport_pos.y - measure_distance - wrapping_offset.y;
+        float measure_y_position = relative_pos.y + viewport_size.y + viewport_pos.y - measure_distance - wrapping_offset.y;
 
         // Set the line in the VertexArray
         // i corresponds to the left end of the line, and i+1 corresponds to the right end of the line
@@ -105,7 +105,7 @@ void Grid::render(State* state, sf::RenderWindow* window) {
         text.setString(std::to_string(measure_number));
         text.setFont(*state->get_font());
         text.setPosition(viewport_pos.x + 2, 
-                         relative_pos.y + viewport_size.y - measure_distance - viewport_pos.y*2 - wrapping_offset.y
+                         relative_pos.y + viewport_size.y - measure_distance + viewport_pos.y - wrapping_offset.y - MEASURE_NUMBER_HEIGHT_OFFSET
                         );
         text.setCharacterSize(FONT_SIZE_SFML);
         text.setFillColor(sf::Color::White);
@@ -143,7 +143,7 @@ void Grid::render(State* state, sf::RenderWindow* window) {
         
         column_label.setFont(*state->get_font());
         column_label.setPosition(viewport_pos.x + note_width*i - absolute_pos.x*grid_scale.x + wrapping_offset.x + 2,
-                ImGui::GetFrameHeight()
+                viewport_pos.y
                 );
         column_label.setCharacterSize(FONT_SIZE_SFML);
         column_label.setFillColor(sf::Color::White);
