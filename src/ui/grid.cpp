@@ -115,7 +115,7 @@ void Grid::render(State* state, sf::RenderWindow* window) {
     // Setup column labels
     int first_visible_c = (absolute_pos.x*grid_scale.x - wrapping_offset.x) / note_width;
     if (first_visible_c < 0) {first_visible_c = 0;}
-    int last_visible_c = first_visible_c + viewport_size.x / note_width;
+    int last_visible_c = first_visible_c + std::ceil(viewport_size.x / note_width) + 1;
     for (int i = first_visible_c; i < last_visible_c; i++) {
         sf::Text column_label;
         if (i < play_channels.size()) {
@@ -143,8 +143,8 @@ void Grid::render(State* state, sf::RenderWindow* window) {
         
         column_label.setFont(*state->get_font());
         column_label.setPosition(viewport_pos.x + note_width*i - absolute_pos.x*grid_scale.x + wrapping_offset.x + 2,
-                viewport_pos.y
-                );
+                                 viewport_pos.y
+                                );
         column_label.setCharacterSize(FONT_SIZE_SFML);
         column_label.setFillColor(sf::Color::White);
         texts.push_back(column_label);
