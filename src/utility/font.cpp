@@ -1,30 +1,18 @@
-#if defined(__linux__)
-    #define PLATFORM_NAME "linux"
-#elif define(_WIN32)
-    #define PLATFORM_NAME "windows"
-#endif
-
 #include "font.h"
 
 #include <filesystem>
 
 namespace fs = std::filesystem;
 
-const std::string LINUX_FONT_PATH = "/usr/share/fonts/noto/NotoSansMono-Medium.ttf";
-const std::string LINUX_FONT_PATH_2 = "~/.local/share/fonts/noto/NotoSansMono-Medium.ttf";
-const std::string WIN_FONT_PATH = "fonts/NotoSansMono-Medium.ttf";
+const std::string FONT_PATH_USR = "/usr/share/fonts/TTF/VL-Gothic-Regular.ttf";
+const std::string FONT_PATH_LOCAL = "~/.local/share/TTF/VL-Gothic-Regular.ttf";
 
 std::string ImBMS::Font::get_font() {
-    if (PLATFORM_NAME == "linux") {
-        if (fs::exists(LINUX_FONT_PATH)) {
-            return LINUX_FONT_PATH;
+    if (fs::exists(FONT_PATH_USR)) {
+        return FONT_PATH_USR;
 
-        } else if (fs::exists(LINUX_FONT_PATH_2)) {
-            return LINUX_FONT_PATH_2;
-        }
-
-    } else if (PLATFORM_NAME == "windows") {
-        return WIN_FONT_PATH;
+    } else if (fs::exists(FONT_PATH_LOCAL)) {
+        return FONT_PATH_LOCAL;
     }
 
     return "";

@@ -4,8 +4,8 @@
 #include "imgui-SFML.h"
 #include "SFML/Graphics/Text.hpp"
 
-const float FONT_SIZE_IMGUI = 17.5f;
-const int FONT_SIZE_SFML = 12;
+const int FONT_SIZE_IMGUI = 17;
+const int FONT_SIZE_SFML = 13;
 
 namespace ImBMS {
     namespace Font {
