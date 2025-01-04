@@ -97,6 +97,26 @@ void FileDialog::render() {
             this->is_open = false;
             return;
         }
+
+        if (event.type == sf::Event::KeyPressed) {
+            if (event.key.scancode == sf::Keyboard::Scan::LShift || event.key.scancode == sf::Keyboard::Scan::RShift) {
+                state->set_shift(true);
+            }
+
+            if (event.key.scancode == sf::Keyboard::Scan::LControl || event.key.scancode == sf::Keyboard::Scan::RControl) {
+                state->set_control(true);
+            }
+        }
+
+        if (event.type == sf::Event::KeyReleased) {
+            if (event.key.scancode == sf::Keyboard::Scan::LShift || event.key.scancode == sf::Keyboard::Scan::RShift) {
+                state->set_shift(false);
+            }
+
+            if (event.key.scancode == sf::Keyboard::Scan::LControl || event.key.scancode == sf::Keyboard::Scan::RControl) {
+                state->set_control(false);
+            }
+        }
     }
 
     ImGui::SFML::Update(*(this->window), delta_clock.restart());
