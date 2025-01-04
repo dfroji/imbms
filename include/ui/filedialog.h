@@ -32,7 +32,6 @@ private:
     void render();
     std::vector<fs::path> get_files();
     bool is_root();
-    double get_button_width(std::string text);
 
     sf::RenderWindow* window;   
     bool is_open;

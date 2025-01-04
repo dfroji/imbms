@@ -169,11 +169,9 @@ void FileDialog::render() {
     }
    
     std::string first_button_label = "Cancel";
-    double first_button_width = get_button_width(first_button_label);
-    double second_button_width = get_button_width(this->button_label);
 
     // close the file dialog when pressed
-    if (ImGui::Button(first_button_label.c_str())) {
+    if (ImGui::Button(first_button_label.c_str(), BUTTON_SIZE)) {
         this->path = "";
         this->filename = "";
         this->is_open = false;
@@ -182,7 +180,7 @@ void FileDialog::render() {
     }
 
     ImGui::SameLine();
-    ImGui::SetNextItemWidth(ImGui::GetMainViewport()->WorkSize.x - first_button_width - second_button_width);
+    ImGui::SetNextItemWidth(ImGui::GetMainViewport()->WorkSize.x - 2*(BUTTON_SIZE.x + 2*ImGui::GetStyle().FramePadding.x + 2*ImGui::GetStyle().ItemInnerSpacing.x));
 
     if (fs::is_regular_file(files[this->selected]) 
             && this->extensions.contains(files[this->selected].extension().string())
@@ -201,7 +199,7 @@ void FileDialog::render() {
     ImGui::SameLine();
 
     // close the file dialog and change the path if the file is valid
-    if (ImGui::Button(button_label.c_str())) {
+    if (ImGui::Button(button_label.c_str(), BUTTON_SIZE)) {
         fs::path fpath = this->path.string() + filename;
         if (this->extensions.contains(fpath.extension().string())) {
             this->is_open = false;
@@ -238,8 +236,3 @@ std::vector<fs::path> FileDialog::get_files() {
 bool FileDialog::is_root() {
     return this->path == this->path.root_path();
 }
-
-double FileDialog::get_button_width(std::string text) {
-    return ImGui::CalcTextSize(text.c_str()).x + INNER_SPACES*ImGui::GetStyle().ItemInnerSpacing.x;
-}
-

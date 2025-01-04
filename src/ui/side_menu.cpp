@@ -189,14 +189,14 @@ void SideMenu::render(State* state, BMS* bms) {
 
             (ImGui::InputDouble("BPM", &exbpm, 0.0f, 10000.0f, "%.2f"));
 
-            if (ImGui::Button("Cancel")) {
+            if (ImGui::Button("Cancel", BUTTON_SIZE)) {
                 ImGui::CloseCurrentPopup();
                 state->set_popup(false);
             }
 
             ImGui::SameLine();
 
-            if (ImGui::Button("OK")) {
+            if (ImGui::Button("OK", BUTTON_SIZE)) {
                 bms->set_bpm_change(std::to_string(exbpm), selected_keysound + 1);
                 ImGui::CloseCurrentPopup();
                 state->set_popup(false);

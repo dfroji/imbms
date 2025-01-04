@@ -102,14 +102,14 @@ void MenuBar::discard_changes_popup(State* state, sf::RenderWindow* window) {
     if (ImGui::BeginPopupModal("Warning", NULL, popup_flags)) {
         ImGui::Text("Discard unsaved changes?");
 
-        if (ImGui::Button("Cancel")) {
+        if (ImGui::Button("Cancel", BUTTON_SIZE)) {
             state->set_unsaved_changes_popup(false);
             ImGui::CloseCurrentPopup();
         }
 
         ImGui::SameLine();
 
-        if (ImGui::Button("OK")) {
+        if (ImGui::Button("OK", BUTTON_SIZE)) {
             state->set_unsaved_changes_popup(false);
             ImGui::CloseCurrentPopup();
 
