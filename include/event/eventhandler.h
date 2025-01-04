@@ -20,6 +20,9 @@ class EventHandler {
         static int get_pointed_cell(sf::Vector2i mouse_pos, State* state);
         static Note get_pointed_note(sf::Vector2i mouse_pos, State* state);
 
+        static void open_file(State* state);
+        static void save_file(State* state);
+
     private:
         void key_pressed_event(sf::Event event);
         void key_released_event(sf::Event event);
@@ -35,5 +38,4 @@ class EventHandler {
         bool is_lshift_pressed;
         bool is_lcontrol_pressed;
         bool is_mouse1_held;
-
 };

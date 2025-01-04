@@ -7,6 +7,7 @@ class MenuBar {
         MenuBar();
         ~MenuBar();
 
-        void render(State* state);
+        void render(State* state, sf::RenderWindow* window);
     private:
+        void discard_changes_popup(State* state, sf::RenderWindow* window);
 };

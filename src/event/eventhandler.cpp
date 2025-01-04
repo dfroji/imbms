@@ -20,7 +20,12 @@ void EventHandler::poll_event(State* state, sf::RenderWindow* window) {
         ImGui::SFML::ProcessEvent(*window, event);
 
         if (event.type == sf::Event::Closed) {
-            window->close();
+            if (state->is_modified()) {
+                state->set_unsaved_changes_popup(true, DiscardAction::Close);
+
+            } else {
+                window->close();
+            }
         }
 
         if (event.type == sf::Event::KeyPressed) {
@@ -163,6 +168,18 @@ Note EventHandler::get_pointed_note(sf::Vector2i mouse_pos, State* state) {
     return note;
 }
 
+void EventHandler::open_file(State* state) {
+    FileDialog fd(state);
+    fs::path filepath = fd.open_file(state->get_current_path(), FDMode::BMSFiles);
+    state->load_bms(filepath);
+}
+
+void EventHandler::save_file(State* state) {
+    FileDialog fd(state);
+    fs::path filepath = fd.save_file(state->get_current_path(), FDMode::BMSFiles);
+    state->save_bms(filepath);
+}
+
 void EventHandler::key_pressed_event(sf::Event event) {
     if (event.key.scancode == sf::Keyboard::Scan::LShift || event.key.scancode == sf::Keyboard::Scan::RShift) {
         state->set_shift(true);
@@ -174,30 +191,34 @@ void EventHandler::key_pressed_event(sf::Event event) {
 
     if (event.key.scancode == sf::Keyboard::Scan::N) {
         if (state->is_control()) {
-            state->new_bms();
+            if (state->is_modified()) {
+                state->set_unsaved_changes_popup(true, DiscardAction::New);
+
+            } else {
+                state->new_bms();
+            }
         }
     }
 
     if (event.key.scancode == sf::Keyboard::Scan::O) {
         if (state->is_control()) {
-            FileDialog fd(state);
-            fs::path filepath = fd.open_file(state->get_current_path(), FDMode::BMSFiles);
-            state->load_bms(filepath);
+            if (state->is_modified()) {
+                state->set_unsaved_changes_popup(true, DiscardAction::Open);
+
+            } else {
+                open_file(state);
+            }
         }
     }
 
     if (event.key.scancode == sf::Keyboard::Scan::S) {
         if (state->is_control()) {
             if (state->is_shift()) {
-                FileDialog fd(state);
-                fs::path filepath = fd.save_file(state->get_current_path(), FDMode::BMSFiles);
-                state->save_bms(filepath);
+                save_file(state);
 
             } else if (state->is_modified()) {
                 if (!state->has_filepath()) {
-                    FileDialog fd(state);
-                    fs::path filepath = fd.save_file(state->get_current_path(), FDMode::BMSFiles);
-                    state->save_bms(filepath);
+                    save_file(state);
 
                 } else {
                     state->save_bms(state->get_filename());

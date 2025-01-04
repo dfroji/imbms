@@ -49,7 +49,7 @@ void UI::render() {
 
     window->clear();
 
-    menu_bar_renderer.render(state);
+    menu_bar_renderer.render(state, window);
     side_menu_renderer.render(state, state->get_bms());
     grid_renderer.render(state, window);
     notes_renderer.render(state, window, event.get_mouse_pos());

@@ -28,6 +28,8 @@ struct fVec2 {
     float y;
 };
 
+enum DiscardAction {None, New, Open, Close};
+
 struct Note {
     Channel* channel = nullptr;
     int component_i = -1;
@@ -101,6 +103,9 @@ class State {
         bool is_popup();
         void set_popup(bool b);
 
+        bool is_unsaved_changes_popup();
+        void set_unsaved_changes_popup(bool b, DiscardAction discard_action = DiscardAction::None);
+
         bool view_bpm();
         void set_view_bpm(bool b);
 
@@ -110,6 +115,8 @@ class State {
         bool is_modified();
 
         bool has_filepath();
+
+        DiscardAction get_discard_action();
 
         BMS* get_bms();
         void set_bms(BMS* new_bms);
@@ -161,8 +168,11 @@ class State {
         bool is_movable_;
         bool is_menu_bar_interacted_;
         bool is_popup_;
+        bool is_unsaved_changes_popup_;
         bool view_bpm_;
         bool view_bga_;
+
+        DiscardAction discard_action;
 
         BMS* bms;
         BMS* saved_bms;

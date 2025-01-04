@@ -33,6 +33,7 @@ State::State() {
     is_movable_ = false;
     is_menu_bar_interacted_ = false;
     is_popup_ = false;
+    is_unsaved_changes_popup_ = false;
     view_bpm_ = true;
     view_bga_ = true;
 
@@ -227,6 +228,19 @@ void State::set_popup(bool b) {
     is_popup_ = b;
 }
 
+bool State::is_unsaved_changes_popup() {
+    return is_unsaved_changes_popup_;
+}
+
+void State::set_unsaved_changes_popup(bool b, DiscardAction discard_action) {
+    is_popup_ = b;
+    is_unsaved_changes_popup_ = b;
+
+    if (discard_action != DiscardAction::None) {
+        this->discard_action = discard_action;
+    }
+}
+
 bool State::view_bpm() {
     return view_bpm_;
 }
@@ -249,6 +263,10 @@ bool State::is_modified() {
 
 bool State::has_filepath() {
     return filename.has_filename();
+}
+
+DiscardAction State::get_discard_action() {
+    return discard_action;
 }
 
 BMS* State::get_bms() {
