@@ -87,6 +87,7 @@ void FileDialog::init_window(std::string window_name) {
 void FileDialog::render() {
     sf::Event event;
     sf::Clock delta_clock;
+    bool enter_pressed = false;
     
     while (this->window->pollEvent(event)) {
         ImGui::SFML::ProcessEvent(*(this->window), event);
@@ -105,6 +106,10 @@ void FileDialog::render() {
 
             if (event.key.scancode == sf::Keyboard::Scan::LControl || event.key.scancode == sf::Keyboard::Scan::RControl) {
                 state->set_control(true);
+            }
+
+            if (event.key.scancode == sf::Keyboard::Scan::Enter) {
+                enter_pressed = true;
             }
         }
 
@@ -226,7 +231,7 @@ void FileDialog::render() {
     ImGui::SameLine();
 
     // close the file dialog and change the path if the file is valid
-    if (ImGui::Button(button_label.c_str(), BUTTON_SIZE)) {
+    if (ImGui::Button(button_label.c_str(), BUTTON_SIZE) || enter_pressed) {
         fs::path fpath = this->path.string() + filename;
         if (this->extensions.contains(fpath.extension().string())) {
             this->is_open = false;
