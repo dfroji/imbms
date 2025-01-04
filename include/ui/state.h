@@ -15,7 +15,7 @@ namespace fs = std::filesystem;
 
 const int SCROLL_SPEED = 20;
 const int PADDING = 3;
-const int DEFAULT_SCALING_DIV = 20;
+const int DEFAULT_SCALING_DIV = 40;
 const float SIDE_MENU_WIDTH = 0.2f;
 const ImVec2 BUTTON_SIZE(50.f, 0.f);
 
