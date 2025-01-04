@@ -90,6 +90,13 @@ void FileDialog::render() {
     
     while (this->window->pollEvent(event)) {
         ImGui::SFML::ProcessEvent(*(this->window), event);
+
+        if (event.type == sf::Event::Closed) {
+            this->path = "";
+            this->filename = "";
+            this->is_open = false;
+            return;
+        }
     }
 
     ImGui::SFML::Update(*(this->window), delta_clock.restart());
