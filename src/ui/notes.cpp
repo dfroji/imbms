@@ -210,9 +210,12 @@ std::string Notes::get_note_label(int component, int channel_i, State* state) {
 }
 
 void Notes::render_moving_selection(State* state, sf::RenderWindow* window, sf::Vector2i mouse_pos) {
+    ImVec2 viewport_pos = state->get_viewport_pos();
     ImVec2 viewport_size = state->get_viewport_size();
+    iVec2 absolute_pos = state->get_absolute_pos();
     fVec2 default_scaling = state->get_default_scaling();
     fVec2 grid_scale = state->get_grid_scale();
+    fVec2 wrapping_offset = state->get_wrapping_offset();
     sf::Color color = Notes::get_channel_color(EventHandler::get_pointed_channel(mouse_pos, state), state);
     sf::Vector2i absolute_mouse_pos = sf::Mouse::getPosition(*window);
     float note_width = state->get_note_width(); 
@@ -226,8 +229,21 @@ void Notes::render_moving_selection(State* state, sf::RenderWindow* window, sf::
             // selection outline included as it is a selected note
             sf::RectangleShape note_render(sf::Vector2f(note_width, NOTE_HEIGHT));
             note_render.setFillColor(color);
-            note_render.setOrigin(note_width/2, NOTE_HEIGHT/2);
-            note_render.setPosition(absolute_mouse_pos.x, absolute_mouse_pos.y);
+
+            sf::Vector2f note_position = {0.f, 0.f};
+            sf::Vector2f origin = {0.f, 0.f};
+            if (state->is_timewise_locked()) {
+                note_position.x = absolute_mouse_pos.x;
+                note_position.y = absolute_pos.y*grid_scale.y + viewport_size.y + viewport_pos.y - wrapping_offset.y - 2*note->measure_i*default_scaling.y*grid_scale.y - ((2*default_scaling.y*grid_scale.y)/note->quantization*note->component_i);
+                origin = {note_width/2, NOTE_HEIGHT};
+
+            } else {
+                note_position = {absolute_mouse_pos.x, absolute_mouse_pos.y};
+                origin = {note_width/2, NOTE_HEIGHT/2};
+            }
+
+            note_render.setPosition(note_position);
+            note_render.setOrigin(origin);
             note_render.setOutlineThickness(SELECTION_OUTLINE_THICKNESS);
             note_render.setOutlineColor(SELECTION_OUTLINE_COLOR);
 
@@ -236,7 +252,7 @@ void Notes::render_moving_selection(State* state, sf::RenderWindow* window, sf::
             component_text.setString(ImBMS::format_base36(note->component, 2));
             component_text.setFont(*state->get_font());
             component_text.setCharacterSize(FONT_SIZE_SFML);
-            component_text.setOrigin(note_width/2, NOTE_HEIGHT/2);
+            component_text.setOrigin(origin);
             component_text.setPosition(note_render.getPosition().x, note_render.getPosition().y-3); // i have no idea where the -3 comes from
             component_text.setFillColor(sf::Color::White);
             component_text.setOutlineThickness(1.f);

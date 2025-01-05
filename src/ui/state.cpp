@@ -36,6 +36,7 @@ State::State() {
     is_unsaved_changes_popup_ = false;
     view_bpm_ = true;
     view_bga_ = true;
+    timewise_lock = false;
 
     bms = new BMS();
     saved_bms = bms->copy();
@@ -255,6 +256,14 @@ bool State::view_bga() {
 
 void State::set_view_bga(bool b) {
     view_bga_ = b;
+}
+
+bool State::is_timewise_locked() {
+    return timewise_lock;
+}
+
+void State::set_timewise_lock(bool b) {
+    timewise_lock = b;
 }
 
 bool State::is_modified() {

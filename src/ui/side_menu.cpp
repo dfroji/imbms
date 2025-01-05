@@ -219,13 +219,17 @@ void SideMenu::render(State* state, BMS* bms) {
     // header for grid settings
     int quantization = state->get_quantization();
     fVec2 grid_scale = state->get_grid_scale();
+    static bool timewise_lock = state->is_timewise_locked();
     if (ImGui::CollapsingHeader("Grid")) {
         ImGui::InputInt("##quantization", &quantization);
         ImGui::DragFloat("x scale", &grid_scale.x, 0.1f, 1.0f, 100.0f, "%.1f");
         ImGui::DragFloat("y scale", &grid_scale.y, 0.1f, 1.0f, 100.0f, "%.1f");
+        ImGui::Checkbox("Timewise lock", &timewise_lock);
     }
+
     state->set_quantization(quantization);
     state->set_grid_scale(grid_scale);
+    state->set_timewise_lock(timewise_lock);
 
     ImGui::End();
 }

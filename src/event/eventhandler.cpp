@@ -161,6 +161,7 @@ Note EventHandler::get_pointed_note(sf::Vector2i mouse_pos, State* state) {
             note.component = components[i];
             note.measure_i = measure_i;
             note.channel_i = channel_i;
+            note.quantization = components.size();
             break;
         }
     }

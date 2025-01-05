@@ -5,13 +5,18 @@
 #include "eventhandler.h"
 #include "utils.h"
 
-bool BMSEditEvent::add_note(int component, sf::Vector2i mouse_pos, State* state) {
+bool BMSEditEvent::add_note(int component, sf::Vector2i mouse_pos, State* state, Note* note) {
     if (mouse_pos.x < 0 || mouse_pos.y < 0) {return false;}
 
     BMS* bms = state->get_bms();
     int measure_i = EventHandler::get_pointed_measure(mouse_pos, state);
     int channel_i = EventHandler::get_pointed_channel(mouse_pos, state);
     int cell = EventHandler::get_pointed_cell(mouse_pos, state); 
+
+    if (state->is_timewise_locked() && note != nullptr) {
+        measure_i = note->measure_i;
+        cell = note->component_i;
+    }
 
     if (bms->get_measures().size() - 1 <= measure_i) {
         bms->resize_measure_v(measure_i + 1);
@@ -25,15 +30,15 @@ bool BMSEditEvent::add_note(int component, sf::Vector2i mouse_pos, State* state)
     std::vector<std::string> other_channels = state->get_other_channels();
     if (channel_i < play_channels.size()) {
         channel_i = ImBMS::base36_to_int(play_channels[channel_i]);
-        return BMSEditEvent::add_play_or_bga_note(component, mouse_pos, measure_i, channel_i, cell, state);
+        return BMSEditEvent::add_play_or_bga_note(component, mouse_pos, measure_i, channel_i, cell, state, note);
 
     } else if (channel_i < play_channels.size() + other_channels.size()) {
         channel_i = ImBMS::base36_to_int(other_channels[channel_i-play_channels.size()]);
-        return BMSEditEvent::add_play_or_bga_note(component, mouse_pos, measure_i, channel_i, cell, state); 
+        return BMSEditEvent::add_play_or_bga_note(component, mouse_pos, measure_i, channel_i, cell, state, note); 
 
     } else {
         channel_i = channel_i - play_channels.size() - other_channels.size();
-        return BMSEditEvent::add_bgm_note(component, mouse_pos, measure_i, channel_i, cell, state); 
+        return BMSEditEvent::add_bgm_note(component, mouse_pos, measure_i, channel_i, cell, state, note); 
     }
 }
 
@@ -92,7 +97,13 @@ void BMSEditEvent::move_notes(sf::Vector2i mouse_pos, State* state) {
         // get the new channel's pointer for the note
         // todo: something like offsets to get correct channels for multiple notes
         // instead of just pointing to the exact same channel
-        Measure* measure = bms->get_measures()[pointed_measure];
+
+        Measure* measure = nullptr;
+        if (state->is_timewise_locked()) {
+            measure = bms->get_measures()[note->measure_i];
+        } else {
+            measure = bms->get_measures()[pointed_measure];
+        }
         Channel* new_channel = nullptr;
         if (!is_bgm) {
             // get the play or bga channel
@@ -123,13 +134,15 @@ void BMSEditEvent::move_notes(sf::Vector2i mouse_pos, State* state) {
         }
 
         note->channel = new_channel;
-        note->component_i = pointed_cell;
-        note->measure_i = pointed_measure;
+        if (!state->is_timewise_locked()) {
+            note->component_i = pointed_cell;
+            note->measure_i = pointed_measure;
+        }
         note->channel_i = pointed_channel;
 
         // add the notes to the bms object
         // cancel the move if adding any of the notes fails
-        if (!BMSEditEvent::add_note(note->component, mouse_pos, state)) {
+        if (!BMSEditEvent::add_note(note->component, mouse_pos, state, note)) {
             for (int i = 0; i < moved_notes; i++) {
                 state->undo();
             }
@@ -149,12 +162,16 @@ void BMSEditEvent::remove_selected_notes(State* state) {
     }
 }
 
-bool BMSEditEvent::add_play_or_bga_note(int component, sf::Vector2i mouse_pos, int measure_i, int channel_i, int cell, State* state) {
+bool BMSEditEvent::add_play_or_bga_note(int component, sf::Vector2i mouse_pos, int measure_i, int channel_i, int cell, State* state, Note* note) {
     BMS* bms = state->get_bms();
     std::vector<Measure*> measures = bms->get_measures();
     Channel* channel = nullptr;
 
+    // use a moved note's quantization if timewise lock is enabled
     int quantization = state->get_quantization();
+    if (state->is_timewise_locked() && note != nullptr) {
+        quantization = note->quantization;
+    }
 
     std::vector<int> old_components = {};
 
@@ -190,7 +207,7 @@ bool BMSEditEvent::add_play_or_bga_note(int component, sf::Vector2i mouse_pos, i
     return true;
 }
 
-bool BMSEditEvent::add_bgm_note(int component, sf::Vector2i mouse_pos, int measure_i, int channel_i, int cell, State* state) {
+bool BMSEditEvent::add_bgm_note(int component, sf::Vector2i mouse_pos, int measure_i, int channel_i, int cell, State* state, Note* note) {
     BMS* bms = state->get_bms();
     std::vector<Measure*> measures = bms->get_measures();
     
@@ -200,7 +217,11 @@ bool BMSEditEvent::add_bgm_note(int component, sf::Vector2i mouse_pos, int measu
     Channel* channel = nullptr;
     std::vector<int> old_components;
 
+    // use a moved note's quantization if timewise lock is enabled
     int quantization = state->get_quantization();
+    if (state->is_timewise_locked() && note != nullptr) {
+        quantization = note->quantization;
+    }
 
     // add new bgm channels if needed
     int bgm_channels_size = measure->bgm_channels.size();

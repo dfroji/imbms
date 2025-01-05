@@ -37,6 +37,7 @@ struct Note {
     int component = -1;
     int measure_i = -1;
     int channel_i = -1;
+    int quantization = -1;
     bool operator==(const Note& rhs) {
         return (this->channel == rhs.channel && this->component_i == rhs.component_i);
     }
@@ -44,7 +45,7 @@ struct Note {
         return (this->channel != rhs.channel && this->component_i != rhs.component_i);
     }
 };
-const Note NULL_NOTE = Note(nullptr, -1, -1, -1, -1);
+const Note NULL_NOTE = Note();
 
 class State {
     public:
@@ -113,6 +114,9 @@ class State {
         bool view_bga();
         void set_view_bga(bool b);
 
+        bool is_timewise_locked();
+        void set_timewise_lock(bool b);
+
         bool is_modified();
 
         bool has_filepath();
@@ -172,6 +176,7 @@ class State {
         bool is_unsaved_changes_popup_;
         bool view_bpm_;
         bool view_bga_;
+        bool timewise_lock;
 
         DiscardAction discard_action;
 
