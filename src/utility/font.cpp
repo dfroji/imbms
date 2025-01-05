@@ -29,7 +29,7 @@ void ImBMS::Font::load_imgui(ImGuiIO& io) {
                                      nullptr, 
                                      io.Fonts->GetGlyphRangesJapanese()
                                     );
-        ImGui::SFML::UpdateFontTexture();
+        if (!ImGui::SFML::UpdateFontTexture()) {return;}
     }
 }
 

@@ -204,9 +204,9 @@ std::string Notes::get_note_label(int component, int channel_i, State* state) {
                 return label;
         }
 
-    } else {
-        return ImBMS::format_base36(component, 2);
     }
+    
+    return ImBMS::format_base36(component, 2);
 }
 
 void Notes::render_moving_selection(State* state, sf::RenderWindow* window, sf::Vector2i mouse_pos) {
@@ -238,7 +238,8 @@ void Notes::render_moving_selection(State* state, sf::RenderWindow* window, sf::
                 origin = {note_width/2, NOTE_HEIGHT};
 
             } else {
-                note_position = {absolute_mouse_pos.x, absolute_mouse_pos.y};
+                note_position.x = absolute_mouse_pos.x;
+                note_position.y = absolute_mouse_pos.y;
                 origin = {note_width/2, NOTE_HEIGHT/2};
             }
 

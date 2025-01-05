@@ -13,75 +13,80 @@ const int FRAMES = 2;
 const int INNER_SPACES = 6;
 
 FileDialog::FileDialog(State* state) {
-    this->is_open = true;
-    this->selected = 0;
+    is_open = true;
+    selected = 0;
     this->state = state;
 }
 
 FileDialog::~FileDialog() {
-    if (this->window != nullptr) {
-        this->window->close();
-        ImGui::SFML::Shutdown(*(this->window));
-        delete this->window;
+    if (window != nullptr) {
+        window->close();
+        ImGui::SFML::Shutdown(*window);
+        delete window;
     }
 }
 
 fs::path FileDialog::open_file(fs::path path, FDMode mode) {
-    init_window("Open file"); 
+    if (!init_window("Open file")) {return "";}
     this->button_label = "Open";
 
     this->path = path;
     this->mode = mode;
     set_extensions(mode);
 
-    // this->path and this->filename are modified in render()
-    while (this->is_open) {
+    // this->path and filename are modified in render()
+    while (is_open) {
         render();
     }
 
-    this->path /= this->filename;
+    this->path /= filename;
     return this->path;
 }
 
 fs::path FileDialog::save_file(fs::path path, FDMode mode) {
-    init_window("Save file");
-    this->button_label = "Save";
+    if (!init_window("Save file")) {return "";}
+    button_label = "Save";
 
     this->path = path;
     this->mode = mode;
     set_extensions(mode);
 
-    // this->path and this->filename are modified in render()
-    while (this->is_open) {
+    // this->path and filename are modified in render()
+    while (is_open) {
         render();
     }
     
-    this->path /= this->filename;
+    this->path /= filename;
     return this->path;
 }
 
 void FileDialog::set_extensions(FDMode mode) {
     switch (mode) {
         case FDMode::BMSFiles:
-            this->extensions = BMS_EXTENSIONS;
+            extensions = BMS_EXTENSIONS;
             break;
         case FDMode::Keysounds:
-            this->extensions = KEYSOUND_EXTENSIONS;
+            extensions = KEYSOUND_EXTENSIONS;
             break;
         case FDMode::Graphics:
-            this->extensions = GRAPHIC_EXTENSIONS;
+            extensions = GRAPHIC_EXTENSIONS;
             break;
     }
 }
 
-void FileDialog::init_window(std::string window_name) {
-    this->window = new sf::RenderWindow(sf::VideoMode(640, 480), window_name);
-    this->window->setVerticalSyncEnabled(true);
-    ImGui::SFML::Init(*(this->window));
+bool FileDialog::init_window(std::string window_name) {
+    window = new sf::RenderWindow(sf::VideoMode(640, 480), window_name);
+    window->setVerticalSyncEnabled(true);
+    if (!ImGui::SFML::Init(*(this->window))) {
+        delete window;
+        return false;
+    }
 
     ImGuiIO& io = ImGui::GetIO();
     io.IniFilename = NULL; // disable the generation of imgui.ini
     ImBMS::Font::load_imgui(io);
+
+    return true;
 }
 
 void FileDialog::render() {
@@ -89,13 +94,13 @@ void FileDialog::render() {
     sf::Clock delta_clock;
     bool enter_pressed = false;
     
-    while (this->window->pollEvent(event)) {
-        ImGui::SFML::ProcessEvent(*(this->window), event);
+    while (window->pollEvent(event)) {
+        ImGui::SFML::ProcessEvent(*window, event);
 
         if (event.type == sf::Event::Closed) {
-            this->path = "";
-            this->filename = "";
-            this->is_open = false;
+            path = "";
+            filename = "";
+            is_open = false;
             return;
         }
 
@@ -124,11 +129,11 @@ void FileDialog::render() {
         }
     }
 
-    ImGui::SFML::Update(*(this->window), delta_clock.restart());
+    ImGui::SFML::Update(*window, delta_clock.restart());
 
-    this->is_open = this->window->isOpen();
+    is_open = window->isOpen();
 
-    this->window->clear();
+    window->clear();
 
     std::vector<fs::path> files = get_files();
 
@@ -139,7 +144,7 @@ void FileDialog::render() {
 
     ImGui::SetNextWindowSize(ImGui::GetMainViewport()->Size);
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->Pos);
-    ImGui::Begin("File dialog", &this->is_open, window_flags);
+    ImGui::Begin("File dialog", &is_open, window_flags);
 
     ImGui::SetNextItemWidth(-FLT_MIN);
     static char path[1024] = "";
@@ -157,7 +162,7 @@ void FileDialog::render() {
     if (ImGui::BeginListBox("##Files", ImVec2(-FLT_MIN, ImGui::GetMainViewport()->Size.y - FRAMES*ImGui::GetFrameHeight() - INNER_SPACES*ImGui::GetStyle().ItemInnerSpacing.y))) {
         for (int i = 0; i < files.size(); i++) {
             // files that don't have a valid extension are not displayed
-            if (fs::is_regular_file(files[i]) && !this->extensions.contains(files[i].extension().string())) {
+            if (fs::is_regular_file(files[i]) && !extensions.contains(files[i].extension().string())) {
                 continue;
             }
 
@@ -182,7 +187,7 @@ void FileDialog::render() {
                 this->selected = i;
 
                 // play audio file of a valid format when clicked
-                if (fs::is_regular_file(files[i]) && this->mode == FDMode::Keysounds) {
+                if (fs::is_regular_file(files[i]) && mode == FDMode::Keysounds) {
                     state->play_keysound(files[i]);
                 }
 
@@ -205,8 +210,8 @@ void FileDialog::render() {
     // close the file dialog when pressed
     if (ImGui::Button(first_button_label.c_str(), BUTTON_SIZE)) {
         this->path = "";
-        this->filename = "";
-        this->is_open = false;
+        filename = "";
+        is_open = false;
         std::strcpy(file, ""); // clear file so it is not used the next time a file dialog is opened
         return;
     }
@@ -233,16 +238,16 @@ void FileDialog::render() {
     // close the file dialog and change the path if the file is valid
     if (ImGui::Button(button_label.c_str(), BUTTON_SIZE) || enter_pressed) {
         fs::path fpath = this->path.string() + filename;
-        if (this->extensions.contains(fpath.extension().string())) {
-            this->is_open = false;
+        if (extensions.contains(fpath.extension().string())) {
+            is_open = false;
             std::strcpy(file, ""); // clear file so it is not used the next time a file dialog is opened
         }
     }
 
     ImGui::End();
 
-    ImGui::SFML::Render(*(this->window));
-    this->window->display();
+    ImGui::SFML::Render(*window);
+    window->display();
 }
 
 std::vector<fs::path> FileDialog::get_files() {

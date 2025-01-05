@@ -9,7 +9,10 @@
 UI::UI() {
     window = new sf::RenderWindow(sf::VideoMode(640, 480), "ImBMS");
     window->setVerticalSyncEnabled(true);
-    ImGui::SFML::Init(*window);
+    if (!ImGui::SFML::Init(*window)) {
+        delete window;
+        return;
+    }
 
     ImGuiIO& io = ImGui::GetIO();
     io.IniFilename = NULL; // disable the generation of imgui.ini

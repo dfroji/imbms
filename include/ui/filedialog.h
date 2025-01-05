@@ -28,7 +28,7 @@ public:
     fs::path save_file(fs::path path, FDMode mode);
 private:
     void set_extensions(FDMode mode);
-    void init_window(std::string window_name);
+    bool init_window(std::string window_name);
     void render();
     std::vector<fs::path> get_files();
     bool is_root();
