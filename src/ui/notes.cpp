@@ -25,7 +25,7 @@ void Notes::render(State* state, sf::RenderWindow* window, sf::Vector2i mouse_po
     // limit the rendered measures of notes to only visible measures
     // last_visible may be excessive but further limitations occur when the notes are processed 
     int first_visible = state->get_wraps().y*state->get_measures_wrapped();
-    int last_visible = first_visible+state->get_visible_measures()+NOTE_PADDING;
+    int last_visible = first_visible+state->get_visible_measures();
 
     std::vector<std::string> channels = state->get_bms()->get_play_channels();
 

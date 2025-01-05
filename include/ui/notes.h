@@ -14,7 +14,6 @@
 using VRectangleShape = std::vector<sf::RectangleShape>;
 using VText = std::vector<sf::Text>;
 
-const int NOTE_PADDING = 2;
 const int NOTE_HEIGHT = 10;
 const int SELECTION_OUTLINE_THICKNESS = 2;
 

@@ -114,7 +114,7 @@ void State::update() {
 
     // Calculate the count of measures within the screen
     // Limit the count to keep the scrolling seamless at higher grid scales
-    visible_measures = viewport_size.y / (default_scaling.y*grid_scale.y);
+    visible_measures = viewport_size.y / (default_scaling.y);
     measures_wrapped = viewport_size.y / default_scaling.y / 2;
     if (visible_measures < measures_wrapped) {visible_measures = measures_wrapped;}
 
