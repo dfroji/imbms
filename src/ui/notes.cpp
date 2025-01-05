@@ -108,7 +108,7 @@ void Notes::render_channel_notes(int measure_i, int channel_i, Channel* channel,
                          };
 
         // continue if the note is not visible
-        if (note_pos.y < 0 || note_pos.y > viewport_size.y) {continue;}
+        if (note_pos.y < 0 || note_pos.y > viewport_size.y + viewport_pos.y) {continue;}
 
         // the rectangle for the note
         sf::RectangleShape note(sf::Vector2f(note_width, NOTE_HEIGHT));
