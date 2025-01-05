@@ -224,7 +224,13 @@ void SideMenu::render(State* state, BMS* bms) {
         ImGui::InputInt("##quantization", &quantization);
         ImGui::DragFloat("x scale", &grid_scale.x, 0.1f, 1.0f, 100.0f, "%.1f");
         ImGui::DragFloat("y scale", &grid_scale.y, 0.1f, 1.0f, 100.0f, "%.1f");
+
         ImGui::Checkbox("Timewise lock", &timewise_lock);
+        ImGui::SameLine();
+        ImGui::TextDisabled("?");
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Disables moving notes vertically");
+        }
     }
 
     state->set_quantization(quantization);
