@@ -4,6 +4,9 @@
 
 #include "filedialog.h"
 
+const float SCALE_MIN = 1.0f;
+const float SCALE_MAX = 20.0f;
+
 SideMenu::SideMenu() {
 
 }
@@ -87,6 +90,7 @@ void SideMenu::render(State* state, BMS* bms) {
 
         playlevel = std::stoi(bms->get_header_data("#PLAYLEVEL"));
         if (ImGui::InputInt("Level", &playlevel)) {
+            if (playlevel < 0) {playlevel = 0;} 
             bms->insert_header_data("#PLAYLEVEL", std::to_string(playlevel));
         }
 
@@ -97,6 +101,7 @@ void SideMenu::render(State* state, BMS* bms) {
 
         total = std::stoi(bms->get_header_data("#TOTAL"));
         if (ImGui::InputInt("Total", &total)) {
+            if (total < 1) {total = 1;} 
             bms->insert_header_data("#TOTAL", std::to_string(total));
         }
 
@@ -237,23 +242,35 @@ void SideMenu::render(State* state, BMS* bms) {
     fVec2 grid_scale = state->get_grid_scale();
     static bool timewise_lock = state->is_timewise_locked();
     if (ImGui::CollapsingHeader("Grid", NULL, cheader_flags)) {
-        ImGui::InputInt("Quantization", &quantization);
-        ImGui::DragFloat("X scale", &grid_scale.x, 0.1f, 1.0f, 100.0f, "%.1f");
-        ImGui::DragFloat("Y scale", &grid_scale.y, 0.1f, 1.0f, 100.0f, "%.1f");
+        if (ImGui::InputInt("Quantization", &quantization)) {
+            if (quantization < 1) {quantization = 1;}
+            state->set_quantization(quantization);
+
+        }
+
+        if (ImGui::SliderFloat("X scale", &grid_scale.x, SCALE_MIN, SCALE_MAX, "%.1f")) {
+            if (grid_scale.x < SCALE_MIN) {grid_scale.x = SCALE_MIN;}
+            if (grid_scale.x > SCALE_MAX) {grid_scale.x = SCALE_MAX;}
+            state->set_grid_scale(grid_scale);
+        }
+
+        if (ImGui::SliderFloat("Y scale", &grid_scale.y, SCALE_MIN, SCALE_MAX, "%.1f")) {
+            if (grid_scale.y < SCALE_MIN) {grid_scale.y = SCALE_MIN;}
+            if (grid_scale.y > SCALE_MAX) {grid_scale.y = SCALE_MAX;}
+            state->set_grid_scale(grid_scale);
+        }
 
         ImGui::Separator();
 
-        ImGui::Checkbox("Timewise lock", &timewise_lock);
+        if (ImGui::Checkbox("Timewise lock", &timewise_lock)) {
+            state->set_timewise_lock(timewise_lock);
+        }
         ImGui::SameLine();
         ImGui::TextDisabled("?");
         if (ImGui::IsItemHovered()) {
             ImGui::SetTooltip("Disables moving notes vertically");
         }
     }
-
-    state->set_quantization(quantization);
-    state->set_grid_scale(grid_scale);
-    state->set_timewise_lock(timewise_lock);
 
     ImGui::End();
 }
