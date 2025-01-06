@@ -15,7 +15,7 @@ State::State() {
     ImBMS::Font::load_sfml(font);
 
     current_path = fs::current_path();
-    absolute_pos = {0, 0};
+    absolute_pos = INITIAL_POS;
 
     viewport_size = {0, 0};
     viewport_pos = {0, 0};
@@ -289,6 +289,8 @@ bool State::load_bms(fs::path filepath) {
     delete saved_bms;
     saved_bms = bms->copy();
 
+    absolute_pos = INITIAL_POS;
+
     filename = filepath;
     current_path = filepath.parent_path();
 
@@ -310,7 +312,7 @@ bool State::save_bms(fs::path filepath) {
 }
 
 void State::new_bms() {
-    absolute_pos = {0, 0};
+    absolute_pos = INITIAL_POS;
 
     viewport_size = {0, 0};
     viewport_pos = {0, 0};

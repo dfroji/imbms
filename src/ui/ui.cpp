@@ -34,8 +34,6 @@ UI::~UI() {
 void UI::render() {
     sf::Clock delta_clock;
 
-    state->update();
-
     // change the title of the window to the filename
     std::string filename = state->get_filename().filename().generic_string();
     if (filename == "") {filename = "Untitled";} // use Untitled if if filepath is empty
@@ -61,6 +59,7 @@ void UI::render() {
     ImGui::SFML::Render(*window);
     window->display();
 
+    state->update();
 }
 
 bool UI::is_open() {

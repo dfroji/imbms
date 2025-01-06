@@ -13,12 +13,6 @@
 
 namespace fs = std::filesystem;
 
-const int SCROLL_SPEED = 20;
-const int PADDING = 3;
-const int DEFAULT_SCALING_DIV = 40;
-const float SIDE_MENU_WIDTH = 0.2f;
-const ImVec2 BUTTON_SIZE(50.f, 0.f);
-
 struct iVec2 {
     int x;
     int y;
@@ -28,6 +22,13 @@ struct fVec2 {
     float x;
     float y;
 };
+
+const int SCROLL_SPEED = 20;
+const int PADDING = 3;
+const int DEFAULT_SCALING_DIV = 40;
+const float SIDE_MENU_WIDTH = 0.2f;
+const ImVec2 BUTTON_SIZE(50.f, 0.f);
+const iVec2 INITIAL_POS = {-SCROLL_SPEED, 0};
 
 enum DiscardAction {None, New, Open, Close};
 
