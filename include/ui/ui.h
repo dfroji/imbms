@@ -10,6 +10,7 @@
 #include "side_menu.h"
 #include "grid.h"
 #include "notes.h"
+#include "background.h"
 
 class UI {
     public:
@@ -26,6 +27,7 @@ class UI {
         SideMenu side_menu_renderer;
         Grid grid_renderer;
         Notes notes_renderer;
+        Background bg_renderer;
 
         sf::RenderWindow* window;
         bool is_open_;

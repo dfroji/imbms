@@ -54,6 +54,7 @@ void UI::render() {
 
     menu_bar_renderer.render(state, window);
     side_menu_renderer.render(state, state->get_bms());
+    bg_renderer.render(state, window);
     grid_renderer.render(state, window);
     notes_renderer.render(state, window, event.get_mouse_pos());
     

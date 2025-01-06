@@ -76,3 +76,4 @@ const sf::Color PM_RED_COLOR = sf::Color(255,0,0);
 const sf::Color BGM_COLOR = sf::Color(255,0,0);
 const sf::Color OTHER_COLOR = sf::Color(0,255,0);
 const sf::Color SELECTION_OUTLINE_COLOR = sf::Color(255,100,100);
+const sf::Color DIMMING_COLOR = {255, 255, 255, 30};
