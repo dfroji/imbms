@@ -4,9 +4,10 @@ BMS::BMS() {
     header_data = {};
     insert_header_data("#BPM", std::to_string(DEFAULT_BPM));
     insert_header_data("#PLAYER", std::to_string(Player::sp));
-    insert_header_data("#DIFFICULTY", std::to_string(Difficulty::easy));
+    insert_header_data("#DIFFICULTY", std::to_string(Difficulty::beginner));
     insert_header_data("#RANK", std::to_string(Rank::rank_easy));
     insert_header_data("#TOTAL", std::to_string(DEFAULT_TOTAL));
+    insert_header_data("#PLAYLEVEL", "1");
 
     playstyle = Playstyle::SP;
 

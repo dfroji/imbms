@@ -21,6 +21,9 @@ void SideMenu::render(State* state, BMS* bms) {
     window_flags |= ImGuiWindowFlags_NoTitleBar;
     window_flags |= ImGuiWindowFlags_NoResize;
 
+    ImGuiTreeNodeFlags cheader_flags = 0;
+    cheader_flags |= ImGuiTreeNodeFlags_DefaultOpen;
+
     ImGuiWindowFlags popup_flags = 0;
     popup_flags |= ImGuiWindowFlags_AlwaysAutoResize;
     popup_flags |= ImGuiWindowFlags_NoMove;
@@ -45,11 +48,13 @@ void SideMenu::render(State* state, BMS* bms) {
     // static values used in a collapsing header are initialized outside of it
     // as they wouldn't update propely when loading a file and the header is open
     static int current_mode = bms->get_playstyle();
+    static int playlevel = std::stoi(bms->get_header_data("#PLAYLEVEL"));
     static double bpm = std::stod(bms->get_header_data("#BPM"));
     static int total = std::stoi(bms->get_header_data("#TOTAL"));
     static int current_rank = std::stoi(bms->get_header_data("#RANK"));
+    static int current_difficulty = std::stoi(bms->get_header_data("#DIFFICULTY"));
     static int selected_keysound = state->get_selected_keysound() - 1;
-    if (ImGui::CollapsingHeader("Metadata")) {
+    if (ImGui::CollapsingHeader("Metadata", NULL, cheader_flags)) {
         static char title[1024] = "", subtitle[1024] = "";
         static char artist[1024] = "", subartist[1024] = "";
         static char genre[1024] = "";
@@ -80,6 +85,11 @@ void SideMenu::render(State* state, BMS* bms) {
             bms->set_playstyle(static_cast<Playstyle>(current_mode));
         }
 
+        playlevel = std::stoi(bms->get_header_data("#PLAYLEVEL"));
+        if (ImGui::InputInt("Level", &playlevel)) {
+            bms->insert_header_data("#PLAYLEVEL", std::to_string(playlevel));
+        }
+
         bpm = std::stod(bms->get_header_data("#BPM"));
         if (ImGui::InputDouble("BPM", &bpm, 1.0f, 10.0f, "%.0f")) {
             bms->insert_header_data("#BPM", std::to_string(bpm));
@@ -92,8 +102,14 @@ void SideMenu::render(State* state, BMS* bms) {
 
         const char* ranks[] = {"Very Hard", "Hard", "Normal", "Easy"};
         current_rank = std::stoi(bms->get_header_data("#RANK"));
-        if (ImGui::Combo("Rank", &current_rank, ranks, IM_ARRAYSIZE(ranks))) {
+        if (ImGui::Combo("Judge", &current_rank, ranks, IM_ARRAYSIZE(ranks))) {
             bms->insert_header_data("#RANK", std::to_string(static_cast<Rank>(current_rank)));
+        }
+
+        const char* difficulties[] = {"Beginner", "Normal", "Hyper", "Another", "Insane"};
+        current_difficulty = std::stoi(bms->get_header_data("#DIFFICULTY")) - 1;
+        if (ImGui::Combo("Difficulty", &current_difficulty, difficulties, IM_ARRAYSIZE(difficulties))) {
+            bms->insert_header_data("#DIFFICULTY", std::to_string(static_cast<Difficulty>(current_difficulty + 1)));
         }
     }
 
@@ -220,10 +236,12 @@ void SideMenu::render(State* state, BMS* bms) {
     int quantization = state->get_quantization();
     fVec2 grid_scale = state->get_grid_scale();
     static bool timewise_lock = state->is_timewise_locked();
-    if (ImGui::CollapsingHeader("Grid")) {
-        ImGui::InputInt("##quantization", &quantization);
-        ImGui::DragFloat("x scale", &grid_scale.x, 0.1f, 1.0f, 100.0f, "%.1f");
-        ImGui::DragFloat("y scale", &grid_scale.y, 0.1f, 1.0f, 100.0f, "%.1f");
+    if (ImGui::CollapsingHeader("Grid", NULL, cheader_flags)) {
+        ImGui::InputInt("Quantization", &quantization);
+        ImGui::DragFloat("X scale", &grid_scale.x, 0.1f, 1.0f, 100.0f, "%.1f");
+        ImGui::DragFloat("Y scale", &grid_scale.y, 0.1f, 1.0f, 100.0f, "%.1f");
+
+        ImGui::Separator();
 
         ImGui::Checkbox("Timewise lock", &timewise_lock);
         ImGui::SameLine();

@@ -77,7 +77,7 @@ struct Measure {
 
 enum Player {player_null, sp, couple, dp};
 enum Rank {rank_vhard, rank_hard, rank_normal, rank_easy};
-enum Difficulty {difficulty_null, easy, normal, hyper, another, insane};
+enum Difficulty {difficulty_null, beginner, normal, hyper, another, insane};
 
 enum Playstyle {SP, DP, PM};
 
