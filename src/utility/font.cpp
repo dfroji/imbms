@@ -2,18 +2,30 @@
 
 #include <filesystem>
 
+#include "fontconfig/fontconfig.h"
+
 namespace fs = std::filesystem;
 
-const std::string FONT_PATH_USR = "/usr/share/fonts/TTF/VL-Gothic-Regular.ttf";
-const std::string FONT_PATH_LOCAL = "~/.local/share/fonts/TTF/VL-Gothic-Regular.ttf";
+const char* FONT_NAME = "VL Gothic";
 
 std::string ImBMS::Font::get_font() {
-    if (fs::exists(FONT_PATH_USR)) {
-        return FONT_PATH_USR;
+    FcConfig* config = FcInitLoadConfigAndFonts();
+    FcPattern* pat = FcNameParse((FcChar8*) FONT_NAME);
+    FcObjectSet* objset = FcObjectSetBuild(FC_FAMILY, FC_STYLE, FC_LANG, FC_FILE, (char*) 0);
+    FcFontSet* fontset = FcFontList(config, pat, objset);
 
-    } else if (fs::exists(FONT_PATH_LOCAL)) {
-        return FONT_PATH_LOCAL;
+    for (int i = 0; fontset && i < fontset->nfont; i++) {
+        FcPattern* fontpat = fontset->fonts[i];
+        FcChar8* file;
+        if (FcPatternGetString(fontpat, FC_FILE, 0, &file) == FcResultMatch) {
+            return (char*)file;
+        }
     }
+
+    FcConfigDestroy(config);
+    FcPatternDestroy(pat);
+    FcObjectSetDestroy(objset);
+    FcFontSetDestroy(fontset);
 
     return "";
 }

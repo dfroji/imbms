@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(SDL2 REQUIRED)
 find_package(ICU COMPONENTS uc REQUIRED)
+find_package(Fontconfig REQUIRED)
 
 FetchContent_Declare(sfml
     GIT_REPOSITORY https://github.com/SFML/SFML
@@ -64,4 +65,5 @@ target_link_libraries(imbms
     PUBLIC ImGui-SFML::ImGui-SFML
     PUBLIC soloud
     PUBLIC ICU::uc
+    PUBLIC Fontconfig::Fontconfig
 )
