@@ -94,7 +94,6 @@ void Notes::render_channel_notes(int measure_i, int channel_i, Channel* channel,
     fVec2 default_scaling = state->get_default_scaling();
     ImVec2 viewport_size = state->get_viewport_size();
     ImVec2 viewport_pos = state->get_viewport_pos();
-    fVec2 wrapping_offset = state->get_wrapping_offset();
     float note_width = (default_scaling.x*grid_scale.x)/4;
 
     std::vector<int> components = channel->components;
@@ -103,8 +102,8 @@ void Notes::render_channel_notes(int measure_i, int channel_i, Channel* channel,
         if (components[i] == 0) {continue;}
 
         // calculate the position of the note with this hell
-        fVec2 note_pos = {-absolute_pos.x*grid_scale.x + channel_i*note_width + wrapping_offset.x,
-                          absolute_pos.y*grid_scale.y + viewport_size.y + viewport_pos.y - wrapping_offset.y - 2*measure_i*default_scaling.y*grid_scale.y - ((2*default_scaling.y*grid_scale.y)/(components.size()))*i
+        fVec2 note_pos = {-absolute_pos.x*grid_scale.x + channel_i*note_width,
+                          absolute_pos.y*grid_scale.y + viewport_size.y + viewport_pos.y - 2*measure_i*default_scaling.y*grid_scale.y - ((2*default_scaling.y*grid_scale.y)/(components.size()))*i
                          };
 
         // continue if the note is not visible
@@ -215,7 +214,6 @@ void Notes::render_moving_selection(State* state, sf::RenderWindow* window, sf::
     iVec2 absolute_pos = state->get_absolute_pos();
     fVec2 default_scaling = state->get_default_scaling();
     fVec2 grid_scale = state->get_grid_scale();
-    fVec2 wrapping_offset = state->get_wrapping_offset();
     sf::Color color = Notes::get_channel_color(EventHandler::get_pointed_channel(mouse_pos, state), state);
     sf::Vector2i absolute_mouse_pos = sf::Mouse::getPosition(*window);
     float note_width = state->get_note_width(); 
@@ -234,7 +232,7 @@ void Notes::render_moving_selection(State* state, sf::RenderWindow* window, sf::
             sf::Vector2f origin = {0.f, 0.f};
             if (state->is_timewise_locked()) {
                 note_position.x = absolute_mouse_pos.x;
-                note_position.y = absolute_pos.y*grid_scale.y + viewport_size.y + viewport_pos.y - wrapping_offset.y - 2*note->measure_i*default_scaling.y*grid_scale.y - ((2*default_scaling.y*grid_scale.y)/note->quantization*note->component_i);
+                note_position.y = absolute_pos.y*grid_scale.y + viewport_size.y + viewport_pos.y - 2*note->measure_i*default_scaling.y*grid_scale.y - ((2*default_scaling.y*grid_scale.y)/note->quantization*note->component_i);
                 origin = {note_width/2, NOTE_HEIGHT};
 
             } else {

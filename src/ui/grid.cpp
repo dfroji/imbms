@@ -23,7 +23,6 @@ void Grid::render(State* state, sf::RenderWindow* window) {
     fVec2 relative_pos = state->get_relative_pos();
     iVec2 absolute_pos = state->get_absolute_pos();
     iVec2 wraps = state->get_wraps();
-    fVec2 wrapping_offset = state->get_wrapping_offset();
     float note_width = state->get_note_width();
     std::vector<std::string> play_channels = state->get_bms()->get_play_channels();
     std::vector<std::string> other_channels = state->get_other_channels();
@@ -36,7 +35,7 @@ void Grid::render(State* state, sf::RenderWindow* window) {
         
         // Calculate the position of the given line
         float line_distance = i*((default_scaling.y*grid_scale.y)/quantization);
-        float line_y_position = relative_pos.y + viewport_size.y + viewport_pos.y - line_distance - wrapping_offset.y;
+        float line_y_position = relative_pos.y + viewport_size.y + viewport_pos.y - line_distance;
 
         // Offset the left end of the line if scrolled beyond the beginning of the grid
         float x_offset = 0;
@@ -65,7 +64,7 @@ void Grid::render(State* state, sf::RenderWindow* window) {
 
         // Calculate the position of the given line
         float line_distance = i*((default_scaling.x*grid_scale.x)/vertical_line_multiplier);
-        float line_x_position = -relative_pos.x + viewport_pos.x + line_distance + wrapping_offset.x;
+        float line_x_position = -relative_pos.x + viewport_pos.x + line_distance;
 
         // Offset the bottom end of the line if scrolled beyond the beginning of the grid
         float y_offset = 0;
@@ -90,7 +89,7 @@ void Grid::render(State* state, sf::RenderWindow* window) {
 
         // Calculate the position of the given measure line
         float measure_distance = i*default_scaling.y*grid_scale.y;
-        float measure_y_position = relative_pos.y + viewport_size.y + viewport_pos.y - measure_distance - wrapping_offset.y;
+        float measure_y_position = relative_pos.y + viewport_size.y + viewport_pos.y - measure_distance;
 
         // Set the line in the VertexArray
         // i corresponds to the left end of the line, and i+1 corresponds to the right end of the line
@@ -105,7 +104,7 @@ void Grid::render(State* state, sf::RenderWindow* window) {
         text.setString(std::to_string(measure_number));
         text.setFont(*state->get_font());
         text.setPosition(viewport_pos.x + 2, 
-                         relative_pos.y + viewport_size.y - measure_distance + viewport_pos.y - wrapping_offset.y - MEASURE_NUMBER_HEIGHT_OFFSET
+                         relative_pos.y + viewport_size.y - measure_distance + viewport_pos.y - MEASURE_NUMBER_HEIGHT_OFFSET
                         );
         text.setCharacterSize(FONT_SIZE_SFML);
         text.setFillColor(sf::Color::White);
@@ -113,7 +112,7 @@ void Grid::render(State* state, sf::RenderWindow* window) {
     }
 
     // Setup column labels
-    int first_visible_c = (absolute_pos.x*grid_scale.x - wrapping_offset.x) / note_width;
+    int first_visible_c = (absolute_pos.x*grid_scale.x) / note_width;
     if (first_visible_c < 0) {first_visible_c = 0;}
     int last_visible_c = first_visible_c + std::ceil(viewport_size.x / note_width) + 1;
     for (int i = first_visible_c; i < last_visible_c; i++) {
@@ -142,7 +141,7 @@ void Grid::render(State* state, sf::RenderWindow* window) {
         }
         
         column_label.setFont(*state->get_font());
-        column_label.setPosition(viewport_pos.x + note_width*i - absolute_pos.x*grid_scale.x + wrapping_offset.x + 2,
+        column_label.setPosition(viewport_pos.x + note_width*i - absolute_pos.x*grid_scale.x + 2,
                                  viewport_pos.y
                                 );
         column_label.setCharacterSize(FONT_SIZE_SFML);

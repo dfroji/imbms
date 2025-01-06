@@ -81,7 +81,6 @@ class State {
         int get_measures_wrapped();
         fVec2 get_relative_pos();
         iVec2 get_wraps();
-        fVec2 get_wrapping_offset();
         float get_note_width();
 
         bool is_shift();
@@ -163,7 +162,6 @@ class State {
         int measures_wrapped;
         fVec2 relative_pos;
         iVec2 wraps;
-        fVec2 wrapping_offset;
         float note_width;
 
         bool is_shift_;

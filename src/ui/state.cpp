@@ -24,7 +24,6 @@ State::State() {
     measures_wrapped = 0;
     relative_pos = {0, 0};
     wraps = {0, 0};
-    wrapping_offset = {0, 0};
 
     is_shift_ = false;
     is_control_ = false;
@@ -128,11 +127,6 @@ void State::update() {
              static_cast<int>((absolute_pos.y*grid_scale.y) / (viewport_size.y*grid_scale.y))
             };
 
-    // The offsets are needed when wrapping
-    wrapping_offset = {wraps.x*((std::sqrt(default_scaling.x)*2*grid_scale.x)-SCROLL_SPEED*grid_scale.x),
-                       wraps.y*((std::sqrt(default_scaling.y)*2*grid_scale.y)-SCROLL_SPEED*grid_scale.y)
-                      };
-
     note_width = (default_scaling.x*grid_scale.x)/4;
 
     limit_absolute_pos();
@@ -163,10 +157,6 @@ fVec2 State::get_relative_pos() {
 
 iVec2 State::get_wraps() {
     return wraps;
-}
-
-fVec2 State::get_wrapping_offset() {
-    return wrapping_offset;
 }
 
 float State::get_note_width() {
@@ -329,7 +319,6 @@ void State::new_bms() {
     measures_wrapped = 0;
     relative_pos = {0, 0};
     wraps = {0, 0};
-    wrapping_offset = {0, 0};
 
     is_shift_ = false;
     is_control_ = false;

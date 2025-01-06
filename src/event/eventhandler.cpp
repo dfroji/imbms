@@ -72,7 +72,6 @@ sf::Vector2i EventHandler::get_mouse_pos() {
 }
 
 int EventHandler::get_pointed_measure(sf::Vector2i mouse_pos, State* state) {
-    fVec2 wrapping_offset = state->get_wrapping_offset();
     fVec2 default_scaling = state->get_default_scaling();
     fVec2 grid_scale = state->get_grid_scale();
     iVec2 wraps = state->get_wraps();
@@ -80,13 +79,12 @@ int EventHandler::get_pointed_measure(sf::Vector2i mouse_pos, State* state) {
 
     // get the pointed measure with this funny calculation
     int pointed_measure = static_cast<int>(
-        ((mouse_pos.y-wrapping_offset.y)/2)/(default_scaling.y*grid_scale.y)+(wraps.y*measures_wrapped)
+        (mouse_pos.y/2)/(default_scaling.y*grid_scale.y)+(wraps.y*measures_wrapped)
     );
     return pointed_measure;
 }
 
 int EventHandler::get_pointed_channel(sf::Vector2i mouse_pos, State* state) {
-    fVec2 wrapping_offset = state->get_wrapping_offset();
     fVec2 default_scaling = state->get_default_scaling();
     fVec2 grid_scale = state->get_grid_scale();
     iVec2 wraps = state->get_wraps();
@@ -95,13 +93,12 @@ int EventHandler::get_pointed_channel(sf::Vector2i mouse_pos, State* state) {
 
     // another funny calculation
     int pointed_channel = static_cast<int>(
-        ((mouse_pos.x-wrapping_offset.x)*4)/(default_scaling.x*grid_scale.x)+(wraps.x*((viewport_size.x*grid_scale.x)/note_width))
+        (mouse_pos.x*4)/(default_scaling.x*grid_scale.x)+(wraps.x*((viewport_size.x*grid_scale.x)/note_width))
     );
     return pointed_channel;
 }
 
 int EventHandler::get_pointed_cell(sf::Vector2i mouse_pos, State* state) {
-    fVec2 wrapping_offset = state->get_wrapping_offset();
     fVec2 default_scaling = state->get_default_scaling();
     fVec2 grid_scale = state->get_grid_scale();
     iVec2 wraps = state->get_wraps();
@@ -110,7 +107,7 @@ int EventHandler::get_pointed_cell(sf::Vector2i mouse_pos, State* state) {
 
     // another one who would've thought
     int pointed_cell = static_cast<int>(
-        (((mouse_pos.y-wrapping_offset.y)/2)/(default_scaling.y*grid_scale.y)+(wraps.y*measures_wrapped))*quantization
+        ((mouse_pos.y/2)/(default_scaling.y*grid_scale.y)+(wraps.y*measures_wrapped))*quantization
     );
     pointed_cell = pointed_cell % quantization;
     return pointed_cell;
@@ -125,7 +122,6 @@ Note EventHandler::get_pointed_note(sf::Vector2i mouse_pos, State* state) {
     fVec2 grid_scale = state->get_grid_scale();
     iVec2 wraps = state->get_wraps();
     int measures_wrapped = state->get_measures_wrapped();
-    fVec2 wrapping_offset = state->get_wrapping_offset(); 
 
     int measure_i = EventHandler::get_pointed_measure(mouse_pos, state);
     int channel_i = EventHandler::get_pointed_channel(mouse_pos, state);
@@ -155,7 +151,7 @@ Note EventHandler::get_pointed_note(sf::Vector2i mouse_pos, State* state) {
 
     std::vector<int> components = channel->components;
     for (int i = 0; i < components.size(); i++) {
-        float note_pos_y = 2*measure_i*default_scaling.y*grid_scale.y - 2*default_scaling.y*grid_scale.y*wraps.y*measures_wrapped + wrapping_offset.y + 2*i*((default_scaling.y*grid_scale.y)/components.size());
+        float note_pos_y = 2*measure_i*default_scaling.y*grid_scale.y - 2*default_scaling.y*grid_scale.y*wraps.y*measures_wrapped + 2*i*((default_scaling.y*grid_scale.y)/components.size());
         if (std::abs(mouse_pos.y - (note_pos_y + NOTE_HEIGHT/2)) < NOTE_HEIGHT/2) {
             note.component_i = i;
             note.component = components[i];
