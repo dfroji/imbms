@@ -1,5 +1,8 @@
 #include "notes.h"
 
+#include <limits>
+#include <cmath>
+
 #include "eventhandler.h"
 #include "font.h"
 
@@ -23,9 +26,11 @@ void Notes::render(State* state, sf::RenderWindow* window, sf::Vector2i mouse_po
     std::vector<Measure*> measures = state->get_bms()->get_measures();
 
     // limit the rendered measures of notes to only visible measures
-    // last_visible may be excessive but further limitations occur when the notes are processed 
+    // further limitations occur when the notes are processed 
     int first_visible = state->get_wraps().y*state->get_measures_wrapped();
-    int last_visible = first_visible+state->get_visible_measures();
+    int last_visible = first_visible+999; // arbitrary number with which long notes get rendered in most cases.
+                                          // i think only very specific incredibly high bpm gimmicks with lns break this,
+                                          // but i'm not sure if that's worth caring about
 
     std::vector<std::string> channels = state->get_bms()->get_play_channels();
 
@@ -65,9 +70,10 @@ void Notes::render_thread(int measure_i, std::vector<std::string> channels, Stat
 void Notes::render_play_channels(int measure_i, std::vector<std::string> channels, State* state) {
     Measure* measure = state->get_bms()->get_measures()[measure_i];
     for (int channel_i = 0; channel_i < channels.size(); channel_i++) {
-        Channel* channel = measure->channels[ImBMS::base36_to_int(channels[channel_i])];
+        int channel_id = ImBMS::base36_to_int(channels[channel_i]);
+        Channel* channel = measure->channels[channel_id];
         if (channel == nullptr) {continue;}
-        render_channel_notes(measure_i, channel_i, channel, get_channel_color(channel_i, state), state);
+        render_channel_notes(measure_i, channel_i, channel, get_channel_color(channel_i, state), state, channel_id);
     }
 }
 
@@ -88,7 +94,46 @@ void Notes::render_bga_channels(int measure_i, std::vector<std::string> channels
     }
 }
 
-void Notes::render_channel_notes(int measure_i, int channel_i, Channel* channel, sf::Color color, State* state) {
+// get the position of the long note head
+float Notes::get_ln_start_pos(int measure_i, int channel_id, State* state, int ln_end_i) {
+    // long note head doesn't exist if; return NaN
+    if (measure_i < 0) {return std::numeric_limits<float>::quiet_NaN();}
+
+    BMS* bms = state->get_bms();
+    Measure* measure = bms->get_measures()[measure_i];
+    if (measure == nullptr) {return Notes::get_ln_start_pos(measure_i-1, channel_id, state);} // continue to next measure if current measure is a nullptr
+
+    Channel* channel = measure->channels[channel_id];
+    if (channel == nullptr) {return Notes::get_ln_start_pos(measure_i-1, channel_id, state);} // continue to next measure if the channel of the current measure is a nullptr
+
+    std::vector<int> components = channel->components;
+
+    iVec2 absolute_pos = state->get_absolute_pos();
+    fVec2 grid_scale = state->get_grid_scale();
+    fVec2 default_scaling = state->get_default_scaling();
+    ImVec2 viewport_size = state->get_viewport_size();
+    ImVec2 viewport_pos = state->get_viewport_pos();
+    float note_width = (default_scaling.x*grid_scale.x)/4;
+
+    // start iteration from the last component of the channel
+    // or if the measure is the same as the long note end's, start iteration from the component before the end
+    int last = components.size();
+    if (ln_end_i > 0) {last = ln_end_i;}
+
+    // if a note exists, calcualte and return its y position
+    for (int i = last-1; i >= 0; i--) {
+        if (components[i] != 0) {
+
+            return absolute_pos.y*grid_scale.y + viewport_size.y + viewport_pos.y - 2*measure_i*default_scaling.y*grid_scale.y - ((2*default_scaling.y*grid_scale.y)/(components.size()))*i;
+
+        }
+    }
+
+    // continue to next measure if long note head was not found in the current measure
+    return Notes::get_ln_start_pos(measure_i-1, channel_id, state);
+}
+
+void Notes::render_channel_notes(int measure_i, int channel_i, Channel* channel, sf::Color color, State* state, int channel_id) {
     iVec2 absolute_pos = state->get_absolute_pos();
     fVec2 grid_scale = state->get_grid_scale();
     fVec2 default_scaling = state->get_default_scaling();
@@ -105,6 +150,25 @@ void Notes::render_channel_notes(int measure_i, int channel_i, Channel* channel,
         fVec2 note_pos = {-absolute_pos.x*grid_scale.x + channel_i*note_width,
                           absolute_pos.y*grid_scale.y + viewport_size.y + viewport_pos.y - 2*measure_i*default_scaling.y*grid_scale.y - ((2*default_scaling.y*grid_scale.y)/(components.size()))*i
                          };
+
+        // long note (strict bml spec)
+        // if the processed note matches LNOBJ, draw a long note until the long notr head (if it exists)
+        if (ImBMS::format_base36(components[i], 2) == state->get_bms()->get_header_data("#LNOBJ")) {
+            float ln_width = note_width*0.7;
+
+            float ln_start_pos = get_ln_start_pos(measure_i, channel_id, state, i);
+
+            if (!std::isnan(ln_start_pos)) {
+                sf::RectangleShape ln(sf::Vector2f(ln_width, ln_start_pos-note_pos.y));
+                ln.setFillColor(color);
+                ln.setOrigin(0, NOTE_HEIGHT);
+                ln.setPosition(note_pos.x+(note_width-ln_width)/2, note_pos.y);
+
+                notes_m.lock();
+                notes_render_v.push_back(ln);
+                notes_m.unlock();
+            }
+        }
 
         // continue if the note is not visible
         if (note_pos.y < 0 || note_pos.y > viewport_size.y + viewport_pos.y) {continue;}

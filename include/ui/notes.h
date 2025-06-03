@@ -28,8 +28,10 @@ class Notes {
         void render_play_channels(int measure_i, std::vector<std::string> channels, State* state);
         void render_bgm_channels(int measure_i, int offset, State* state);
         void render_bga_channels(int measure_i, std::vector<std::string> channels, int offset, State* state);
-        void render_channel_notes(int measure_i, int channel_i, Channel* channel, sf::Color color, State* state);
+        void render_channel_notes(int measure_i, int channel_i, Channel* channel, sf::Color color, State* state, int channel_id = -1);
         void render_moving_selection(State* state, sf::RenderWindow* window, sf::Vector2i mouse_pos);
+
+        float get_ln_start_pos(int measure_i, int channel_id, State* state, int ln_end_i=-1);
 
         sf::Color get_channel_color(int channel_i, State* state);
         std::string get_note_label(int component, int channel_i, State* state);
