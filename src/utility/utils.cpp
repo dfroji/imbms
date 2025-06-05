@@ -33,7 +33,8 @@ int ImBMS::to_decimal(int base, std::string number) {
     return dec;
 }
 
-int ImBMS::base36_to_int(std::string number) {
+int ImBMS::base36_to_int(std::string number, bool null_to_zero) {
+    if (null_to_zero) {return 0;}
     return to_decimal(36, number);
 }
 

@@ -89,6 +89,7 @@ public:
     std::map<std::string, std::string> get_header_data();
     std::string get_header_data(std::string key);
     void insert_header_data(std::string key, std::string value);
+    void remove_header_data(std::string key);
 
     std::vector<std::string> get_keysounds();
     void set_keysound(std::string filepath, int index);

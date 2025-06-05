@@ -57,6 +57,7 @@ void SideMenu::render(State* state, BMS* bms) {
     static int current_rank = std::stoi(bms->get_header_data("#RANK"));
     static int current_difficulty = std::stoi(bms->get_header_data("#DIFFICULTY"));
     static int selected_keysound = state->get_selected_keysound() - 1;
+    static int selected_lnobj = ImBMS::base36_to_int(bms->get_header_data("#LNOBJ"));
     if (ImGui::CollapsingHeader("Metadata", NULL, cheader_flags)) {
         static char title[1024] = "", subtitle[1024] = "";
         static char artist[1024] = "", subartist[1024] = "";
@@ -116,6 +117,24 @@ void SideMenu::render(State* state, BMS* bms) {
         if (ImGui::Combo("Difficulty", &current_difficulty, difficulties, IM_ARRAYSIZE(difficulties))) {
             bms->insert_header_data("#DIFFICULTY", std::to_string(static_cast<Difficulty>(current_difficulty + 1)));
         }
+
+        std::vector<char*> index_labels = get_index_labels(DATA_LIMIT, 2);
+        selected_lnobj = ImBMS::base36_to_int(bms->get_header_data("#LNOBJ"));
+        // +1 to count for the "None" selection
+        if (ImGui::Combo("LNObj", &selected_lnobj, index_labels.data(), DATA_LIMIT+1)) {
+            if (selected_lnobj == 0) {
+                bms->remove_header_data("#LNOBJ");
+
+            } else {
+                bms->insert_header_data("#LNOBJ", ImBMS::format_base36(selected_lnobj, 2));
+            }
+        }
+
+        // free the memory allocated for the index labels
+        for (auto c : index_labels) {
+            delete c;
+        }
+
     }
 
     // header and listbox for keysounds
@@ -386,6 +405,24 @@ std::vector<char*> SideMenu::get_exbpm_labels(int size, int digits) {
 
     // transform strings to char*
     // ImBMS::cstr allocates memory that needs to be freed later
+    std::vector<char*> labels_c;
+    std::transform(labels.begin(), labels.end(), std::back_inserter(labels_c), ImBMS::cstr);
+
+    return labels_c;
+}
+
+std::vector<char*> SideMenu::get_index_labels(int size, int digits) {
+    std::vector<std::string> labels = {};
+
+
+    // push indices to labels starting with "None" as the first label
+    labels.push_back("None");
+    for (int i = 1; i < size+1; i++) {
+        labels.push_back(ImBMS::format_base36(i, 2));
+    }
+
+    // transform the vector of strings to vector of char* for imgui's listbox to use
+    // ImBMS::cstr allocates memory for each label so it has to be freed wherever this function is called
     std::vector<char*> labels_c;
     std::transform(labels.begin(), labels.end(), std::back_inserter(labels_c), ImBMS::cstr);
 

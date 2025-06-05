@@ -30,7 +30,9 @@ void Notes::render(State* state, sf::RenderWindow* window, sf::Vector2i mouse_po
     int first_visible = state->get_wraps().y*state->get_measures_wrapped();
     int last_visible = first_visible+999; // arbitrary number with which long notes get rendered in most cases.
                                           // i think only very specific incredibly high bpm gimmicks with lns break this,
-                                          // but i'm not sure if that's worth caring about
+                                          // but i'm not sure if that's worth caring about.
+                                          // todo: something proper especially if performance becomes an issue
+
 
     std::vector<std::string> channels = state->get_bms()->get_play_channels();
 

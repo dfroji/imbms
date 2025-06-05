@@ -56,6 +56,12 @@ void BMS::insert_header_data(std::string key, std::string value) {
     header_data.insert_or_assign(key, value);
 }
 
+void BMS::remove_header_data(std::string key) {
+    if (auto search = header_data.find(key); search != header_data.end()) {
+        header_data.erase(key);
+    }
+}
+
 std::vector<std::string> BMS::get_keysounds() {
     return keysounds;
 }
