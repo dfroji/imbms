@@ -6,7 +6,7 @@ ImBMS is a BMS chart editor for Linux built with [ImGui-SFML](https://github.com
 
 ## Build with CMake
 ### Requirements
-- SDL2 ([sdl2](https://archlinux.org/packages/?name=sdl2))
+- SDL2 ([sdl2](https://aur.archlinux.org/packages/sdl2)<sup>AUR</sup> or [sdl2-compat](https://archlinux.org/packages/?sort=&q=sdl2-compat))
 - ICU ([icu](https://archlinux.org/packages/?sort=&q=icu))
 - Fontconfig ([fontconfig](https://archlinux.org/packages/?sort=&q=fontconfig))
 - VL Gothic Regular ([ttf-vlgothic](https://archlinux.org/packages/?sort=&q=ttf-vlgothic))
