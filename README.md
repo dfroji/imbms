@@ -1,3 +1,5 @@
+I'm working on rewriting this from scratch using an SFML GUI library I'm currently also working on, so no further developement will be done on this repository!
+
 # ImBMS
 
 ImBMS is a BMS chart editor for Linux built with [ImGui-SFML](https://github.com/SFML/imgui-sfml) using [SoLoud](https://github.com/jarikomppa/soloud) for audio. It's still very much a work in progress with a lot of functionality and QoL features missing, but it is possible to create a proper chart using it. 
